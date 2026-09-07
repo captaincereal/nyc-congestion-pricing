@@ -1,0 +1,53 @@
+---
+description: Data science conventions for the NYC congestion pricing project
+globs:
+  - "src/**/*.py"
+  - "notebooks/**/*.ipynb"
+  - "sql/**/*.sql"
+  - "tests/**/*.py"
+alwaysApply: true
+---
+
+# Data science rules
+
+## Frozen research design
+- See `docs/project_brief.md`. Do not silently change the research question,
+  treatment/control definitions, intervention date (2025-01-05), primary outcome
+  (hourly median link speed), exclusion rules, or the statistical spec.
+- Primary data source for Phases 1-9 is NYC DOT Traffic Speeds NBE (`i4gi-tjb9`)
+  ONLY. Secondary sources come in Phase 10 with a specific question.
+
+## Project layout
+- Raw, immutable inputs live in `data/raw/` and are never edited in place.
+- `data/interim/` holds typed staging; `data/processed/` holds analysis-ready
+  panels only.
+- Reusable logic goes in `src/`; notebooks orchestrate and narrate, they do not
+  define core functions.
+- Generated figures go to `outputs/figures/`, tables to `outputs/tables/`.
+
+## Python
+- Target Python 3.11+. Type hints on public functions.
+- `pandas` for wrangling, `duckdb` for large tabular transforms, `statsmodels`
+  (and later `linearmodels`) for econometrics, `matplotlib` for plots.
+- Every script exposes a `main()` and is runnable as `python -m src....`.
+- Read paths / dataset ids / the treatment date from `src/config.py`, never
+  hard-code them.
+- Set and log `RANDOM_SEED` for anything stochastic.
+
+## Data handling
+- Never invent dataset columns; verify against the real schema first.
+- Do not clean values before documenting the problem in the data-quality report.
+- Track row counts through every transformation (log `rows in -> rows out`).
+- Missing numeric values are `NaN`, never `0` or `-999`.
+
+## Analysis
+- DiD / event-study specs state treatment date, control group, clustering level,
+  and fixed effects in the docstring.
+- Report robust / clustered standard errors; never rely on default OLS SEs.
+- Report effect sizes and confidence intervals. Preserve null results.
+- Statistical significance is not practical significance.
+
+## Reproducibility
+- No manual spreadsheet edits. Transformations are code.
+- Deterministic outputs: same inputs + same commit => same figures/tables.
+- Add a test in `tests/` for each non-trivial transformation in `src/`.

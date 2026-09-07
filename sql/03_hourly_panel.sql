@@ -1,0 +1,48 @@
+-- 03_hourly_panel.sql   (DuckDB)  --  PHASE 4, NOT YET ACTIVE
+--
+-- Build the analysis panel: one row per link_id x hour, with the primary
+-- outcome (hourly median speed) and the DiD / event-time flags.
+--
+-- Blocked on:
+--   * Phase 2 confirmation of the data_as_of timezone
+--   * Phase 3 decisions on which links/hours to exclude (poor coverage, outages)
+--   * Phase 5 treatment geography: `treated` and `is_boundary` come from a
+--     link_id -> CRZ-membership crosswalk built from link_points, NOT hard-coded
+--     here.
+--
+-- Draft shape (subject to change after staging is inspected):
+--
+-- CREATE OR REPLACE TABLE hourly_panel AS
+-- WITH agg AS (
+--     SELECT
+--         link_id,
+--         ts_hour,
+--         median(speed_mph)                              AS median_speed_mph,
+--         avg(speed_mph)                                 AS mean_speed_mph,
+--         count(*)                                       AS n_obs,
+--         any_value(borough)                             AS borough
+--     FROM stg_speed_readings
+--     WHERE speed_mph IS NOT NULL          -- documented in the QC report
+--     GROUP BY link_id, ts_hour
+-- ),
+-- flagged AS (
+--     SELECT
+--         a.*,
+--         CAST(a.ts_hour AS DATE)                        AS date,
+--         EXTRACT(hour FROM a.ts_hour)                   AS hour,
+--         EXTRACT(dow  FROM a.ts_hour)                   AS dow,
+--         EXTRACT(dow  FROM a.ts_hour) IN (0, 6)         AS is_weekend,
+--         EXTRACT(hour FROM a.ts_hour) BETWEEN 7 AND 9
+--           OR EXTRACT(hour FROM a.ts_hour) BETWEEN 16 AND 18  AS is_peak,
+--         a.ts_hour >= TIMESTAMP '2025-01-05 00:00:00'  AS post,
+--         date_diff('week', DATE '2025-01-05', CAST(a.ts_hour AS DATE)) AS event_time
+--     FROM agg a
+-- )
+-- SELECT
+--     f.*,
+--     x.treated,
+--     x.is_boundary,
+--     (x.treated AND f.post)                             AS treated_post
+-- FROM flagged f
+-- JOIN crz_link_crosswalk x USING (link_id)
+-- WHERE NOT x.is_boundary;   -- boundary links go to the spillover model

@@ -1,0 +1,47 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.env
+
+# Jupyter
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/*
+
+# Testing / typing / linting
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Secrets / local env
+.env
+*.env
+
+# Data — keep the folders, ignore the contents
+data/raw/*
+data/interim/*
+data/processed/*
+*.duckdb
+*.duckdb.wal
+!data/**/.gitkeep
+# ...but keep the raw manifest so pulls are auditable in git history
+!data/raw/manifest.json
+
+# Outputs — keep the folders, ignore generated artifacts
+outputs/figures/*
+outputs/tables/*
+!outputs/**/.gitkeep
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+*.swp
