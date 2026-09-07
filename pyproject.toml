@@ -20,6 +20,7 @@ dependencies = [
     "duckdb>=1.1",         # large tabular transforms (staging, panel, QC)
     "requests>=2.31",      # Socrata downloads
     "tenacity>=8.2",       # retry/backoff on the API
+    "python-dotenv>=1.0",  # load a gitignored .env (Socrata token, data dir)
     "shapely>=2.0",        # CRZ polygon membership (Phase 5)
     "tabulate>=0.9",       # DataFrame.to_markdown for generated reports
     "matplotlib>=3.8",     # diagnostics / QC plots

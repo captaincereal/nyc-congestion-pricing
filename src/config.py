@@ -17,8 +17,14 @@ import os
 from datetime import date
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 # --- Paths ---------------------------------------------------------------------
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
+
+# Load a local, gitignored .env if present (Socrata token, optional data dir).
+# Never commit .env; see .env.example for the shape.
+load_dotenv(PROJECT_ROOT / ".env")
 DATA_DIR = Path(os.environ.get("NYC_CP_DATA_DIR", PROJECT_ROOT / "data"))
 RAW_DIR = DATA_DIR / "raw"
 INTERIM_DIR = DATA_DIR / "interim"
