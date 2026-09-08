@@ -39,6 +39,9 @@ outputs/figures/*
 outputs/tables/*
 !outputs/**/.gitkeep
 
+# Local run logs (scheduled catch-up downloads, etc.)
+logs/
+
 # OS / editor
 .DS_Store
 Thumbs.db
