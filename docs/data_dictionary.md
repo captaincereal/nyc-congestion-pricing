@@ -39,10 +39,14 @@ No latitude/longitude columns — segment location must be derived from
 
 ## `data/raw/`
 
-Immutable source extracts, written by `python -m src.data.download`. Named
-`dot_speeds_<window>_<pull-date>.parquet`. Never edited. Each pull appends an
-entry to `data/raw/manifest.json` recording query params, row count, byte size,
-SHA-256, and pull timestamp.
+Immutable source extracts, written by `python -m src.data.download`, one
+calendar month per file: `data/raw/dot_speeds/dot_speeds_YYYY-MM.parquet`.
+Never edited. `data/raw/manifest.json` records, per month: SoQL window, row
+count, expected row count (from a live `count(1)` query), byte size, SHA-256,
+and pull timestamp. The manifest is merged across runs and rewritten after
+every month, so an interrupted pull still leaves an accurate manifest.
+`python -m src.data.download --verify` re-checks every on-disk part against the
+live API row count.
 
 ## `data/interim/` — `stg_speed_readings`
 
