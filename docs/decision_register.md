@@ -137,8 +137,21 @@ the roster changes over time.
 The fix is written (nine sample days across both datasets) but not yet run — it
 costs ~60 API requests and would compete with the download.
 
+**Update 2026-09-09 — these are probably decommissioned sensors.** Of the 33
+unassigned links, 25 stop reporting entirely during autumn 2024 (last readings
+cluster on 2024-11-13, 11-20/21 and 12-22) and never appear in the post period.
+That is almost certainly why they were absent from the 2025-01-06 segment
+sample — they were already gone by then. The refetch samples 2023-01, 2023-07,
+2024-01 and 2024-06, all of which precede the shutdown, so recovery is likely.
+
+Two consequences worth noting. First, these links have **no post-treatment
+observations**, so a DiD would drop them regardless; leaving them unassigned
+costs control-pool size, not identification. Second, sensors decommissioning
+mid-window is itself a finding: link identity is not stable across the study
+period, which matters for D7 and for any balanced-panel claim.
+
 > **Pending:** refetch runs once the priority window finishes; then report how
-> many of the 32 are recovered.
+> many of the 33 are recovered.
 
 ### D5 — What happens to the crossings
 
@@ -201,3 +214,12 @@ Running `--verify` upgrades this, and should happen before any published result.
 - **Segment roster drifts over time.** D4 is the visible symptom; the deeper
   point is that link identity is not guaranteed stable across a four-year
   window, which matters for a balanced panel.
+
+### Cleared
+
+- ~~**Links may drop out at the treatment boundary**~~ — checked 2026-09-09 and
+  the panel is balanced where it counts. Every analysis group has all its links
+  in both periods: control 154/154, treated 130/130, exempt 6/6, boundary 5/5,
+  crossings 2/2, **zero** dropouts. All 25 dropouts are `unassigned` links that
+  stopped reporting in autumn 2024, well before tolling — so they cannot
+  introduce a discontinuity at 2025-01-05.
