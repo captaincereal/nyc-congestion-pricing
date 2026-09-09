@@ -187,6 +187,43 @@ tolled entry points. They therefore support the spillover/diversion analysis
 (Phase 9 robustness and the SUTVA discussion above) at 5-minute resolution over
 the full study window. This is a genuine addition to the design, not a salvage.
 
+### 2026-09-09 — Rolling-window downsampling of the EZ Pass feed
+
+**Status:** ingestion/sampling decision. **No frozen item is affected** — the
+outcome remains the hourly median link speed.
+
+The EZ Pass feeds do not publish independent 15-minute observations. They
+publish a **rolling** 900-second median, re-emitted roughly every 61 seconds.
+Measured on segment `sid=1004` for 2025-01-06 08:00-09:00: **52 readings in the
+hour, median gap 61 s**, each summarising the preceding 900 s. Consecutive rows
+therefore share ~14 of their 15 minutes (~93% overlap) and are frequently
+byte-identical — eight consecutive readings returned `median_speed_fps = 20.57`.
+
+Ingesting every row would mean ~10.4M rows *per month* (~450M over the study
+window) of which ~92% carry no independent information, and would take days
+against a feed that throttles sustained pulls.
+
+Ingestion therefore restricts to the minutes that open each **non-overlapping**
+15-minute window, plus a backup minute in case the first is missing:
+`date_extract_mm(median_calculation_timestamp) IN (0,1,15,16,30,31,45,46)`.
+Staging then keeps exactly one reading per `(link, 15-minute window)`,
+preferring the median built from more probe samples.
+
+Measured effect on one hour of live data: 12,938 rows -> 1,978 rows (**6.5x**)
+with **all 287 active segments retained**. A stricter 4-per-hour filter gives
+13.2x but drops to 274 segments, so the backup minute is kept.
+
+This is a reduction in redundancy, not in information: the retained series is
+the set of independent 15-minute medians from which the frozen hourly median is
+supposed to be computed. Medianing 52 overlapping windows would in fact
+over-weight whichever value persists longest, so the downsampled series is the
+more defensible input. The filter is a one-line change in
+`src/config.py:EZPASS_SAMPLE_MINUTES` should a future check want the full feed.
+
+Implementation note: SoQL's minute function is `date_extract_mm`.
+`date_extract_m` is **month** and silently matches nothing — it returned zero
+rows without erroring during development.
+
 #### Known data-quality issues to resolve in Phase 3
 
 - `median_speed_fps` contains impossible values (observed max ~20,662 fps,

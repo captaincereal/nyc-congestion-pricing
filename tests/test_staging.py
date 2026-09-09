@@ -34,7 +34,7 @@ def raw_part(tmp_path: Path) -> str:
 def _stage(parts_glob: str) -> pd.DataFrame:
     con = duckdb.connect()
     con.execute(SQL, {"parts_glob": parts_glob})
-    df = con.execute("SELECT * FROM stg_speed_readings ORDER BY link_id, ts").df()
+    df = con.execute("SELECT * FROM stg_dot_highway_readings ORDER BY link_id, ts").df()
     con.close()
     return df
 

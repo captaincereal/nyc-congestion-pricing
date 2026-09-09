@@ -33,21 +33,43 @@ $logDir = Join-Path $repo 'logs'
 New-Item -ItemType Directory -Force -Path $logDir | Out-Null
 $log = Join-Path $logDir ("catchup_{0:yyyyMMdd_HHmmss}.log" -f (Get-Date))
 
-"=== catch-up run $(Get-Date -Format o) ===" | Tee-Object -FilePath $log
+function Write-Log([string]$msg) {
+    # utf8 explicitly: Tee-Object/Out-File default to UTF-16 here, which makes
+    # the log unreadable to grep and to the Python tooling.
+    Write-Host $msg
+    Add-Content -Path $log -Value $msg -Encoding utf8
+}
+
+function Invoke-Pull([string]$label, [string]$module) {
+    Write-Log "--- $label ---"
+    # The downloaders log via Python's `logging`, which writes to STDERR. With
+    # $ErrorActionPreference='Stop' PowerShell treats native stderr as a
+    # terminating error and aborts the script on the first log line, so drop to
+    # 'Continue' around the native call. This is what silently killed the
+    # 2026-09-09 05:56 run before it fetched anything.
+    $prev = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        & $python -m $module --start 2023-01-01 2>&1 |
+            ForEach-Object { Add-Content -Path $log -Value "$_" -Encoding utf8 }
+        $code = $LASTEXITCODE
+    } finally {
+        $ErrorActionPreference = $prev
+    }
+    Write-Log "$label exit code: $code"
+    return $code
+}
+
+Write-Log "=== catch-up run $(Get-Date -Format o) ==="
 
 # PRIMARY source first (EZ Pass local-street speeds). This is a large multi-night
 # pull; it is resumable and the manifest is rewritten after every month, so a
 # throttled or interrupted run simply resumes where it left off.
-"--- ezpass (primary) ---" | Tee-Object -FilePath $log -Append
-& $python -m src.data.download_ezpass --start 2023-01-01 *>> $log
-"ezpass exit code: $LASTEXITCODE" | Tee-Object -FilePath $log -Append
+Invoke-Pull 'ezpass (primary)' 'src.data.download_ezpass' | Out-Null
 
 # SECONDARY source (DOT highway speeds, for the spillover analysis). Nearly
 # complete - only a few tail months outstanding.
-"--- dot speeds (secondary) ---" | Tee-Object -FilePath $log -Append
-& $python -m src.data.download --start 2023-01-01 *>> $log
-$exit = $LASTEXITCODE
-"dot speeds exit code: $exit" | Tee-Object -FilePath $log -Append
+$exit = Invoke-Pull 'dot speeds (secondary)' 'src.data.download'
 
 # Report coverage for both sources. Self-disable only when BOTH have reached the
 # target month - the primary pull spans many nights, so finishing the secondary
@@ -59,22 +81,22 @@ foreach ($pair in @(
 )) {
     $mf = Join-Path $repo $pair.path
     if (-not (Test-Path $mf)) {
-        "$($pair.name): no manifest yet" | Tee-Object -FilePath $log -Append
+        Write-Log "$($pair.name): no manifest yet"
         $done = $false
         continue
     }
     $m = Get-Content $mf -Raw | ConvertFrom-Json
     $last = $m.coverage.last_month
     "$($pair.name): $($m.coverage.first_month)..$last  ($($m.parts.Count) parts, complete=$($m.all_parts_complete))" |
-        Tee-Object -FilePath $log -Append
+        ForEach-Object { Write-Log $_ }
     if (-not ($last -ge $TargetLastMonth -and $m.all_parts_complete)) { $done = $false }
 }
 
 if ($done) {
     "both sources reached $TargetLastMonth - unregistering scheduled task '$TaskName'" |
-        Tee-Object -FilePath $log -Append
+        ForEach-Object { Write-Log $_ }
     try { Unregister-ScheduledTask -TaskName $TaskName -Confirm:$false } catch {
-        "  (could not unregister: $_)" | Tee-Object -FilePath $log -Append
+        Write-Log "  (could not unregister: $_)"
     }
 }
 

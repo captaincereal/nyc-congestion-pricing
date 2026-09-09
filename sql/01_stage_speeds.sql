@@ -1,5 +1,15 @@
 -- 01_stage_speeds.sql   (DuckDB)
--- Type + normalize the raw DOT Traffic Speeds parts into one staging table.
+-- Type + normalize the raw DOT Traffic Speeds parts into stg_dot_highway_readings.
+--
+-- SECONDARY source. This feed carries only ~123 links city-wide, all highways,
+-- crossings and toll-EXEMPT roads (FDR Drive, West Side Hwy) — it has no links
+-- on tolled CRZ surface streets, so it cannot serve the primary specification.
+-- It is retained for the spillover/diversion analysis: those exempt roads are
+-- exactly where displaced traffic would go. The primary staging table
+-- (stg_speed_readings) is built from the EZ Pass local-street feeds by
+-- sql/01_stage_ezpass.sql. See the 2026-09-08 decision record in
+-- docs/methodology.md.
+--
 -- NO value cleaning: implausible speeds, zeros, duplicates and outages are
 -- reported by 02_quality_checks.sql / quality_report.py and handled later,
 -- only after they are documented.
@@ -11,7 +21,7 @@
 -- clock (spring-forward hour 2025-03-09 02:00-02:59 is empty). No timezone
 -- conversion is applied. If this is ever revisited, do it here and nowhere else.
 
-CREATE OR REPLACE TABLE stg_speed_readings AS
+CREATE OR REPLACE TABLE stg_dot_highway_readings AS
 WITH raw AS (
     SELECT * FROM read_parquet($parts_glob, union_by_name => true)
 ),

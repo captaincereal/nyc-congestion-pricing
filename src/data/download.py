@@ -115,6 +115,11 @@ class PartRecord:
     sha256: str
     pulled_at: str
     complete: bool
+    # False when the part was written without checking `rows` against a live
+    # count(1) — see download_ezpass's --count flag. `complete` is then only a
+    # statement that paging finished cleanly, not that the row count was
+    # verified. Run `--verify` to upgrade it.
+    verified: bool = True
 
 
 _PART_FIELDS = frozenset(f.name for f in fields(PartRecord))

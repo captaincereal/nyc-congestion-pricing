@@ -32,3 +32,18 @@ def test_where_filters_month_and_aggregation_period():
     assert "median_calculation_timestamp < '2025-02-01T00:00:00'" in w
     # The feed also emits 0-second rows; only 15-minute aggregates are usable.
     assert "aggregation_period_sec = 900" in w
+
+
+def test_where_downsamples_rolling_window_republication():
+    # The feed republishes a rolling 900s median ~every 61s (~93% overlap).
+    # We keep only the minutes opening each non-overlapping 15-min window,
+    # plus a backup minute.
+    w = _where(date(2025, 1, 1))
+    assert "date_extract_mm(median_calculation_timestamp) IN (0,1,15,16,30,31,45,46)" in w
+
+
+def test_where_uses_minute_not_month_function():
+    # SoQL date_extract_m is MONTH and silently matches nothing; minute is _mm.
+    w = _where(date(2025, 1, 1))
+    assert "date_extract_mm(" in w
+    assert "date_extract_m(" not in w.replace("date_extract_mm(", "")

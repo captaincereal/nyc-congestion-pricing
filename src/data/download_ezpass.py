@@ -50,6 +50,7 @@ from src.config import (
     EZPASS_DATASET_IDS,
     EZPASS_MANIFEST_PATH,
     EZPASS_PARTS_DIR,
+    EZPASS_SAMPLE_MINUTES,
     EZPASS_SPLIT_DATE,
     EZPASS_TIME_COL,
     SOCRATA_DOMAIN,
@@ -93,10 +94,22 @@ def _datasets_for_month(month: date) -> list[str]:
 
 
 def _where(month: date) -> str:
+    """SoQL filter for one month: the time window, real aggregates, and the
+    rolling-window downsample.
+
+    The feed republishes a rolling 900s median roughly every 61 seconds, so
+    ~92% of rows are near-duplicates of their neighbours. Restricting to the
+    minutes that open each non-overlapping 15-minute window (plus a backup
+    minute) cuts the pull 6.5x with no loss of independent information. Note
+    SoQL's minute function is ``date_extract_mm``; ``date_extract_m`` is MONTH
+    and silently matches nothing here.
+    """
     lo, hi = _month_bounds(month)
+    minutes = ",".join(str(m) for m in EZPASS_SAMPLE_MINUTES)
     return (
         f"{EZPASS_TIME_COL} >= '{lo}' AND {EZPASS_TIME_COL} < '{hi}'"
         f" AND aggregation_period_sec = {EZPASS_AGG_PERIOD_SEC}"
+        f" AND date_extract_mm({EZPASS_TIME_COL}) IN ({minutes})"
     )
 
 
@@ -150,7 +163,12 @@ def _fetch_pages(session: requests.Session, dataset_id: str, where: str) -> list
 
 
 def download_month(
-    session: requests.Session, month: date, *, force: bool, prior: dict | None = None
+    session: requests.Session,
+    month: date,
+    *,
+    force: bool,
+    prior: dict | None = None,
+    do_count: bool = False,
 ) -> PartRecord:
     dest = EZPASS_PARTS_DIR / f"ezpass_speeds_{month:%Y-%m}.parquet"
     where = _where(month)
@@ -175,12 +193,16 @@ def download_month(
             complete=rows == expected,
         )
 
-    expected = sum(_count(session, ds, where) for ds in datasets)
+    # The minute filter puts a function on the timestamp column, which stops
+    # Socrata using its index: a whole-month count(1) then runs for many minutes
+    # and can time out. The count only verifies completeness, so it is off by
+    # default here and available on demand via --count / --verify.
+    expected = sum(_count(session, ds, where) for ds in datasets) if do_count else None
     log.info(
-        "GET %s from %s (expected %s rows)",
+        "GET %s from %s (%s)",
         f"{month:%Y-%m}",
         "+".join(datasets),
-        f"{expected:,}",
+        f"expected {expected:,} rows" if expected is not None else "row count not pre-checked",
     )
 
     frames: list[pd.DataFrame] = []
@@ -194,9 +216,14 @@ def download_month(
     tmp.replace(dest)
 
     rows = len(df)
-    complete = rows == expected
-    if not complete:
-        log.warning("%s: got %s rows, expected %s", dest.name, f"{rows:,}", f"{expected:,}")
+    if expected is None:
+        # Paging ran to a short page, so the month is as complete as the feed
+        # will give us — but unverified against a live count.
+        complete, verified = True, False
+    else:
+        complete, verified = rows == expected, True
+        if not complete:
+            log.warning("%s: got %s rows, expected %s", dest.name, f"{rows:,}", f"{expected:,}")
     log.info("wrote %s (%s rows, %.1f MB)", dest.name, f"{rows:,}", dest.stat().st_size / 1e6)
 
     return PartRecord(
@@ -204,11 +231,12 @@ def download_month(
         month=f"{month:%Y-%m}",
         where=where,
         rows=rows,
-        rows_expected=expected,
+        rows_expected=expected if expected is not None else rows,
         bytes=dest.stat().st_size,
         sha256=_sha256(dest),
         pulled_at=datetime.now(UTC).isoformat(timespec="seconds"),
         complete=complete,
+        verified=verified,
     )
 
 
@@ -253,6 +281,12 @@ def main() -> None:
     parser.add_argument("--end", type=date.fromisoformat, default=None)
     parser.add_argument("--force", action="store_true", help="re-download existing months")
     parser.add_argument("--verify", action="store_true", help="check disk vs live API, no download")
+    parser.add_argument(
+        "--count",
+        action="store_true",
+        help="pre-check each month against a live count(1); slow (the minute "
+        "filter defeats Socrata's index) and off by default",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -269,7 +303,13 @@ def main() -> None:
     for month in _iter_months(args.start, end):
         tag = f"{month:%Y-%m}"
         try:
-            rec = download_month(session, month, force=args.force, prior=parts_by_month.get(tag))
+            rec = download_month(
+                session,
+                month,
+                force=args.force,
+                prior=parts_by_month.get(tag),
+                do_count=args.count,
+            )
             parts_by_month[rec.month] = asdict(rec)
             _write(parts_by_month)
         except Exception:  # noqa: BLE001 - record and continue

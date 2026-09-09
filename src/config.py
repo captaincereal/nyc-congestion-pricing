@@ -80,6 +80,16 @@ EZPASS_GEOM_COL = "polyline"  # encoded polyline; CRZ assignment is geometric
 EZPASS_AGG_PERIOD_SEC = 900
 FPS_TO_MPH = 0.681818  # 3600 / 5280
 
+# The feed republishes a ROLLING 900-second median about every 61 seconds, so
+# consecutive readings share ~14 of their 15 minutes and are frequently
+# byte-identical (measured 2026-09-09: 52 readings/segment/hour, ~93% overlap).
+# Pulling all of it would be ~450M rows for the study window, ~92% redundant.
+# We therefore sample the minutes that open each non-overlapping 15-minute
+# window, plus a backup minute in case the first is missing. Staging then keeps
+# one reading per (link, 15-minute window). Measured reduction: 6.5x, with all
+# 287 active segments retained.
+EZPASS_SAMPLE_MINUTES = (0, 1, 15, 16, 30, 31, 45, 46)
+
 # --- Secondary source (spillover / diversion analysis) ----------------------
 # NYC DOT Traffic Speeds NBE: TRANSCOM probe / E-ZPass-reader link speeds,
 # sub-hourly cadence, history from 2017-04-17.
@@ -112,6 +122,9 @@ CLUSTER_VAR = "link_id"
 RAW_MANIFEST_PATH = RAW_DIR / "manifest.json"
 EZPASS_PARTS_DIR = RAW_DIR / "ezpass_speeds"
 EZPASS_MANIFEST_PATH = RAW_DIR / "ezpass_manifest.json"
+# Secondary (DOT highways) staging output; the primary lands in
+# STAGED_SPEEDS_PATH / the canonical `stg_speed_readings` table.
+STAGED_DOT_HIGHWAY_PATH = INTERIM_DIR / "stg_dot_highway_readings.parquet"
 STAGED_SPEEDS_PATH = INTERIM_DIR / "stg_speed_readings.parquet"
 HOURLY_PANEL_PATH = PROCESSED_DIR / "hourly_panel.parquet"
 DUCKDB_PATH = DATA_DIR / "nyc_cp.duckdb"
