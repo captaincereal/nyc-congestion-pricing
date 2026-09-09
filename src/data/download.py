@@ -120,12 +120,17 @@ class PartRecord:
 _PART_FIELDS = frozenset(f.name for f in fields(PartRecord))
 
 
-def _load_existing_parts() -> dict[str, dict]:
-    """Existing manifest parts keyed by ``YYYY-MM``, or ``{}`` if none/unreadable."""
-    if not RAW_MANIFEST_PATH.exists():
+def _load_existing_parts(path=None) -> dict[str, dict]:
+    """Existing manifest parts keyed by ``YYYY-MM``, or ``{}`` if none/unreadable.
+
+    ``path`` defaults to :data:`RAW_MANIFEST_PATH`, resolved at call time so
+    tests (and the EZ Pass ingest) can point it elsewhere.
+    """
+    path = path or RAW_MANIFEST_PATH
+    if not path.exists():
         return {}
     try:
-        data = json.loads(RAW_MANIFEST_PATH.read_text())
+        data = json.loads(path.read_text())
     except (OSError, json.JSONDecodeError):
         log.warning("existing manifest is unreadable - starting a fresh one")
         return {}
@@ -216,18 +221,29 @@ def download_month(
     )
 
 
-def write_manifest(parts_by_month: dict[str, dict]) -> None:
+def write_manifest(
+    parts_by_month: dict[str, dict],
+    *,
+    path=None,
+    dataset_id: str | None = None,
+    time_col: str | None = None,
+) -> None:
     """Rewrite the manifest from ``parts_by_month`` (month -> part dict).
 
     ``coverage`` is derived from the parts actually present, not from any single
     run's ``--start``/``--end``, because the manifest is merged across runs.
+    ``path`` / ``dataset_id`` / ``time_col`` default to the DOT speeds feed and
+    are resolved at call time so the EZ Pass ingest can reuse this.
     """
+    path = path or RAW_MANIFEST_PATH
+    dataset_id = dataset_id or DOT_SPEEDS_DATASET_ID
+    time_col = time_col or RAW_TIME_COL
     months = sorted(parts_by_month)
     parts = [parts_by_month[m] for m in months]
     manifest = {
-        "dataset_id": DOT_SPEEDS_DATASET_ID,
-        "source_url": f"https://{SOCRATA_DOMAIN}/Transportation/x/{DOT_SPEEDS_DATASET_ID}",
-        "time_column": RAW_TIME_COL,
+        "dataset_id": dataset_id,
+        "source_url": f"https://{SOCRATA_DOMAIN}/d/{dataset_id}",
+        "time_column": time_col,
         "coverage": {"first_month": months[0], "last_month": months[-1]} if months else {},
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "total_rows": sum(p["rows"] for p in parts),
@@ -235,12 +251,12 @@ def write_manifest(parts_by_month: dict[str, dict]) -> None:
         "all_parts_complete": all(p["complete"] for p in parts),
         "parts": parts,
     }
-    tmp = RAW_MANIFEST_PATH.with_suffix(".json.part")
+    tmp = path.with_suffix(".json.part")
     tmp.write_text(json.dumps(manifest, indent=2))
-    tmp.replace(RAW_MANIFEST_PATH)
+    tmp.replace(path)
     log.info(
         "wrote %s (%s rows across %d parts, %s..%s)",
-        RAW_MANIFEST_PATH.name,
+        path.name,
         f"{manifest['total_rows']:,}",
         len(parts),
         months[0] if months else "-",

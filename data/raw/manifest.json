@@ -4,11 +4,11 @@
   "time_column": "data_as_of",
   "coverage": {
     "first_month": "2023-01",
-    "last_month": "2026-04"
+    "last_month": "2026-07"
   },
-  "generated_at": "2026-09-08T16:36:36+00:00",
-  "total_rows": 40249114,
-  "total_rows_expected": 40249114,
+  "generated_at": "2026-09-09T03:51:13+00:00",
+  "total_rows": 42216965,
+  "total_rows_expected": 42216965,
   "all_parts_complete": true,
   "parts": [
     {
@@ -449,6 +449,28 @@
       "bytes": 3684718,
       "sha256": "f53fb6bade4d05ba1f87f2df059b173b8d15925597c673330ee2f356ba8b4d14",
       "pulled_at": "2026-09-08T16:36:36+00:00",
+      "complete": true
+    },
+    {
+      "part": "dot_speeds_2026-05.parquet",
+      "month": "2026-05",
+      "where": "data_as_of >= '2026-05-01T00:00:00' AND data_as_of < '2026-06-01T00:00:00'",
+      "rows": 936708,
+      "rows_expected": 936708,
+      "bytes": 5820247,
+      "sha256": "8269d25feb56fba29e784ac52b74a96dd774d64b6a0033812a1e9986a0da9a37",
+      "pulled_at": "2026-09-09T02:27:35+00:00",
+      "complete": true
+    },
+    {
+      "part": "dot_speeds_2026-07.parquet",
+      "month": "2026-07",
+      "where": "data_as_of >= '2026-07-01T00:00:00' AND data_as_of < '2026-08-01T00:00:00'",
+      "rows": 1031143,
+      "rows_expected": 1031143,
+      "bytes": 5861942,
+      "sha256": "3558e1da7c5e450002ed5ba65c7cab0d7932f2fc963b303f98db2735721a5e14",
+      "pulled_at": "2026-09-09T03:51:13+00:00",
       "complete": true
     }
   ]
