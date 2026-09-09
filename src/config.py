@@ -83,12 +83,31 @@ FPS_TO_MPH = 0.681818  # 3600 / 5280
 # The feed republishes a ROLLING 900-second median about every 61 seconds, so
 # consecutive readings share ~14 of their 15 minutes and are frequently
 # byte-identical (measured 2026-09-09: 52 readings/segment/hour, ~93% overlap).
-# Pulling all of it would be ~450M rows for the study window, ~92% redundant.
-# We therefore sample the minutes that open each non-overlapping 15-minute
-# window, plus a backup minute in case the first is missing. Staging then keeps
-# one reading per (link, 15-minute window). Measured reduction: 6.5x, with all
-# 287 active segments retained.
-EZPASS_SAMPLE_MINUTES = (0, 1, 15, 16, 30, 31, 45, 46)
+# We keep one reading per non-overlapping window of this many minutes.
+#
+# This downsample is applied CLIENT-side. Doing it server-side with
+# date_extract_mm() puts a function in the WHERE clause, which stops Socrata
+# using its timestamp index: measured on 2023-01, a 50k page at offset 500,000
+# took 255.8s with the filter versus 3.7s without it (69x). Ingestion therefore
+# fetches with plain indexed range predicates and discards redundant rows here.
+EZPASS_WINDOW_MINUTES = 15
+
+# Fetch one day per request. The month-wide queries needed offsets in the
+# millions, where even indexed paging degrades; a day is ~335k rows (~7 pages),
+# keeping every offset shallow.
+EZPASS_CHUNK_DAYS = 1
+
+# Only these columns vary per reading. link_name / borough / polyline /
+# link_length_ft are per-segment constants and are fetched once into
+# EZPASS_SEGMENTS_PATH instead of being repeated on every row — worth a 3.1x
+# payload reduction (8.2MB -> 2.7MB per 50k-row page).
+EZPASS_READING_COLS = (
+    "sid",
+    "median_calculation_timestamp",
+    "median_speed_fps",
+    "median_tt_sec",
+    "n_samples",
+)
 
 # --- Secondary source (spillover / diversion analysis) ----------------------
 # NYC DOT Traffic Speeds NBE: TRANSCOM probe / E-ZPass-reader link speeds,
@@ -122,6 +141,9 @@ CLUSTER_VAR = "link_id"
 RAW_MANIFEST_PATH = RAW_DIR / "manifest.json"
 EZPASS_PARTS_DIR = RAW_DIR / "ezpass_speeds"
 EZPASS_MANIFEST_PATH = RAW_DIR / "ezpass_manifest.json"
+# Per-segment attributes (sid, link_name, borough, polyline, link_length_ft),
+# fetched once rather than repeated on every reading.
+EZPASS_SEGMENTS_PATH = RAW_DIR / "ezpass_segments.parquet"
 # Secondary (DOT highways) staging output; the primary lands in
 # STAGED_SPEEDS_PATH / the canonical `stg_speed_readings` table.
 STAGED_DOT_HIGHWAY_PATH = INTERIM_DIR / "stg_dot_highway_readings.parquet"

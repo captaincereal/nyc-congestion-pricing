@@ -39,7 +39,7 @@ import argparse
 import io
 import logging
 from dataclasses import asdict
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 
 import pandas as pd
 import requests
@@ -47,12 +47,15 @@ from tenacity import retry, stop_after_attempt, wait_exponential
 
 from src.config import (
     EZPASS_AGG_PERIOD_SEC,
+    EZPASS_CHUNK_DAYS,
     EZPASS_DATASET_IDS,
     EZPASS_MANIFEST_PATH,
     EZPASS_PARTS_DIR,
-    EZPASS_SAMPLE_MINUTES,
+    EZPASS_READING_COLS,
+    EZPASS_SEGMENTS_PATH,
     EZPASS_SPLIT_DATE,
     EZPASS_TIME_COL,
+    EZPASS_WINDOW_MINUTES,
     SOCRATA_DOMAIN,
     STUDY_START,
 )
@@ -94,23 +97,66 @@ def _datasets_for_month(month: date) -> list[str]:
 
 
 def _where(month: date) -> str:
-    """SoQL filter for one month: the time window, real aggregates, and the
-    rolling-window downsample.
+    """SoQL filter for a whole month (used for counts and the manifest record).
 
-    The feed republishes a rolling 900s median roughly every 61 seconds, so
-    ~92% of rows are near-duplicates of their neighbours. Restricting to the
-    minutes that open each non-overlapping 15-minute window (plus a backup
-    minute) cuts the pull 6.5x with no loss of independent information. Note
-    SoQL's minute function is ``date_extract_mm``; ``date_extract_m`` is MONTH
-    and silently matches nothing here.
+    Kept index-friendly: plain range predicates only. An earlier version added
+    ``date_extract_mm(...) IN (...)`` to downsample server-side, which put a
+    function on the indexed timestamp column and made deep paging collapse -- a
+    50k page at offset 500,000 took 255.8s versus 3.7s without it. The
+    downsample now happens client-side in :func:`_downsample`.
     """
     lo, hi = _month_bounds(month)
-    minutes = ",".join(str(m) for m in EZPASS_SAMPLE_MINUTES)
     return (
         f"{EZPASS_TIME_COL} >= '{lo}' AND {EZPASS_TIME_COL} < '{hi}'"
         f" AND aggregation_period_sec = {EZPASS_AGG_PERIOD_SEC}"
-        f" AND date_extract_mm({EZPASS_TIME_COL}) IN ({minutes})"
     )
+
+
+def _day_where(day: date) -> str:
+    """SoQL filter for a single day."""
+    nxt = day + timedelta(days=EZPASS_CHUNK_DAYS)
+    return (
+        f"{EZPASS_TIME_COL} >= '{day:%Y-%m-%d}T00:00:00'"
+        f" AND {EZPASS_TIME_COL} < '{nxt:%Y-%m-%d}T00:00:00'"
+        f" AND aggregation_period_sec = {EZPASS_AGG_PERIOD_SEC}"
+    )
+
+
+def _days_in_month(month: date):
+    cur = month.replace(day=1)
+    nxt = (
+        date(month.year + 1, 1, 1) if month.month == 12 else date(month.year, month.month + 1, 1)
+    )
+    while cur < nxt:
+        yield cur
+        cur += timedelta(days=EZPASS_CHUNK_DAYS)
+
+
+def _downsample(df: pd.DataFrame) -> pd.DataFrame:
+    """Keep one reading per (sid, non-overlapping N-minute window).
+
+    The feed publishes a rolling 900s median about every 61s, so neighbouring
+    rows overlap ~93% and are frequently identical. Prefer the median built
+    from the most probe samples; ties break on the earliest timestamp so the
+    result is deterministic across re-runs.
+    """
+    if df.empty:
+        return df
+    out = df.copy()
+    ts = pd.to_datetime(out[EZPASS_TIME_COL], errors="coerce")
+    out = out[ts.notna()]
+    ts = ts[ts.notna()]
+    freq = f"{EZPASS_WINDOW_MINUTES}min"
+    out["_window"] = ts.dt.floor(freq)
+    out["_n"] = pd.to_numeric(out["n_samples"], errors="coerce").fillna(-1)
+    out["_ts"] = ts
+    out = (
+        out.sort_values(["sid", "_window", "_n", "_ts"], ascending=[True, True, False, True])
+        .drop_duplicates(["sid", "_window"], keep="first")
+        .drop(columns=["_window", "_n", "_ts"])
+        .reset_index(drop=True)
+    )
+    return out
 
 
 def _base(dataset_id: str) -> str:
@@ -135,21 +181,22 @@ def _get_page(session: requests.Session, dataset_id: str, params: dict) -> reque
     return resp
 
 
-def _fetch_pages(session: requests.Session, dataset_id: str, where: str) -> list[pd.DataFrame]:
-    """Page through one dataset for one month, ordered for stable offset paging."""
+def _fetch_pages(
+    session: requests.Session, dataset_id: str, where: str, *, select: str | None = None
+) -> list[pd.DataFrame]:
+    """Page through one dataset for one filter, ordered for stable offset paging."""
     frames: list[pd.DataFrame] = []
     offset = 0
     while True:
-        resp = _get_page(
-            session,
-            dataset_id,
-            {
-                "$where": where,
-                "$order": f"{EZPASS_TIME_COL},sid",
-                "$limit": PAGE_SIZE,
-                "$offset": offset,
-            },
-        )
+        params = {
+            "$where": where,
+            "$order": f"{EZPASS_TIME_COL},sid",
+            "$limit": PAGE_SIZE,
+            "$offset": offset,
+        }
+        if select:
+            params["$select"] = select
+        resp = _get_page(session, dataset_id, params)
         page = pd.read_csv(io.BytesIO(resp.content), dtype=str)
         if page.empty:
             break
@@ -157,9 +204,23 @@ def _fetch_pages(session: requests.Session, dataset_id: str, where: str) -> list
         offset += len(page)
         if len(page) < PAGE_SIZE:
             break
-        if offset % (PAGE_SIZE * 10) == 0:
-            log.info("  %s: %s rows so far", dataset_id, f"{offset:,}")
     return frames
+
+
+def _fetch_day(session: requests.Session, day: date, datasets: list[str]) -> pd.DataFrame:
+    """Fetch and downsample one day across the dataset(s) covering it.
+
+    Downsampling per day (rather than per month) keeps peak memory to one day of
+    raw readings — ~335k rows — instead of the ~10.4M a month would hold.
+    """
+    where = _day_where(day)
+    select = ",".join(EZPASS_READING_COLS)
+    frames: list[pd.DataFrame] = []
+    for ds in datasets:
+        frames.extend(_fetch_pages(session, ds, where, select=select))
+    if not frames:
+        return pd.DataFrame(columns=list(EZPASS_READING_COLS))
+    return _downsample(pd.concat(frames, ignore_index=True))
 
 
 def download_month(
@@ -205,11 +266,15 @@ def download_month(
         f"expected {expected:,} rows" if expected is not None else "row count not pre-checked",
     )
 
-    frames: list[pd.DataFrame] = []
-    for ds in datasets:
-        frames.extend(_fetch_pages(session, ds, where))
+    days: list[pd.DataFrame] = []
+    raw_seen = 0
+    for day in _days_in_month(month):
+        chunk = _fetch_day(session, day, datasets)
+        days.append(chunk)
+        raw_seen += len(chunk)
+        log.info("  %s: %s kept rows so far", f"{month:%Y-%m}", f"{raw_seen:,}")
 
-    df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+    df = pd.concat(days, ignore_index=True) if days else pd.DataFrame()
     EZPASS_PARTS_DIR.mkdir(parents=True, exist_ok=True)
     tmp = dest.with_suffix(".parquet.part")
     df.to_parquet(tmp, engine="pyarrow", index=False)
@@ -238,6 +303,32 @@ def download_month(
         complete=complete,
         verified=verified,
     )
+
+
+def fetch_segments(session: requests.Session, sample_day: date) -> pd.DataFrame:
+    """Fetch the per-segment attribute table (sid -> name, borough, geometry).
+
+    These columns are constant per segment, so they are pulled once here rather
+    than repeated on all ~450M readings. A single day carries every active
+    segment, which is far cheaper than a GROUP BY over the full table (that
+    query timed out repeatedly during development).
+    """
+    cols = "sid,link_name,borough,polyline,link_length_ft"
+    frames: list[pd.DataFrame] = []
+    for ds in _datasets_for_month(sample_day):
+        frames.extend(_fetch_pages(session, ds, _day_where(sample_day), select=cols))
+    if not frames:
+        raise SystemExit(f"no segment rows returned for {sample_day}")
+    seg = (
+        pd.concat(frames, ignore_index=True)
+        .drop_duplicates(subset=["sid"])
+        .sort_values("sid")
+        .reset_index(drop=True)
+    )
+    EZPASS_SEGMENTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    seg.to_parquet(EZPASS_SEGMENTS_PATH, engine="pyarrow", index=False)
+    log.info("wrote %s (%d segments)", EZPASS_SEGMENTS_PATH.name, len(seg))
+    return seg
 
 
 def _write(parts_by_month: dict[str, dict]) -> None:
@@ -284,8 +375,13 @@ def main() -> None:
     parser.add_argument(
         "--count",
         action="store_true",
-        help="pre-check each month against a live count(1); slow (the minute "
-        "filter defeats Socrata's index) and off by default",
+        help="pre-check each month against a live count(1); adds a slow "
+        "aggregate query per month and is off by default",
+    )
+    parser.add_argument(
+        "--segments",
+        action="store_true",
+        help="fetch only the per-segment attribute table and exit",
     )
     args = parser.parse_args()
 
@@ -294,9 +390,17 @@ def main() -> None:
     end = args.end or date.today().replace(day=1)
     session = _session()
 
+    if args.segments:
+        fetch_segments(session, date(2025, 1, 6))
+        return
+
     if args.verify:
         verify(session, args.start, end)
         return
+
+    if not EZPASS_SEGMENTS_PATH.exists():
+        log.info("segment table missing - fetching it first")
+        fetch_segments(session, date(2025, 1, 6))
 
     parts_by_month = _load_existing_parts(EZPASS_MANIFEST_PATH)
     failures: list[str] = []

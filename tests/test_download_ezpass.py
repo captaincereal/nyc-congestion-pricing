@@ -1,9 +1,13 @@
 from datetime import date
 
+import pandas as pd
+
 from src.data.download_ezpass import (
     DATASET_AFTER_SPLIT,
     DATASET_BEFORE_SPLIT,
     _datasets_for_month,
+    _days_in_month,
+    _downsample,
     _where,
 )
 
@@ -34,16 +38,62 @@ def test_where_filters_month_and_aggregation_period():
     assert "aggregation_period_sec = 900" in w
 
 
-def test_where_downsamples_rolling_window_republication():
-    # The feed republishes a rolling 900s median ~every 61s (~93% overlap).
-    # We keep only the minutes opening each non-overlapping 15-min window,
-    # plus a backup minute.
+def test_where_stays_index_friendly():
+    # A function on the timestamp column (date_extract_mm) defeated Socrata's
+    # index: a 50k page at offset 500,000 took 255.8s vs 3.7s without it.
+    # Downsampling is client-side now, so the filter must stay a plain range.
     w = _where(date(2025, 1, 1))
-    assert "date_extract_mm(median_calculation_timestamp) IN (0,1,15,16,30,31,45,46)" in w
+    assert "date_extract" not in w
 
 
-def test_where_uses_minute_not_month_function():
-    # SoQL date_extract_m is MONTH and silently matches nothing; minute is _mm.
-    w = _where(date(2025, 1, 1))
-    assert "date_extract_mm(" in w
-    assert "date_extract_m(" not in w.replace("date_extract_mm(", "")
+def test_days_in_month_covers_every_day():
+    days = list(_days_in_month(date(2024, 2, 1)))
+    assert days[0] == date(2024, 2, 1)
+    assert days[-1] == date(2024, 2, 29)  # leap year
+    assert len(days) == 29
+
+
+def test_days_in_month_rolls_over_year():
+    days = list(_days_in_month(date(2024, 12, 1)))
+    assert len(days) == 31
+    assert days[-1] == date(2024, 12, 31)
+
+
+def _reading(sid, ts, n, fps):
+    return {
+        "sid": sid,
+        "median_calculation_timestamp": ts,
+        "median_speed_fps": fps,
+        "median_tt_sec": "100",
+        "n_samples": n,
+    }
+
+
+def test_downsample_keeps_one_row_per_window_preferring_more_samples():
+    df = pd.DataFrame(
+        [
+            _reading("1004", "2025-01-06T08:00:10", "12", "20.5"),
+            _reading("1004", "2025-01-06T08:01:07", "30", "21.5"),  # same window, better
+            _reading("1004", "2025-01-06T08:14:59", "5", "22.5"),  # same window, worse
+            _reading("1004", "2025-01-06T08:15:07", "20", "18.4"),  # next window
+            _reading("2001", "2025-01-06T08:00:30", "9", "10.0"),  # other segment
+        ]
+    )
+    out = _downsample(df)
+    assert len(out) == 3
+    kept = out[out.sid == "1004"].sort_values("median_calculation_timestamp")
+    assert list(kept["n_samples"]) == ["30", "20"]
+
+
+def test_downsample_drops_unparseable_timestamps():
+    df = pd.DataFrame(
+        [
+            _reading("1004", "not-a-timestamp", "5", "10"),
+            _reading("1004", "2025-01-06T08:00:10", "5", "10"),
+        ]
+    )
+    assert len(_downsample(df)) == 1
+
+
+def test_downsample_handles_empty_frame():
+    assert _downsample(pd.DataFrame()).empty

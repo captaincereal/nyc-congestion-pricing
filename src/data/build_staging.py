@@ -33,6 +33,7 @@ import duckdb
 from src.config import (
     DUCKDB_PATH,
     EZPASS_PARTS_DIR,
+    EZPASS_SEGMENTS_PATH,
     PROJECT_ROOT,
     RAW_DIR,
     STAGED_DOT_HIGHWAY_PATH,
@@ -48,6 +49,9 @@ class Source:
     parts_glob: str
     table: str
     out_path: Path
+    # Extra SQL bind parameters beyond $parts_glob (e.g. the EZ Pass segment
+    # attribute table, which staging joins onto the readings).
+    extra_params: dict[str, str] | None = None
 
 
 SOURCES = {
@@ -56,6 +60,7 @@ SOURCES = {
         parts_glob=str(EZPASS_PARTS_DIR / "*.parquet"),
         table="stg_speed_readings",
         out_path=STAGED_SPEEDS_PATH,
+        extra_params={"segments_path": str(EZPASS_SEGMENTS_PATH)},
     ),
     "dot": Source(
         sql_path=PROJECT_ROOT / "sql" / "01_stage_speeds.sql",
@@ -72,7 +77,8 @@ def build(con: duckdb.DuckDBPyConnection, source: Source) -> None:
     ).fetchone()[0]
     log.info("raw parts: %s rows", f"{raw_rows:,}")
 
-    con.execute(source.sql_path.read_text(), {"parts_glob": source.parts_glob})
+    params = {"parts_glob": source.parts_glob, **(source.extra_params or {})}
+    con.execute(source.sql_path.read_text(), params)
 
     staged_rows = con.execute(f"SELECT count(*) FROM {source.table}").fetchone()[0]
     dropped = raw_rows - staged_rows
