@@ -1,12 +1,12 @@
 {
   "dataset_id": "i4gi-tjb9",
-  "source_url": "https://data.cityofnewyork.us/Transportation/x/i4gi-tjb9",
+  "source_url": "https://data.cityofnewyork.us/d/i4gi-tjb9",
   "time_column": "data_as_of",
   "coverage": {
     "first_month": "2023-01",
     "last_month": "2026-07"
   },
-  "generated_at": "2026-09-09T03:51:13+00:00",
+  "generated_at": "2026-09-09T14:58:23+00:00",
   "total_rows": 42216965,
   "total_rows_expected": 42216965,
   "all_parts_complete": true,
@@ -20,7 +20,8 @@
       "bytes": 5422511,
       "sha256": "4130ff3fb261b08d953c1b5bf35a5c22afd24c15faf27b0a2b53919fa9aeeb97",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-02.parquet",
@@ -31,7 +32,8 @@
       "bytes": 6298222,
       "sha256": "d0a1ac6cdbdbe36c0cd8fbe5d9bb5df59eff5c3c584570fef216fba87e08e336",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-03.parquet",
@@ -42,7 +44,8 @@
       "bytes": 7254506,
       "sha256": "0e2aa5efc764ea67537a61e0d9a6bdd8f58b7e0bf85b8d11400c233fea0271d1",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-04.parquet",
@@ -53,7 +56,8 @@
       "bytes": 6789323,
       "sha256": "f9d49ed21ae588a039052ba397844f6b224e08218565fc0748df1c531739353f",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-05.parquet",
@@ -64,7 +68,8 @@
       "bytes": 4355827,
       "sha256": "23d0321f42dea4a8aba30a594021efc15e21381fd202ec4cc50718a5bf1b0597",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-06.parquet",
@@ -75,7 +80,8 @@
       "bytes": 4994011,
       "sha256": "18cce74bc2b402df911d4a5d35784fc81118972ac3106484287bf4ad4f47014f",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-07.parquet",
@@ -86,7 +92,8 @@
       "bytes": 5840736,
       "sha256": "d4299d84230ffd984e0e397735cbcb6dc2a243bfb5f0d3faa5de84ebdb7c60c1",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-08.parquet",
@@ -97,7 +104,8 @@
       "bytes": 7150251,
       "sha256": "be1381520cf20a344290e3733aa1925b02e737c5a0452ab9c901c18e60cae6ab",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-09.parquet",
@@ -108,7 +116,8 @@
       "bytes": 6297649,
       "sha256": "4dd0fbe3c8c91db39f397668c901035663051c82c58d354ac055ef476c218ffc",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-10.parquet",
@@ -119,7 +128,8 @@
       "bytes": 6395860,
       "sha256": "75bbe0c35e286f8d19af94469494b7d08ccbf40d46e1c0562cb4a7ec42585517",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-11.parquet",
@@ -130,7 +140,8 @@
       "bytes": 6621821,
       "sha256": "a9462672dd3cc68c91c169527c7f06904a4bbecc4696ae371ec381b9090b6326",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2023-12.parquet",
@@ -141,7 +152,8 @@
       "bytes": 6845290,
       "sha256": "441a7a7ee5f1b616adf7dbe8acd73e4be55daaa302a818ebd62b1cd5a31d8a05",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-01.parquet",
@@ -152,7 +164,8 @@
       "bytes": 6014525,
       "sha256": "3bb41d68dd409a66bc6f5f8d1e6c85137e276d1188b12f224e376c9e44d5ce66",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-02.parquet",
@@ -163,7 +176,8 @@
       "bytes": 3576835,
       "sha256": "92c573050f36d1fa05d1c9c1c1f4177b10e250c9ccf5816682b08953b1cd25b5",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-03.parquet",
@@ -174,7 +188,8 @@
       "bytes": 6604976,
       "sha256": "793c181c3e087738d5d1d5071e98b031d67e54ce7ec96539c0194741b426437c",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-04.parquet",
@@ -185,7 +200,8 @@
       "bytes": 6596102,
       "sha256": "daecc9026824dc30b6ede67ac02a8a68f5fb5d22674e1e08c3d91fa60c7de80e",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-05.parquet",
@@ -196,7 +212,8 @@
       "bytes": 7030817,
       "sha256": "56f9208fb02b4dc2f0d2a866c88ac9b60fd798a01326cd474ad6a490e8168d79",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-06.parquet",
@@ -207,7 +224,8 @@
       "bytes": 6851678,
       "sha256": "0ae943747919fee768acba8e956b710e3105308b719c61d0c647557d2053d599",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-07.parquet",
@@ -218,7 +236,8 @@
       "bytes": 6821460,
       "sha256": "5e6d130d445f2d2e9cc9f21257919cf5d8879b334798942ef832b88ca2bb66db",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-08.parquet",
@@ -229,7 +248,8 @@
       "bytes": 6232363,
       "sha256": "28e42854ec7fb93720389438e1e9888e14a3b54ddcaaf37d9a25e70fbcb8c674",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-09.parquet",
@@ -240,7 +260,8 @@
       "bytes": 6953132,
       "sha256": "92524d97e7f91e7d0a0f707a869efbf4803039193410cc3925fa40ba11b997ca",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-10.parquet",
@@ -251,7 +272,8 @@
       "bytes": 6369341,
       "sha256": "8f0a61ec2e5db2a69ef0ff39e76cc44983bc5737833e6b0ada16aaa24a28b499",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-11.parquet",
@@ -262,7 +284,8 @@
       "bytes": 6546115,
       "sha256": "5d5bd010426d8f9048cf36c430471c54ef8cb1b2a556678b70e835e90cc82024",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2024-12.parquet",
@@ -273,7 +296,8 @@
       "bytes": 4744529,
       "sha256": "e560d006c0a06915eda48687c6b7d88549260f7b9447fce0a225523c79dc4b5b",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-01.parquet",
@@ -284,7 +308,8 @@
       "bytes": 6005273,
       "sha256": "d15519ac96c3b199f4ff7beb6b550ad75911bf22338bd08b2e94a822fde8e710",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-02.parquet",
@@ -295,7 +320,8 @@
       "bytes": 5317482,
       "sha256": "e9179ec538c2fd0f56b48bdf8d7ba62f8d916e65f30612c8780b72a0dcd6972b",
       "pulled_at": "(pre-existing)",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-03.parquet",
@@ -306,7 +332,8 @@
       "bytes": 6626534,
       "sha256": "04b92b1ae8db5fe4a8a6fe6a60f879b22fcee4b2d48531c626320b2cc4fa506d",
       "pulled_at": "2026-09-08T13:51:34+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-04.parquet",
@@ -317,7 +344,8 @@
       "bytes": 5258437,
       "sha256": "cba9a110f27323f5b2536a2b585a76631480c7ee320d538563e85affb995090a",
       "pulled_at": "2026-09-08T13:58:01+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-05.parquet",
@@ -328,7 +356,8 @@
       "bytes": 6549245,
       "sha256": "801d1c29b04eded0e133b238c0c5556f5aeb66d4e4fe37c7124e526a0f050e7d",
       "pulled_at": "2026-09-08T14:14:09+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-06.parquet",
@@ -339,7 +368,8 @@
       "bytes": 6317543,
       "sha256": "64334f347223918a83afd9535c7c541515705c2218331aad927bf7f31412b16a",
       "pulled_at": "2026-09-08T14:19:02+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-07.parquet",
@@ -350,7 +380,8 @@
       "bytes": 6081947,
       "sha256": "b0c8ff60042e47ba76d9a0fede2637d6a753e01d721fd9c651bf570445a25c59",
       "pulled_at": "2026-09-08T14:23:25+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-08.parquet",
@@ -361,7 +392,8 @@
       "bytes": 6056823,
       "sha256": "0bae89c34efd821d18e3975ed6bc6f62bcaafca6710f5aa57c46a78a99683410",
       "pulled_at": "2026-09-08T14:29:28+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-09.parquet",
@@ -372,7 +404,8 @@
       "bytes": 5728758,
       "sha256": "5f2c952839030a8f2aedbd5cc06444be8941447a2015c2ed6279ded8bdf5cbfb",
       "pulled_at": "2026-09-08T14:39:31+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-10.parquet",
@@ -383,7 +416,8 @@
       "bytes": 6036615,
       "sha256": "67676bbe17441e491b2294e184f3a4b65b38b4a0322498b076c222533f92611a",
       "pulled_at": "2026-09-08T14:44:02+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-11.parquet",
@@ -394,7 +428,8 @@
       "bytes": 6747205,
       "sha256": "fc018d5c3865c4f60fc52dbba03105b40fa72817876f05b7713008c3fc640a6b",
       "pulled_at": "2026-09-08T14:53:56+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2025-12.parquet",
@@ -405,7 +440,8 @@
       "bytes": 6014495,
       "sha256": "3126a99bffdfda62914a8a02d0d393bea0d74897520ebec40bb898fedc4eb204",
       "pulled_at": "2026-09-08T15:06:38+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2026-01.parquet",
@@ -416,7 +452,8 @@
       "bytes": 5896869,
       "sha256": "c17692df49d2ec34addd011b851c94521a085dbdfa2a5e8269a7567f8335a5ea",
       "pulled_at": "2026-09-08T15:12:49+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2026-02.parquet",
@@ -427,7 +464,8 @@
       "bytes": 5685040,
       "sha256": "63767116038109a8bf7abe0046454a6370b3774cf266ee99e1f8ec3f4e80acc9",
       "pulled_at": "2026-09-08T15:19:10+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2026-03.parquet",
@@ -438,7 +476,8 @@
       "bytes": 5455442,
       "sha256": "69d2d4552936c4ff7278849b1296f7036e37c73fcf34e01da0d4ed6895a36aa8",
       "pulled_at": "2026-09-08T15:39:51+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2026-04.parquet",
@@ -449,7 +488,8 @@
       "bytes": 3684718,
       "sha256": "f53fb6bade4d05ba1f87f2df059b173b8d15925597c673330ee2f356ba8b4d14",
       "pulled_at": "2026-09-08T16:36:36+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2026-05.parquet",
@@ -460,7 +500,8 @@
       "bytes": 5820247,
       "sha256": "8269d25feb56fba29e784ac52b74a96dd774d64b6a0033812a1e9986a0da9a37",
       "pulled_at": "2026-09-09T02:27:35+00:00",
-      "complete": true
+      "complete": true,
+      "verified": true
     },
     {
       "part": "dot_speeds_2026-07.parquet",

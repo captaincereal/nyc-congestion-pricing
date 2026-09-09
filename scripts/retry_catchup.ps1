@@ -40,7 +40,7 @@ function Write-Log([string]$msg) {
     Add-Content -Path $log -Value $msg -Encoding utf8
 }
 
-function Invoke-Pull([string]$label, [string]$module) {
+function Invoke-Pull([string]$label, [string]$module, [string[]]$extraArgs = @()) {
     Write-Log "--- $label ---"
     # The downloaders log via Python's `logging`, which writes to STDERR. With
     # $ErrorActionPreference='Stop' PowerShell treats native stderr as a
@@ -50,7 +50,7 @@ function Invoke-Pull([string]$label, [string]$module) {
     $prev = $ErrorActionPreference
     $ErrorActionPreference = 'Continue'
     try {
-        & $python -m $module --start 2023-01-01 2>&1 |
+        & $python -m $module @extraArgs 2>&1 |
             ForEach-Object { Add-Content -Path $log -Value "$_" -Encoding utf8 }
         $code = $LASTEXITCODE
     } finally {
@@ -62,14 +62,20 @@ function Invoke-Pull([string]$label, [string]$module) {
 
 Write-Log "=== catch-up run $(Get-Date -Format o) ==="
 
-# PRIMARY source first (EZ Pass local-street speeds). This is a large multi-night
-# pull; it is resumable and the manifest is rewritten after every month, so a
-# throttled or interrupted run simply resumes where it left off.
-Invoke-Pull 'ezpass (primary)' 'src.data.download_ezpass' | Out-Null
+# PRIMARY source, PRIORITY WINDOW first: 2024-10..2025-03 is three months either
+# side of the 2025-01-05 toll, which is enough to build the panel, run the
+# quality report and get a first descriptive read. Socrata throughput is erratic
+# (measured 3s-80s per 50k-row page) so the full 45-month pull takes many hours;
+# fetching this window first means the analysis is not blocked on the backfill.
+Invoke-Pull 'ezpass priority window' 'src.data.download_ezpass' `
+    @('--start', '2024-10-01', '--end', '2025-04-01') | Out-Null
+
+# PRIMARY source, full backfill. Skips whatever the priority window already got.
+Invoke-Pull 'ezpass backfill' 'src.data.download_ezpass' @('--start', '2023-01-01') | Out-Null
 
 # SECONDARY source (DOT highway speeds, for the spillover analysis). Nearly
 # complete - only a few tail months outstanding.
-$exit = Invoke-Pull 'dot speeds (secondary)' 'src.data.download'
+$exit = Invoke-Pull 'dot speeds (secondary)' 'src.data.download' @('--start', '2023-01-01')
 
 # Report coverage for both sources. Self-disable only when BOTH have reached the
 # target month - the primary pull spans many nights, so finishing the secondary
