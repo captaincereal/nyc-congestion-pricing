@@ -305,20 +305,45 @@ def download_month(
     )
 
 
-def fetch_segments(session: requests.Session, sample_day: date) -> pd.DataFrame:
+# One sample day per period. The active segment roster CHANGES over time, so a
+# single day is not enough: building the table from 2025-01-06 alone left 32
+# sids (7.9% of October 2024 readings) with no borough or geometry, and so no
+# treatment group. These span both datasets and the whole study window.
+SEGMENT_SAMPLE_DAYS = (
+    date(2023, 1, 10),
+    date(2023, 7, 11),
+    date(2024, 1, 10),
+    date(2024, 6, 11),
+    date(2024, 10, 9),
+    date(2025, 1, 6),
+    date(2025, 7, 9),
+    date(2026, 1, 7),
+    date(2026, 6, 10),
+)
+
+
+def fetch_segments(
+    session: requests.Session, sample_days: tuple[date, ...] = SEGMENT_SAMPLE_DAYS
+) -> pd.DataFrame:
     """Fetch the per-segment attribute table (sid -> name, borough, geometry).
 
     These columns are constant per segment, so they are pulled once here rather
-    than repeated on all ~450M readings. A single day carries every active
-    segment, which is far cheaper than a GROUP BY over the full table (that
-    query timed out repeatedly during development).
+    than repeated on all ~450M readings. Sampling a day is far cheaper than a
+    GROUP BY over the full table (that query timed out repeatedly during
+    development), but it must be several days spread across the study window --
+    see SEGMENT_SAMPLE_DAYS for why one is not enough.
     """
     cols = "sid,link_name,borough,polyline,link_length_ft"
     frames: list[pd.DataFrame] = []
-    for ds in _datasets_for_month(sample_day):
-        frames.extend(_fetch_pages(session, ds, _day_where(sample_day), select=cols))
+    for day in sample_days:
+        for ds in _datasets_for_month(day):
+            try:
+                frames.extend(_fetch_pages(session, ds, _day_where(day), select=cols))
+            except Exception:  # noqa: BLE001 - one bad sample day must not lose the rest
+                log.exception("segment sample failed for %s on %s", day, ds)
+        log.info("  segments: %s sampled", day)
     if not frames:
-        raise SystemExit(f"no segment rows returned for {sample_day}")
+        raise SystemExit("no segment rows returned for any sample day")
     seg = (
         pd.concat(frames, ignore_index=True)
         .drop_duplicates(subset=["sid"])
@@ -391,7 +416,7 @@ def main() -> None:
     session = _session()
 
     if args.segments:
-        fetch_segments(session, date(2025, 1, 6))
+        fetch_segments(session)
         return
 
     if args.verify:
@@ -400,7 +425,7 @@ def main() -> None:
 
     if not EZPASS_SEGMENTS_PATH.exists():
         log.info("segment table missing - fetching it first")
-        fetch_segments(session, date(2025, 1, 6))
+        fetch_segments(session)
 
     parts_by_month = _load_existing_parts(EZPASS_MANIFEST_PATH)
     failures: list[str] = []

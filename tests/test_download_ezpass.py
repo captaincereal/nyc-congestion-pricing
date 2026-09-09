@@ -97,3 +97,15 @@ def test_downsample_drops_unparseable_timestamps():
 
 def test_downsample_handles_empty_frame():
     assert _downsample(pd.DataFrame()).empty
+
+
+def test_segment_sample_days_span_both_datasets_and_study_window():
+    from src.data.download_ezpass import SEGMENT_SAMPLE_DAYS, _datasets_for_month
+
+    # A single sample day left 32 sids (7.9% of Oct-2024 readings) with no
+    # geometry, because the active segment roster changes over time.
+    assert len(SEGMENT_SAMPLE_DAYS) >= 5
+    covered = {ds for d in SEGMENT_SAMPLE_DAYS for ds in _datasets_for_month(d)}
+    assert covered == {DATASET_BEFORE_SPLIT, DATASET_AFTER_SPLIT}
+    assert min(SEGMENT_SAMPLE_DAYS) <= date(2023, 3, 1)  # covers the study start
+    assert max(SEGMENT_SAMPLE_DAYS) >= date(2026, 1, 1)  # and the recent end
