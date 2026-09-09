@@ -30,6 +30,9 @@ _RAW_ROWS = [
     # null keys dropped
     (None, "2025-01-06T08:00:00.000", "10", "1", "1"),
     ("3001", None, "10", "1", "1"),
+    # fall-back date: 01:xx is the ambiguous repeated hour
+    ("1004", "2024-11-03T01:30:00.000", "14.6667", "100", "9"),
+    ("1004", "2024-11-03T03:30:00.000", "14.6667", "100", "9"),
     # reading for a segment absent from the segments table -> kept, attrs null
     ("9999", "2025-01-06T09:00:00.000", "14.6667", "100", "4"),
 ]
@@ -110,3 +113,21 @@ def test_reading_without_segment_row_is_kept_with_null_attrs(raw_part):
     # rather than vanishing from the panel unnoticed.
     assert len(orphan) == 1
     assert pd.isna(orphan.iloc[0]["borough"])
+
+
+def test_fall_back_hour_is_flagged_ambiguous(raw_part):
+    """01:00-01:59 runs twice on a US fall-back date under naive local time.
+
+    Both passes floor to the same 15-minute windows, so de-dup keeps one and
+    discards the other - the hour is ambiguous and under-counted. Verified
+    against the raw feed on 2024-11-03: 103 readings in hour 01 vs 51 in
+    neighbouring hours. Staging flags rather than drops.
+    """
+    df = _stage(raw_part)
+    flagged = df[df["is_dst_ambiguous_hour"]]
+    assert len(flagged) == 1
+    assert str(flagged.iloc[0]["ts"]).startswith("2024-11-03 01:")
+    # the 03:00 reading on the same date is NOT ambiguous
+    same_day = df[df["ts"].astype(str).str.startswith("2024-11-03")]
+    assert len(same_day) == 2
+    assert same_day["is_dst_ambiguous_hour"].sum() == 1

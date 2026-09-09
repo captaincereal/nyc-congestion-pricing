@@ -22,10 +22,21 @@
 -- here (x 3600/5280) and nowhere else, so speed_mph is directly comparable to
 -- the secondary DOT highway feed.
 --
--- Timezone: median_calculation_timestamp is assumed naive America/New_York wall
--- clock, matching the DOT feed. VERIFY before Phase 4 by checking that the
--- spring-forward hour (2025-03-09 02:00-02:59) is empty; if it is not, fix the
--- interpretation here and nowhere else.
+-- Timezone: median_calculation_timestamp is naive America/New_York wall clock.
+-- VERIFIED 2026-09-09 against the raw feed: on the fall-back date 2024-11-03,
+-- sid 1004 has 103 readings stamped in hour 01 versus 51 in every neighbouring
+-- hour and 51 in that hour on the control Sunday 2024-10-27 -- exactly the
+-- doubling expected when 01:00-01:59 runs twice and both passes carry the same
+-- wall-clock stamp. Under UTC no hour would double. No timezone conversion is
+-- applied anywhere; if this is ever revisited, do it here and nowhere else.
+--
+-- CONSEQUENCE - ambiguous fall-back hour: because both passes of 01:00-01:59
+-- floor to the same 15-minute windows, the de-dup below keeps one reading per
+-- window and silently discards the other. On fall-back dates that hour is
+-- therefore ambiguous (it is unknowable which real hour a kept reading came
+-- from) and under-counted. It is flagged here as `is_dst_ambiguous_hour` so the
+-- panel build can exclude it rather than quietly averaging two different hours
+-- together. Cost of excluding: one hour per year per link.
 --
 -- Window semantics: each row is a median over a preceding `aggregation_period_sec`
 -- window (900s). A reading is attributed to the hour of its timestamp, so a
@@ -96,6 +107,14 @@ SELECT
     ts,
     ts_window,
     date_trunc('hour', ts)          AS ts_hour,
+    -- The 01:00-01:59 hour on a US fall-back date runs twice under naive local
+    -- time; both passes collapse into the same windows above, so this hour is
+    -- ambiguous and under-counted. Flagged, not dropped: staging does not
+    -- remove data, the panel build decides.
+    (date_part('hour', ts) = 1
+     AND CAST(ts AS DATE) IN (
+        DATE '2023-11-05', DATE '2024-11-03', DATE '2025-11-02', DATE '2026-11-01'
+     ))                             AS is_dst_ambiguous_hour,
     speed_mph,
     travel_time_s,
     n_samples,
