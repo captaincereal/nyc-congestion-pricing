@@ -10,7 +10,11 @@ Short version:
 - **Primary outcome**: hourly median traffic speed (mph) on a road segment.
 - **Method**: difference-in-differences + event study, with robustness and
   placebo tests. Standard errors clustered by segment.
-- **Data**: NYC DOT Traffic Speeds NBE (`i4gi-tjb9`) only, for the core analysis.
+- **Data**: NYC DOT E-Z Pass **local-street** speeds (`erdf-2akx` + `6a2s-2t65`)
+  for the core analysis. The Traffic Speeds NBE feed (`i4gi-tjb9`) was the
+  original primary source but carries no links on tolled CRZ surface streets;
+  it is now secondary, used for the spillover analysis. See the 2026-09-08
+  decision record in `docs/methodology.md`.
 - **Principles**: no correlation-as-causation; don't change treatment/control
   definitions after seeing results without documenting; report nulls; report
   confidence intervals; document missing data; raw data stays unchanged; every

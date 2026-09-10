@@ -39,7 +39,8 @@ Secondary questions:
 | **Standard errors** | Clustered by link (`CLUSTER_VAR`) |
 | **Study period** | 2023-01-01 through the latest complete data (≥ 24 months pre-treatment) |
 | **Unit of analysis** | link × hour |
-| **Primary data source** | NYC DOT Traffic Speeds NBE (`i4gi-tjb9`) — the only source for Phases 1–9 |
+| **Primary data source** | NYC DOT E-Z Pass local-street speeds (`erdf-2akx` + `6a2s-2t65`) — changed 2026-09-08, see the decision record in `docs/methodology.md` |
+| **Secondary data source** | NYC DOT Traffic Speeds NBE (`i4gi-tjb9`) — highways, crossings and toll-exempt roads only; used for the spillover/diversion analysis |
 
 ## Scope
 

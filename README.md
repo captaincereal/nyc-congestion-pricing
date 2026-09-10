@@ -61,10 +61,21 @@ assumptions, and `docs/project_brief.md` for frozen definitions.
 
 ## Data
 
-Primary and (for now) only source: **NYC DOT Traffic Speeds NBE**
-(`i4gi-tjb9`, NYC Open Data). Schema and conventions in
-`docs/data_dictionary.md`. Secondary sources are deferred — see
-`docs/future_data_sources.md`.
+**Primary — NYC DOT E-Z Pass local-street speeds** (`erdf-2akx` +
+`6a2s-2t65`, NYC Open Data). Two datasets with identical schemas that join with
+no gap, covering 2021-04-08 to the present. `median_speed_fps` on ~346 named
+street segments, including the tolled Manhattan grid.
+
+**Secondary — NYC DOT Traffic Speeds NBE** (`i4gi-tjb9`). This was the original
+primary source. It carries only ~123 links city-wide and **none** on tolled CRZ
+surface streets — every in-zone link is a toll-exempt highway (FDR Drive, West
+Side Highway) or a crossing — so it cannot support the primary specification. It
+is retained for the spillover/diversion analysis, since those exempt roads are
+exactly where displaced traffic would go. Full reasoning in the 2026-09-08
+decision record in `docs/methodology.md`.
+
+Schema and conventions in `docs/data_dictionary.md`; open questions in
+`docs/decision_register.md`; further sources in `docs/future_data_sources.md`.
 
 ## Project structure
 

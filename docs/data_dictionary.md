@@ -1,6 +1,38 @@
 # Data dictionary
 
-## Primary source — NYC DOT Traffic Speeds NBE
+## Primary source — NYC DOT E-Z Pass local-street speeds
+
+- **Portal**: NYC Open Data (Socrata), dataset ids `erdf-2akx` + `6a2s-2t65`
+- **What it is**: median speed and travel time over named **local street**
+  segments, from E-Z Pass readers installed across the city (the Midtown in
+  Motion programme and its successors).
+- **Coverage**: `erdf-2akx` 2021-04-08 .. 2024-07-07; `6a2s-2t65` 2024-07-08 ..
+  present. Identical schemas, same `sid` space, joining with no gap.
+- **Segments**: ~346 across Manhattan, Queens, Brooklyn and Staten Island
+  (no Bronx), including the tolled Manhattan grid the secondary feed lacks.
+- **Cadence**: a **rolling** 900-second median re-published about every 61
+  seconds, so consecutive rows overlap ~93%. Ingestion reduces this to one
+  reading per non-overlapping 15-minute window.
+
+| Field | Example | Type (raw) | Notes |
+|---|---|---|---|
+| `sid` | `1004` | string | **Stable segment identifier — the analysis unit** (`link_id` downstream). |
+| `link_name` | `42nd Street - Eastbound - Lexington Ave to 3rd Ave` | string | Free text. The roadway *subject* is the part before the first delimiter; endpoints name cross streets. Delimiters are inconsistent (` - `, en dash, mojibaked en dash, `Street- westbound`). |
+| `borough` | `Manhattan` | string | Casing/spacing varies; folded to lowercase in staging. |
+| `polyline` | `agvwFxmobMfCeI` | string | Google-encoded polyline. **The basis for treatment assignment** — decoded in `src/data/geo.py`, never string-matched on `link_name`. |
+| `link_length_ft` | `3781.98` | string→float | Segment length. |
+| `aggregation_period_sec` | `900` | string→int | Window the median covers. The feed also emits `0`; ingestion keeps only `900`. |
+| `n_samples` | `25` | string→int | Probe vehicles behind the median. 10.2% of readings rest on ≤3. |
+| `median_calculation_timestamp` | `2025-01-06T08:00:10.000` | string→timestamp | **Naive `America/New_York`, verified both directions**: hour 01 doubles on fall-back 2024-11-03 (103 vs 51), and hour 02 is empty on spring-forward 2025-03-09 (0 vs 1,063). No conversion applied. |
+| `median_tt_sec` | `228.0` | string→float | Median seconds to traverse. Agrees with the reported speed to a median 0.002 mph. |
+| `median_speed_fps` | `20.57` | string→float | **Primary outcome input.** FEET PER SECOND — converted to mph (×3600/5280) in staging and nowhere else. Contains impossible values (observed max ~20,662 fps); not cleaned in staging. |
+
+## Secondary source — NYC DOT Traffic Speeds NBE
+
+Demoted from primary on 2026-09-08: it carries only ~121–125 links city-wide and
+**none** on tolled CRZ surface streets. Retained for the spillover/diversion
+analysis, because FDR Drive and the West Side Highway are precisely the
+toll-exempt roads displaced traffic can move to. See `docs/methodology.md`.
 
 - **Portal**: NYC Open Data (Socrata), dataset id `i4gi-tjb9`
 - **URL**: https://data.cityofnewyork.us/Transportation/DOT-Traffic-Speeds-NBE/i4gi-tjb9
@@ -11,10 +43,11 @@
 - **Known bias**: coverage is concentrated on highways, parkways, bridges and
   tunnels, and major arterials. Surface-street coverage inside the Congestion
   Relief Zone is thinner — quantified in `data_quality_report.md`.
-- **Coverage concern (open)**: a 4-hour sample in March 2025 returned only 121
-  distinct `link_id` city-wide. If active-link counts are really this low, the
-  treated group inside the CRZ may be too small for a clean design. First thing
-  to quantify once the full pull is in (Phase 3).
+- **Coverage concern — RESOLVED, and fatal for primary use**: a census of 40
+  ingested months confirms ~121–125 distinct `link_id` city-wide in every month.
+  Of the 18 whose geometry lies inside the CRZ, every one is toll-exempt or a
+  crossing. The treated group under the frozen design was empty, which is why
+  this source was demoted.
 
 ### Raw fields (verified against the live API, 2026-09-07)
 
@@ -39,8 +72,12 @@ No latitude/longitude columns — segment location must be derived from
 
 ## `data/raw/`
 
-Immutable source extracts, written by `python -m src.data.download`, one
-calendar month per file: `data/raw/dot_speeds/dot_speeds_YYYY-MM.parquet`.
+Immutable source extracts, one calendar month per file. Primary:
+`data/raw/ezpass_speeds/ezpass_speeds_YYYY-MM.parquet` written by
+`python -m src.data.download_ezpass`, with per-segment attributes held once in
+`data/raw/ezpass_segments.parquet`. Secondary:
+`data/raw/dot_speeds/dot_speeds_YYYY-MM.parquet` written by
+`python -m src.data.download`.
 Never edited. `data/raw/manifest.json` records, per month: SoQL window, row
 count, expected row count (from a live `count(1)` query), byte size, SHA-256,
 and pull timestamp. The manifest is merged across runs and rewritten after
@@ -50,25 +87,39 @@ live API row count.
 
 ## `data/interim/` — `stg_speed_readings`
 
-Typed, de-duplicated staging of the raw feed. **No cleaning of values** beyond
-type casting; problems are documented in the data-quality report, not fixed
-here. Built by `sql/01_stage_speeds.sql` (DuckDB).
+Typed, de-duplicated staging of the **primary** feed. **No cleaning of values**
+beyond type casting; problems are documented in the data-quality report, not
+fixed here. Built by `sql/01_stage_ezpass.sql` (DuckDB), which also joins the
+per-segment attributes. One row per `(link_id, 15-minute window)`.
+
+The secondary feed stages separately to `stg_dot_highway_readings` via
+`sql/01_stage_speeds.sql`; use `python -m src.data.build_staging --source dot`.
 
 | Column | Type | Description |
 |---|---|---|
-| `link_id` | VARCHAR | Segment identifier |
-| `ts` | TIMESTAMP | `data_as_of` parsed, `America/New_York` |
-| `speed_mph` | DOUBLE | `speed` cast to float (not range-filtered) |
-| `travel_time_s` | DOUBLE | `travel_time` cast to float |
-| `status` | VARCHAR | Raw status flag |
+| `link_id` | VARCHAR | Segment identifier (`sid`) |
+| `ts` | TIMESTAMP | Reading time, naive `America/New_York` |
+| `ts_window` | TIMESTAMP | The non-overlapping 15-minute window it belongs to |
+| `ts_hour` | TIMESTAMP | Hour start |
+| `is_dst_ambiguous_hour` | BOOLEAN | True for 01:00–01:59 on a fall-back date, where the hour runs twice and de-dup kept only one pass. Flagged, not dropped |
+| `speed_mph` | DOUBLE | `median_speed_fps` × 3600/5280 (not range-filtered) |
+| `travel_time_s` | DOUBLE | `median_tt_sec` |
+| `n_samples` | INTEGER | Probe vehicles behind the median |
+| `link_length_ft` | DOUBLE | From the segment table |
 | `borough` | VARCHAR | Normalized borough label |
 | `link_name` | VARCHAR | Segment description |
+| `polyline` | VARCHAR | Encoded geometry, for treatment assignment |
 
 ## `data/processed/` — `hourly_panel`
 
-Analysis-ready. One row per `link_id` × hour. Built by `sql/03_hourly_panel.sql`
-in **Phase 4** — schema below is the current plan and may change once the
-staging data is inspected.
+Analysis-ready. One row per `link_id` × hour, built by `sql/03_hourly_panel.sql`
+(`python -m src.data.build_panel`). Excludes only the DST-ambiguous hour and
+null speeds; carries the diagnostics a cleaning rule would need
+(`n_obs`, `n_probe_samples`, `min_n_samples`, `n_zero_speed`, `n_over_80`)
+rather than applying thresholds, so exclusions stay documented and reversible.
+Treatment groups come from `data/interim/segment_treatment.parquet`
+(`python -m src.data.geo`): `treated`, `control`, `exempt_in_zone`, `boundary`,
+`crossing`.
 
 | Column | Type | Description |
 |---|---|---|
