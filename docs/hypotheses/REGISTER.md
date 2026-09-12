@@ -44,3 +44,9 @@ prediction and acceptance criteria to be written first.
 The serial-correlation-collapse queue entry above is now represented by H003;
 the historical queue and the other registrations are preserved. Three
 hypotheses are registered. H002 remains deferred until the contiguous pre-period.
+
+2026-09-12, H003 prospective amendment before execution: at the owner's
+direction, peak replaces all-hours as the primary decision sample and daily
+peak becomes the lead metric. Estimators and stability thresholds are unchanged;
+all cuts remain reported. The registration retains the original text and
+the dated amendment. H002 remains deferred.

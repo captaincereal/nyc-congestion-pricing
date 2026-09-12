@@ -32,3 +32,9 @@ allow within-link serial correlation under their asymptotic assumptions.
 Read H001's available result and explain complementarity and limitations;
 do not rerun it. Cite author, year and venue precisely, and flag uncertain
 references. The registration lists verified methodological citations.
+
+Prospective owner-directed amendment, committed before execution: use peak
+as the primary decision sample, lead with the daily peak metric, and compare
+hourly and collapsed peak estimates using the unchanged stability thresholds.
+Retain all-hours, offpeak and weekend as secondary cuts. Read the amendment
+at the end of the registration. H001 now has completed results to inspect.

@@ -127,3 +127,22 @@ References, verified against the published papers:
   for difference-in-differences with few treated clusters.”
   *Journal of Econometrics* 218(2):435–450.
   https://doi.org/10.1016/j.jeconom.2020.04.024
+
+## Owner-directed amendment — 2026-09-12, before execution
+
+After registration and before any H003 data estimation, the owner specified:
+“Daily aggregation (step 3): primary driver of final peak metric” and
+“Peak result: main actionable output for downstream reasoning.”
+
+This prospective amendment makes **peak** the primary decision sample and
+the **daily peak coefficient and its uncertainty** the lead reported metric.
+The hourly peak reference and collapsed peak estimate remain the registered
+comparators. Apply the same prediction and the same joint descriptive
+stability thresholds above to the peak cut instead of all-hours. All-hours,
+offpeak and weekend remain fully reported secondary cuts. No estimator,
+input, treatment, threshold or inference procedure changes. The original
+registration above is retained for audit; this amendment controls the sample
+priority. “Actionable” here means usable for downstream methodological
+reasoning, not identified evidence of a causal toll effect. H001 is now
+completed; inspect its completed result rather than treating its earlier
+smoke run as the final exercise.
