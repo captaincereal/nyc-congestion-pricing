@@ -56,7 +56,9 @@ refactor, commit boundaries and messages.
 
 ## Bring to the owner first
 
-- Pushing to a remote, or anything that changes repository visibility.
+- Force-pushing, rewriting published history, or changing repository
+  visibility. Working on a branch and opening a pull request is normal and
+  needs no approval.
 - Any step that would cost money. The correct move is to say it costs money and
   propose a free path.
 - Changing anything the brief marks frozen.
@@ -143,10 +145,10 @@ memory and writes the parquet only when the month finishes. Killing it at minute
 35 of 40 discards all 35 minutes. The manifest checkpoints across months, never
 within one. The logs show a partial 2024-07 and a partial 2023-11 lost this way.
 
-Three more facts for the rebuild. There is no git remote configured yet. The
-Socrata app token lives in a gitignored `.env` as `NYC_OPENDATA_APP_TOKEN`; it
-is a rate-limit identifier for public data, but it belongs in an encrypted
-secret that the owner pastes themselves, and never in a file or a log. All eight
+Two more facts for the rebuild. The Socrata app token is already stored as a
+GitHub Actions secret named `NYC_OPENDATA_APP_TOKEN`, so a workflow can read it
+from `secrets.NYC_OPENDATA_APP_TOKEN`. It is a rate-limit identifier for public
+data rather than a credential, but keep it out of files and logs. All eight
 parts carry `verified: false`, because row counts were never checked against a
 live `count(1)` — `--verify` upgrades that, and should run before any published
 number.
@@ -165,8 +167,8 @@ Socrata is a free public API serving other people, so stay single-threaded
 against it and keep the retry and backoff behaviour — the project already
 measured that concurrent requests make throughput worse.
 
-GitHub Actions is the obvious fit and the owner has agreed to a public repo, so
-minutes are not a constraint. Confirm the current job time limit and runner disk
+GitHub Actions is the obvious fit. The repo is public, so Actions minutes are
+not a constraint, and nothing is scheduled yet — `.github/` does not exist. Confirm the current job time limit and runner disk
 yourself rather than trusting any number in this document.
 
 Before building scheduling around a 25-hour job, spend about 30 minutes finding
