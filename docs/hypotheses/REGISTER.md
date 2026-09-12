@@ -12,6 +12,7 @@ cannot tell the difference from the finding alone.
 | ID | Title | Status | Registered | Verdict |
 |---|---|---|---|---|
 | [H001](H001-placebo-in-space.md) | Is the DiD estimate larger than chance reassignment of control links? | running | 2026-09-12 | — |
+| [H002](H002-honest-did-sensitivity.md) | How large a parallel-trends violation would it take to overturn the estimate? | proposed | 2026-09-12 | — |
 
 ## Queue — considered, not yet registered
 
@@ -19,11 +20,6 @@ These are candidates, not commitments. A queue entry becomes a record when
 someone is about to run it, via the `research-prompt` skill, which forces the
 prediction and acceptance criteria to be written first.
 
-- **Rambachan–Roth sensitivity.** The pre-trend test rejects in all four
-  samples. Rather than treating that as a gate, bound how large a post-treatment
-  violation would have to be, relative to observed pre-treatment violations, to
-  overturn the conclusion, and report the breakdown value. A breakdown value
-  near zero is a real and reportable finding about this design.
 - **Synthetic control / synthetic DiD.** One cordon, one date, every treated
   link sharing one shock: structurally a comparative case study rather than a
   many-treated-units panel. These estimators construct parallel pre-trends by
