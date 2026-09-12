@@ -1,18 +1,33 @@
-"""Event-study estimation of dynamic congestion-pricing effects.
+"""Phase 8 — event-study estimation of dynamic congestion-pricing effects.
 
-    y_{i,t} = alpha_i + gamma_t + sum_{k != -1} theta_k * 1[event_time = k]
-              + X_{i,t}*delta + e_{i,t}
+    median_speed_mph_{i,t} = alpha_i + gamma_t
+        + sum_{k != -1} theta_k * treated_i * 1[event_week_{i,t} = k] + eps_{i,t}
 
-  - event_time in weeks (default) relative to 2025-01-05
-  - reference period k = -1 (omitted)
-  - flat pre-period thetas support parallel trends; post thetas trace adjustment
+  - event_week (weeks relative to 2025-01-05) is already on the panel
+    (sql/03_hourly_panel.sql), clipped here to +/- --horizon weeks.
+  - reference period k = -1 (the week immediately before tolling), omitted.
+  - CONTROL links are folded to k = -1 for every week, not given their own
+    leads/lags. Tolling has one start date for everyone (it is not staggered),
+    so a bare 1[event_week=k] dummy would be identical for treated and control
+    links in the same week and collinear with the time fixed effects gamma_t.
+    Interacting with `treated` is what makes theta_k the treated-vs-control gap
+    at k, i.e. an event-time-disaggregated version of did.py's beta. Control
+    links still matter here: they anchor alpha_i / gamma_t.
+  - Flat, near-zero pre-period thetas (k < -1) support parallel trends; the
+    post-period path (k >= 0) traces the dynamic adjustment. This is the
+    formal version of the pre-trend picture in descriptive.py's gap figure.
 
-Produces:
-    outputs/tables/event_study_<outcome>.csv
-    outputs/figures/event_study_<outcome>.png
+Two-way fixed effects are absorbed exactly as in src.analysis.did (alternating
+within-transformation / Frisch-Waugh-Lovell over unit and time), reused from
+there rather than reimplemented. What's new here is solving a small (K
+dummies) multivariate OLS on the residualized columns and a multivariate
+cluster-robust covariance matrix, instead of did.py's single-beta case. No new
+dependency (e.g. linearmodels) - same house style as Phase 7.
 
 Usage:
-    python -m src.analysis.event_study [--outcome log_volume] [--horizon 12]
+    python -m src.analysis.event_study
+    python -m src.analysis.event_study --sample weekend --horizon 8
+    python -m src.analysis.event_study --weather   # treated x weather controls, Phase 9 robustness
 """
 
 from __future__ import annotations
@@ -20,122 +35,202 @@ from __future__ import annotations
 import argparse
 import logging
 
-import matplotlib.pyplot as plt
-import numpy as np
-import pandas as pd
-from linearmodels.panel import PanelOLS
+import matplotlib
 
-from src.config import FIGURES_DIR, HOURLY_PANEL_PATH, TABLES_DIR
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt  # noqa: E402
+import numpy as np  # noqa: E402
+import pandas as pd  # noqa: E402
+from scipy import stats  # noqa: E402
+
+from src.analysis.descriptive import GRID, INK, INK_MUTED, SERIES_COLOR, SURFACE, _save  # noqa: E402
+from src.analysis.did import OUTCOME, TIME_KEY, _absorb, attach_weather, load  # noqa: E402
+from src.config import CLUSTER_VAR, TABLES_DIR, TREATMENT_DATE  # noqa: E402
 
 log = logging.getLogger(__name__)
 
-CONTROLS = ["temp_c", "precip_mm", "fuel_price", "is_holiday"]
 REFERENCE_K = -1
 
 
-def prepare(df: pd.DataFrame, outcome: str, horizon: int) -> pd.DataFrame:
-    df = df.copy()
-    df["ts_hour"] = pd.to_datetime(df["ts_hour"])
+def build_dummies(df: pd.DataFrame, horizon: int) -> tuple[pd.DataFrame, list[str]]:
+    """Add one dummy column per non-reference week, treated-interacted."""
+    d = df.copy()
+    k = d["event_week"].clip(-horizon, horizon)
+    k = np.where(d["treated"].to_numpy(dtype=bool), k, REFERENCE_K)
+    d["k"] = k.astype(int)
 
-    if outcome == "log_volume":
-        df["log_volume"] = np.log(df["volume"].where(df["volume"] > 0))
-
-    # bin event_time (weeks) to [-horizon, +horizon]; only treated units get leads/lags
-    k = df["event_time"].clip(-horizon, horizon)
-    k = np.where(df["treated"].astype(bool), k, REFERENCE_K)
-    df["k"] = k.astype(int)
-
-    df["time_key"] = df["ts_hour"].dt.floor("h")
-    df = df.dropna(subset=[outcome])
-    return df
-
-
-def build_dummies(df: pd.DataFrame) -> tuple[pd.DataFrame, list[str]]:
-    ks = sorted(x for x in df["k"].unique() if x != REFERENCE_K)
+    ks = sorted(x for x in d["k"].unique() if x != REFERENCE_K)
     names = []
     for kk in ks:
         col = f"k_{'m' if kk < 0 else 'p'}{abs(kk)}"
-        df[col] = (df["k"] == kk).astype(float)
+        d[col] = (d["k"] == kk).astype(float)
         names.append(col)
-    return df, names
+    if not names:
+        raise SystemExit("no non-reference event weeks in this sample/horizon")
+    return d, names
 
 
-def estimate(df: pd.DataFrame, outcome: str, dummy_cols: list[str]):
-    exog_cols = dummy_cols + [c for c in CONTROLS if c in df.columns]
-    panel = df.set_index(["sensor_id", "time_key"])
-    res = PanelOLS(
-        dependent=panel[outcome].astype(float),
-        exog=panel[exog_cols].astype(float),
-        entity_effects=True,
-        time_effects=True,
-        drop_absorbed=True,
-    ).fit(cov_type="clustered", cluster_entity=True)
-    log.info("\n%s", res.summary)
-    return res
+def estimate(df: pd.DataFrame, dummy_cols: list[str], controls: list[str] | None = None) -> dict:
+    """Two-way FE event study; cluster-robust inference on G-1 dof.
+
+    Generalizes did.estimate() from one treatment dummy (D) to K event-time
+    dummies: absorb unit/time effects on all of them at once, partial out any
+    extra controls (weather interactions), then solve the small K x K OLS and
+    its cluster-robust sandwich covariance directly.
+    """
+    controls = controls or []
+    d = df.dropna(subset=[OUTCOME]).copy()
+
+    resid, n_unit, n_time = _absorb(d, [OUTCOME, *dummy_cols, *controls], CLUSTER_VAR, TIME_KEY)
+    y = resid[:, 0]
+    X = resid[:, 1 : 1 + len(dummy_cols)]
+
+    if controls:
+        Z = resid[:, 1 + len(dummy_cols) :]
+        proj = Z @ np.linalg.solve(Z.T @ Z, Z.T)
+        y = y - proj @ y
+        X = X - proj @ X
+
+    xtx = X.T @ X
+    beta = np.linalg.solve(xtx, X.T @ y)
+    e = y - X @ beta
+
+    codes = pd.factorize(d[CLUSTER_VAR])[0]
+    n_clusters = codes.max() + 1
+    k_dim = X.shape[1]
+    scores = np.zeros((n_clusters, k_dim))
+    for j in range(k_dim):
+        scores[:, j] = np.bincount(codes, X[:, j] * e, minlength=n_clusters)
+    meat = scores.T @ scores
+
+    xtx_inv = np.linalg.inv(xtx)
+    n = len(y)
+    k_params = k_dim + len(controls) + n_unit + n_time
+    dof_c = (n_clusters / (n_clusters - 1)) * ((n - 1) / max(n - k_params, 1))
+    vcov = dof_c * xtx_inv @ meat @ xtx_inv
+    se = np.sqrt(np.diag(vcov))
+
+    dof = n_clusters - 1
+    crit = float(stats.t.ppf(0.975, dof))
+    p = 2 * stats.t.sf(np.abs(beta / se), dof)
+
+    return {
+        "beta": beta, "se": se, "p": p, "crit": crit,
+        "n_obs": n, "n_links": int(n_unit), "n_periods": int(n_time), "n_clusters": int(n_clusters),
+    }
 
 
-def coef_frame(res, dummy_cols: list[str]) -> pd.DataFrame:
-    rows = [{"k": REFERENCE_K, "coef": 0.0, "se": 0.0, "ci_low": 0.0, "ci_high": 0.0}]
-    ci = res.conf_int()
-    for col in dummy_cols:
+def coef_frame(result: dict, dummy_cols: list[str]) -> pd.DataFrame:
+    rows = [{"k": REFERENCE_K, "coef": 0.0, "se": 0.0, "p_value": np.nan,
+             "ci_low": 0.0, "ci_high": 0.0}]
+    crit = result["crit"]
+    for col, b, s, p in zip(dummy_cols, result["beta"], result["se"], result["p"], strict=True):
         sign, mag = col.split("_")[1][0], int(col.split("_")[1][1:])
         kk = -mag if sign == "m" else mag
         rows.append(
-            {
-                "k": kk,
-                "coef": res.params[col],
-                "se": res.std_errors[col],
-                "ci_low": ci.loc[col, "lower"],
-                "ci_high": ci.loc[col, "upper"],
-            }
+            {"k": kk, "coef": b, "se": s, "p_value": p, "ci_low": b - crit * s, "ci_high": b + crit * s}
         )
     return pd.DataFrame(rows).sort_values("k").reset_index(drop=True)
 
 
-def plot(coefs: pd.DataFrame, outcome: str):
-    fig, ax = plt.subplots(figsize=(10, 5))
-    ax.axhline(0, color="grey", lw=1)
-    ax.axvline(-0.5, color="black", linestyle="--", label="tolling start")
+def pretrend_test(coefs: pd.DataFrame, result: dict) -> tuple[float, float, int] | None:
+    """Joint test that pre-period thetas are zero (Wald, using the diagonal SEs
+
+    as an approximation - the full off-diagonal covariance isn't threaded
+    through coef_frame). A quick, honest screen: if this rejects, don't trust
+    the pre-trend picture even if it looks flat.
+    """
+    pre = coefs[(coefs["k"] < REFERENCE_K)]
+    if pre.empty:
+        return None
+    z = (pre["coef"] / pre["se"]).to_numpy()
+    stat = float(np.sum(z**2))
+    dof = len(z)
+    p = float(stats.chi2.sf(stat, dof))
+    return stat, p, dof
+
+
+def plot(coefs: pd.DataFrame, sample: str) -> None:
+    fig, ax = plt.subplots(figsize=(10, 5.2))
+    ax.axhline(0, color=GRID, linewidth=1, zorder=1)
     ax.errorbar(
-        coefs["k"],
-        coefs["coef"],
+        coefs["k"], coefs["coef"],
         yerr=[coefs["coef"] - coefs["ci_low"], coefs["ci_high"] - coefs["coef"]],
-        fmt="o-",
-        capsize=3,
+        fmt="o-", color=SERIES_COLOR["treated"], linewidth=2, markersize=4.5,
+        capsize=3, ecolor=INK_MUTED, elinewidth=1, zorder=3,
     )
-    ax.set_xlabel("weeks relative to 2025-01-05")
-    ax.set_ylabel(f"effect on {outcome}")
-    ax.set_title(f"Event study: {outcome}")
-    ax.legend()
-    fig.tight_layout()
-    return fig
+    ax.axvline(-0.5, color=INK, linewidth=1.2, linestyle=(0, (4, 3)), zorder=2)
+    ax.annotate(
+        "tolling begins", xy=(-0.5, ax.get_ylim()[1]),
+        xytext=(6, -4), textcoords="offset points", color=INK, fontsize=8.5, va="top",
+    )
+    ax.set_facecolor(SURFACE)
+    fig.set_facecolor(SURFACE)
+    ax.grid(axis="y", color=GRID, linewidth=0.8, zorder=0)
+    ax.set_axisbelow(True)
+    for side in ("top", "right"):
+        ax.spines[side].set_visible(False)
+    for side in ("left", "bottom"):
+        ax.spines[side].set_color(GRID)
+    ax.tick_params(colors=INK_MUTED, labelsize=9, length=0)
+    ax.set_xlabel("weeks relative to 2025-01-05", color=INK_MUTED, fontsize=10)
+    ax.set_ylabel("treated - control gap (mph), rel. to week -1", color=INK_MUTED, fontsize=10)
+    ax.set_title(
+        f"Event study: {sample}", color=INK, fontsize=13, fontweight="bold", loc="left", pad=24
+    )
+    ax.text(
+        0, 1.02, "95% CI, clustered by link. Flat pre-period supports parallel trends.",
+        transform=ax.transAxes, color=INK_MUTED, fontsize=9.5, va="bottom",
+    )
+    _save(fig, f"event_study_{sample}.png")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--panel", default=str(HOURLY_PANEL_PATH))
-    parser.add_argument(
-        "--outcome",
-        default="log_volume",
-        choices=["log_volume", "volume", "speed_mph", "travel_time_index"],
-    )
-    parser.add_argument("--horizon", type=int, default=12, help="max |weeks| from treatment")
-    args = parser.parse_args()
-
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--sample", default="all", choices=["all", "peak", "offpeak", "weekend"])
+    ap.add_argument("--horizon", type=int, default=12, help="max |weeks| from treatment")
+    ap.add_argument("--weather", action="store_true", help="add treated x weather controls (Phase 9)")
+    args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
-    raw = pd.read_parquet(args.panel)
 
-    df = prepare(raw, args.outcome, args.horizon)
-    df, dummy_cols = build_dummies(df)
-    res = estimate(df, args.outcome, dummy_cols)
-    coefs = coef_frame(res, dummy_cols)
+    df = load(args.sample)
+    if df.empty:
+        raise SystemExit(f"sample {args.sample!r} is empty")
+    controls: list[str] = []
+    if args.weather:
+        df, controls = attach_weather(df)
 
-    out_csv = TABLES_DIR / f"event_study_{args.outcome}.csv"
-    coefs.to_csv(out_csv, index=False)
-    fig = plot(coefs, args.outcome)
-    out_png = FIGURES_DIR / f"event_study_{args.outcome}.png"
-    fig.savefig(out_png, dpi=150)
-    log.info("wrote %s and %s", out_csv, out_png)
+    df, dummy_cols = build_dummies(df, args.horizon)
+    log.info(
+        "sample %s: %s link-hours, %d event-week dummies, horizon +/-%d weeks%s",
+        args.sample, f"{len(df):,}", len(dummy_cols), args.horizon,
+        ", weather-controlled" if controls else "",
+    )
+
+    result = estimate(df, dummy_cols, controls)
+    coefs = coef_frame(result, dummy_cols)
+
+    pt = pretrend_test(coefs, result)
+    if pt:
+        stat, p, dof = pt
+        verdict = "PASS (fail to reject flat pre-trend)" if p > 0.05 else "FAIL (pre-trend not flat)"
+        log.info(
+            "pre-trend joint test (approx Wald, diag-only): chi2=%.2f, dof=%d, p=%.4f -> %s",
+            stat, dof, p, verdict,
+        )
+    else:
+        log.warning("no pre-period weeks available for a pre-trend test")
+
+    tag = f"{args.sample}{'_weather' if controls else ''}"
+    out_csv = TABLES_DIR / f"event_study_{tag}.csv"
+    coefs.round(6).to_csv(out_csv, index=False)
+    plot(coefs, tag)
+    log.info("wrote %s and outputs/figures/event_study_%s.png", out_csv, tag)
+    log.info(
+        "Treatment date %s. %s clusters, %s link-hours. See docs/decision_register.md "
+        "before quoting - pre-period length and D2 (control selection) both bear on this.",
+        TREATMENT_DATE, result["n_clusters"], f"{result['n_obs']:,}",
+    )
 
 
 if __name__ == "__main__":
