@@ -1,14 +1,30 @@
 {
-  "recorded_at": "2026-09-12T17:37:10.365323+00:00",
+  "recorded_at": "2026-09-12T18:12:41.967691+00:00",
   "interpretation": "Exploratory diagnostics; no causal attribution established.",
-  "panel_sha256": "db309c71c6607fd50c201a530652ca2ba4f5a728918ddc28828db6a3c9a5b486",
+  "panel_sha256": "d39875bc3a9ccd083b1707cb6a6052d639a534377040ee3d45359f47d5a12a82",
   "segments_sha256": "2a07d361fae6a4f44e577edecfdcfc0a7cbafc00421619de3047289488285cbd",
-  "manifest_sha256": "b6ca0f05724d35c0cf1a7b9ca679690cd32831bf53bf61271f75c6cbda56ba17",
+  "manifest_sha256": "e820e05ec2ce33c9ebeef0e4861e0593ac63b5daadd5ad22c1cdbec1889d52e7",
   "primary_parts": [
     {
       "part": "ezpass_speeds_2024-06.parquet",
       "sha256": "d3085973cfec9d1b191e414ac2c285dd1229914ec6eca7970a2f49835fd6a53b",
       "rows": 814839,
+      "manifest_sha_matches": true,
+      "verified": false,
+      "verification_method": null
+    },
+    {
+      "part": "ezpass_speeds_2024-08.parquet",
+      "sha256": "40fdc25fc423811e18381ab4e06dafcc3c7407dc7da610fac63f0e06ff436c6d",
+      "rows": 839338,
+      "manifest_sha_matches": true,
+      "verified": false,
+      "verification_method": null
+    },
+    {
+      "part": "ezpass_speeds_2024-09.parquet",
+      "sha256": "8a791beab0415913779aab67b00e7496f29a9c2b9de390af25ad5a35761d7000",
+      "rows": 793009,
       "manifest_sha_matches": true,
       "verified": false,
       "verification_method": null
@@ -82,7 +98,7 @@
     "src/analysis/descriptive.py": "3ff57dc7849edac1ace785c4cc0911995a35bf89ee41bcb764acc9ece1bac56f",
     "src/analysis/did.py": "3a16181104e0f2d8c9907a84d731d5e67715c0d58c5043789a5e9529813db419",
     "src/analysis/event_study.py": "37b78575caba51b8905c7c3779caf8c00497b09aa0a0ac1783a06572c3e9a2fe",
-    "src/analysis/placebo_space.py": "657176eb264437b472af7891514ef89c500169369903d10e5e5e180f587c004a",
+    "src/analysis/placebo_space.py": "639212748a90a517602dc32b26ece6f8edf6858d0ec46cbd8f8512b7386e67f8",
     "src/analysis/provenance.py": "4be5b85bf672cd6bac2cbb685809e1408d71e54167e96fb4260fd90496bf0e3e",
     "src/analysis/robustness.py": "5ab4f983b244ea27b8210978360cd0771a33a50a1f83a39fc1a2a42fec307c1c",
     "src/analysis/spillover_diagnostics.py": "489fcf8aa7f1d1c2d3d0646bc1e4b9b6cc24a140ed041daf7c05ec07dacce2c1",
@@ -102,21 +118,22 @@
   },
   "table_sha256": {
     "boundary_distance_audit.csv": "b4d8e8e9fbc9028e4253118d6a26ecb0bb5818aa993cdc4c8bb9283899b4a7d4",
-    "descriptive_summary.csv": "8852fa9661ce1b19752f25f9f78287df0a8bf0898246a52e3252f5f4767c7dd2",
-    "did_estimates.csv": "8c22e565ae1b7212e6d43abcf2a82f6862483457af4e93f869c473ffcbde5905",
-    "did_estimates_weather.csv": "693649bf20c0f81b04209848c6d7028d173954e5c0e0085fe1875ca544a2d3b5",
-    "event_study_all.csv": "256fe58f13567618c33fe6b1d7fb598527feb78051f0f06d7ac77e6aaf18c7ce",
-    "event_study_offpeak.csv": "31a8afe53384e8c9593a907fb1167ccd7fc9693ccc2dcf1bdd44ff51699087cd",
-    "event_study_peak.csv": "bb8ebec4d7274ee7f146461e6c12a95d43b4fd6c78de516cb97c2fb49782b8e2",
-    "event_study_weekend.csv": "3f575094f09e579432801cc9f9ed97e192669235016b58f206bc8cbf905d27fa",
-    "hourly_profile.csv": "f2801285a13a9d2a343217c4e80b7f806226ec92439920bbb2a08b85434ba99b",
-    "pretrend_tests.csv": "5d7ccf0c3cd41296212f470ab73114143d5b65b20df58be6b53db130499cf687",
-    "robustness_comparison.csv": "27b9d7569d29155e5050fe7570812044beaa1ef0c9e08734099c3c34be5fa058",
-    "robustness_event_study_contiguous.csv": "b23dc4c7a30fd6c76ddc456a20256125a3519933ac7614c9c018a752e467700b",
-    "robustness_pretrend_contiguous.csv": "51cfc80b1930e3057891ec6977a36c5c8639d8df878c23b200c6310fb50b4c5e",
+    "descriptive_summary.csv": "0b93b13f9e60104a2df8d46ac6ad2600e59d3247e7e257bdda0a20baf795a7cc",
+    "did_estimates.csv": "18dcebcdbf595642927ef54604a7f29c2611748938fa7222aab6d10ccf4125cd",
+    "did_estimates_weather.csv": "fea8f656cf250c566eb1744e7562e12c1d2219611cd40326228dce4e5e14e80d",
+    "event_study_all.csv": "dea04c7289972d9ae95fb97ce89e1c132e87a29bc1dfe052198c1b0f8205d4c1",
+    "event_study_offpeak.csv": "fe3c790520a8d6c77aa76a9b1420a3aaa9ab218c8e3049c79f363c23ac4ed22f",
+    "event_study_peak.csv": "b4c86fe9e4e37e63d4c1b17d64816402e817cac3a87d6a524c4d8d06dd5f8c28",
+    "event_study_weekend.csv": "a1230545f31917e548e12abb820375c807ae18fc4f1517728cbfea8c390484af",
+    "hourly_profile.csv": "e43b3126583cb8a03edcbcd5e3e5215da70e021d60f3d2d080b0cfa0290056ea",
+    "placebo_space.csv": "9aca237b5733584b6a8d2b23e955ec19a00225d492d71392ff3069830d15e926",
+    "pretrend_tests.csv": "fb6466b5f3b76bb1b7dc4f2a85fed60b5e27553015ae9c176978facda57b6100",
+    "robustness_comparison.csv": "0df418c5d62568b0eceeabff47b3a2e785a2ae3812e9b1a2cab165c5c641ab52",
+    "robustness_event_study_contiguous.csv": "14a6830e01e2982ca13b091d72be39d82664dc9904347d007a102495b7405b1a",
+    "robustness_pretrend_contiguous.csv": "482505e01ee3297d4efaa41857011eb881e662b10ccd96f2f6cfa92b63554e44",
     "spillover_primary_descriptive.csv": "e5ce8411635eba2b5f352d7a78009a912146d12d3a2941b2bbcd5affcc457910",
     "spillover_secondary_monthly.csv": "f85f61530792242317c833ec232ce026f4b4b7438cfa82975e6db19aaa6bbfa5",
-    "treated_control_gap.csv": "b09b1cbe6f3e359fef3d890fba176d0dc504ea4bd64528d17a25cabe290617b3",
-    "weekly_median_speed.csv": "e65fb63edac02188894d9ce0715d2d335489d633f48d71a9198fef4617015049"
+    "treated_control_gap.csv": "aacec081bdf8dafafe695956a60a807d2e771e476cf0b5b2b8456daf4b05216b",
+    "weekly_median_speed.csv": "e1d265ef06e42f7a033321a06ea1d51bacc1b1b49824669b84ce815ecc8d0f50"
   }
 }

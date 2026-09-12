@@ -22,15 +22,24 @@ rather than shuffling rows. That is what makes it a fair yardstick and the
 analytic SE not one.
 
 Two p-values are reported. The coefficient-based one compares |beta| directly.
-The t-based one compares |beta/se|, and is the more reliable of the two when the
-treated group is atypical of the pool -- which here it is, since treated links
-sit near 7.9 mph against a control pool near 15.6 (MacKinnon & Webb 2020,
-section on randomization inference with few treated clusters).
+The t-based one compares |beta/se|, which MacKinnon & Webb (2020) prefer in
+general when the treated group is atypical of the pool -- which here it is,
+since treated links sit near 7.9 mph against a control pool near 15.6.
+
+In THIS setup, though, read the coefficient-based one. Because `placebo_k`
+preserves the treated share rather than the treated count, placebo draws use
+smaller groups than the real estimate (81 vs 96 links, against the real 148 vs
+177) and run on the control subsample alone. Their standard errors are
+mechanically larger and their t statistics smaller, so comparing the real t
+against that distribution flatters the real estimate. The size mismatch pushes
+the coefficient test toward under-rejecting and the t test toward
+over-rejecting; only the first errs safely.
 
 Reading the result: `se_ratio` is the placebo distribution's spread divided by
-the analytic clustered standard error. A ratio well above one is a direct
-measurement of how much the frozen specification's inference overstates its own
-precision.
+the analytic clustered standard error. A ratio above one measures how much the
+frozen specification's inference overstates its own precision. Treat it as an
+upper bound for the same reason as above -- the smaller placebo groups inflate
+the numerator.
 
 This does not test parallel trends and does not repair a rejected pre-period.
 It bounds how impressed anyone should be by the magnitude.

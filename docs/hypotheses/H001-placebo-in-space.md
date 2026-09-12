@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | running |
+| **Status** | answered |
 | **Registered** | 2026-09-12 |
 | **Registered by** | Claude Opus 5 session (repo automation / methodology review) |
-| **Answered by** | — |
+| **Answered by** | Claude Opus 5 session, 2026-09-12 |
 | **Supersedes / superseded by** | none |
 
 > **Registered after implementation.** The protocol in `README.md` did not exist
@@ -87,26 +87,76 @@ does not wait on the backfill.
 
 ## Result
 
-*Pending: 500-draw run across all four samples in progress.*
+500 draws per sample, 81 of 177 control links relabelled per draw, seeded on
+`RANDOM_SEED`. `outputs/tables/placebo_space.csv`,
+`outputs/figures/placebo_space_*.png`.
 
-Smoke test, weekend sample, 40 draws — indicative only, and 40 draws cannot
-resolve below p ≈ 0.024:
+| Sample | beta | analytic SE | analytic p | placebo SD | se_ratio | rand. p (beta) | rand. p (t) |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| all | +0.793 | 0.212 | 2.2e-04 | 0.314 | 1.48 | 0.014 | 0.002 |
+| offpeak | +0.688 | 0.205 | 8.6e-04 | 0.309 | 1.51 | 0.030 | 0.002 |
+| peak | +0.604 | 0.229 | 8.7e-03 | 0.361 | 1.57 | **0.092** | 0.006 |
+| weekend | +1.141 | 0.242 | 4.0e-06 | 0.329 | 1.36 | 0.002 | 0.002 |
 
-| Sample | beta | analytic SE (p) | placebo SD | se_ratio | randomisation p |
-|---|---:|---|---:|---:|---:|
-| weekend | +1.141 | 0.242 (3.8e-06) | 0.350 | 1.44 | 0.024 |
+The placebo distributions are centred near zero and roughly symmetric (2.5–97.5
+percentiles about -0.62 to +0.57 for the full sample), so the null is
+well behaved. A randomisation p of 0.002 is the floor at 500 draws (1/501) and
+means no placebo draw reached the observed statistic.
 
 ## Verdict
 
-*Pending.*
+**The intermediate outcome named in the acceptance criteria**, with one partial
+refutation.
+
+Randomisation p is below 0.05 on the coefficient-based test for three of four
+samples, so the magnitude is distinguishable from chance reassignment of control
+links. `se_ratio` is not near 1 — it sits at 1.36 to 1.57 — so the analytic
+clustered standard errors are too tight and every Phase 7 p-value is
+correspondingly overstated. Both halves of the pre-registered intermediate case.
+
+**Peak refutes on the coefficient-based test** (p = 0.092). Chance reassignment
+produces a peak-sized estimate about one time in eleven, so the weekday peak
+effect carries little evidential weight from its magnitude alone. This is the
+cut policy discussion cares most about, so the failure is not incidental.
+
+What this changes: the reported precision is wrong, by roughly half again rather
+than by orders of magnitude. The Phase 7 p-values of 1e-4 to 1e-6 should be read
+as something nearer 1e-2, and the peak estimate as not distinguishable from
+chance at conventional levels.
+
+What it does not change: the corrected pre-trend tests still reject in all four
+samples. An estimate that survives chance reassignment is not thereby a causal
+effect — it means the number is not pure noise, which is a much weaker claim.
+This result cannot rescue a design whose leads reject.
 
 ## Notes
 
+**The t-based p-values are anti-conservative and should not be read as the
+headline.** Placebo draws use 81 treated against 96 control links, while the
+real estimate uses 148 against 177 and runs on a larger sample. Placebo
+regressions therefore have mechanically larger standard errors and smaller t
+statistics, so comparing the real t against that distribution flatters the real
+estimate. The registered method anticipated the conservative direction this
+introduces for the coefficient test but not the anti-conservative direction it
+introduces for the t test. The coefficient-based p-values are the defensible
+ones here, notwithstanding MacKinnon & Webb's general preference for t-based
+randomisation inference when the treated group is atypical.
+
+By the same argument `se_ratio` is an upper bound: the placebo spread is
+inflated by the smaller groups, so the true understatement of the analytic SE is
+somewhat below 1.4 to 1.6. The direction is not in doubt, the magnitude is.
+
+Fixing this properly means either matching group sizes (impossible — the control
+pool is 177 links) or a bootstrap correction for the size difference. Worth a
+follow-up hypothesis if the peak result becomes load-bearing.
+
+The prediction above expected `se_ratio` "plausibly well above" 1 and
+randomisation p "orders of magnitude larger than the analytic p". The first was
+an over-warning: an order-of-magnitude understatement was plausible from the
+one-treated-cluster literature and did not materialise. The second held.
+
 This bounds how surprising the magnitude is. It does not test parallel trends
-and does not repair the rejected pre-period leads — those need the
-Rambachan–Roth sensitivity analysis and probably a different control
-construction. A placebo-in-space result cannot rescue a design whose leads
-reject; it can only tell you whether the magnitude was ever worth arguing about.
+and does not repair the rejected pre-period leads.
 
 The first implementation drew `k = n_treated` from the control pool. The smoke
 test exposed it: 148 of 177 leaves 29 controls and makes every draw nearly
