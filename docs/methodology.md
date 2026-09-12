@@ -67,7 +67,7 @@ from statistical significance (mph change relative to baseline speed).
 ## Design 3 — Event study (Phase 8)
 
 ```
-speed_{i,t} = alpha_i + gamma_t + sum_{k != -1} theta_k * 1[event_time_{i,t} = k] + eps_{i,t}
+speed_{i,t} = alpha_i + gamma_t + sum_{k != -1} theta_k * treated_i * 1[event_time_t = k] + eps_{i,t}
 ```
 
 - `event_time` in weeks relative to treatment (months as a robustness check).
@@ -105,6 +105,45 @@ materially changes.
 ---
 
 ## Decision record
+
+### 2026-09-12 — Correct event time and joint inference; frozen design unchanged
+
+Event weeks now use `floor(days_since_2025_01_05 / 7)`. DuckDB's integer week
+difference truncates negative partial weeks toward zero, which had assigned
+2025-01-01 through 2025-01-04 to event week zero. The corrected reference is
+2024-12-29 through 2025-01-04, and event week zero is 2025-01-05 through
+2025-01-11. The binary DiD treatment date was already correct.
+
+The pre-period joint test now uses the complete link-cluster covariance matrix:
+`W = b_pre' inverse(V_pre) b_pre`, compared with chi-square on the number of
+tested leads. Previously it summed squared individual t statistics and ignored
+their covariance, so the old joint p-values and pass/fail labels were invalid.
+The implementation agrees with the covariance-based
+[statsmodels joint Wald definition](https://www.statsmodels.org/v0.10.2/generated/statsmodels.regression.linear_model.OLSResults.wald_test.html).
+Singular or nonfinite covariance is labelled untestable. Weather residualization
+projects the needed columns directly, avoiding an observation-by-observation
+matrix that cannot fit in memory on the real panel.
+
+The default event study retains the existing 12-week endpoint bins. Earlier and
+later weeks are pooled into those endpoints; output columns identify the actual
+weeks pooled. A longer archive therefore does not automatically produce a
+week-by-week year-long pre-trend test. Review a wider `--horizon` with sufficient
+observations and covariance rank when the backfill arrives. A nonsignificant
+test does not prove parallel trends, and holidays are an untested explanation
+for the current failure. Twelve contiguous months are a diagnostic milestone;
+the frozen study still requires the full pre-period beginning in January 2023.
+
+The 2026-09-12 sensitivity comparisons are exploratory specifications evaluated
+after inspecting the data. Their confidence intervals do not account for
+specification search. Geographic control restrictions, quality filters and
+alternative outcomes do not resolve D1 or D2 or replace the primary model.
+Placebos exclude all observations on or after the actual tolling date. The
+secondary feed summaries are descriptive and make no diversion attribution.
+
+The current boundary label means a segment straddles the cordon. It does not
+implement the frozen definition of wholly outside near-boundary links. Choosing
+a distance buffer and a trend-based control pool remains an owner decision
+under D2. No treatment assignment or frozen definition was changed in this run.
 
 ### 2026-09-08 — Primary data source changed to the EZ Pass local-street feeds
 

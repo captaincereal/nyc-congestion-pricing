@@ -90,22 +90,23 @@ def _pretrend_section() -> list[str]:
     ]
     for _, r in df.iterrows():
         lines.append(
-            f"| {r['sample']} | {r['chi2']:.1f} | {int(r['dof'])} | {r['p_value']:.4f} "
-            f"| {'PASS' if r['verdict'] == 'PASS' else '**FAIL**'} | {int(r['pre_weeks'])} "
+            f"| {r['sample']} | {r['chi2']:.1f} | {int(r['dof'])} | {r['p_value']:.3g} "
+            f"| {r['verdict']} | {int(r['pre_weeks'])} "
             f"| {r['panel_start']} .. {r['panel_end']} |"
         )
     failing = (df["verdict"] != "PASS").sum()
     lines.append("")
     if failing:
         lines.append(
-            f"{failing} of {len(df)} samples still fail the pre-trend test, so no estimate "
-            "here is quotable. See D2 in `docs/decision_register.md`."
+            f"{failing} of {len(df)} samples reject the zero-lead restriction or are untestable. "
+            "The current control design does not support a causal estimate. "
+            "See D2 in `docs/decision_register.md`."
         )
     else:
         lines.append(
-            "Every sample clears the pre-trend test. That removes the parallel-trends "
-            "objection; D2 (control selection) and a placebo test still stand between "
-            "this and a quotable number."
+            "No sample rejects the zero-lead restriction. This does not establish parallel "
+            "trends: power, coverage, verification, D2 (control selection), and placebo "
+            "tests still need review before any causal claim."
         )
     return [*lines, ""]
 
@@ -140,8 +141,9 @@ def report(today: date | None = None) -> str:
         )
         if span < 12:
             lines.append(
-                f"- A year of pre-period is the bar for a credible parallel-trends test. "
-                f"{12 - span} more contiguous month(s) to reach it."
+                f"- The 12-month diagnostic milestone is {12 - span} contiguous month(s) away. "
+                "The frozen design requires 24 pre-treatment months; neither duration "
+                "alone establishes parallel trends."
             )
     lines.append("")
 

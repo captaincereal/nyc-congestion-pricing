@@ -58,14 +58,21 @@ from src.config import CLUSTER_VAR, TABLES_DIR, TREATMENT_DATE  # noqa: E402
 log = logging.getLogger(__name__)
 
 REFERENCE_K = -1
+PRETREND_METHOD = "cluster_robust_wald_chi2"
 
 
 def build_dummies(df: pd.DataFrame, horizon: int) -> tuple[pd.DataFrame, list[str]]:
     """Add one dummy column per non-reference week, treated-interacted."""
+    if horizon < 2:
+        raise ValueError("horizon must be at least 2 to preserve the single-week reference k=-1")
     d = df.copy()
+    reference = d["treated"] & d["event_week"].eq(REFERENCE_K) & d[OUTCOME].notna()
+    if not reference.any():
+        raise ValueError("no treated observations with an outcome in reference week k=-1")
     k = d["event_week"].clip(-horizon, horizon)
     k = np.where(d["treated"].to_numpy(dtype=bool), k, REFERENCE_K)
     d["k"] = k.astype(int)
+    d.attrs["event_horizon"] = horizon
 
     ks = sorted(x for x in d["k"].unique() if x != REFERENCE_K)
     names = []
@@ -95,9 +102,11 @@ def estimate(df: pd.DataFrame, dummy_cols: list[str], controls: list[str] | None
 
     if controls:
         Z = resid[:, 1 + len(dummy_cols) :]
-        proj = Z @ np.linalg.solve(Z.T @ Z, Z.T)
-        y = y - proj @ y
-        X = X - proj @ X
+        # Project only the columns needed. Constructing Z (Z'Z)^-1 Z' would
+        # allocate an N x N matrix (terabytes on the real hourly panel).
+        ztz = Z.T @ Z
+        y = y - Z @ np.linalg.solve(ztz, Z.T @ y)
+        X = X - Z @ np.linalg.solve(ztz, Z.T @ X)
 
     xtx = X.T @ X
     beta = np.linalg.solve(xtx, X.T @ y)
@@ -131,6 +140,15 @@ def estimate(df: pd.DataFrame, dummy_cols: list[str], controls: list[str] | None
         "n_links": int(n_unit),
         "n_periods": int(n_time),
         "n_clusters": int(n_clusters),
+        "vcov": vcov,
+        "dummy_cols": list(dummy_cols),
+        "horizon": df.attrs.get("event_horizon"),
+        "event_bins": (
+            d.loc[d["treated"]]
+            .groupby("k")["event_week"]
+            .agg(["min", "max", "nunique"])
+            .to_dict(orient="index")
+        ),
     }
 
 
@@ -152,23 +170,53 @@ def coef_frame(result: dict, dummy_cols: list[str]) -> pd.DataFrame:
                 "ci_high": b + crit * s,
             }
         )
-    return pd.DataFrame(rows).sort_values("k").reset_index(drop=True)
+    frame = pd.DataFrame(rows).sort_values("k").reset_index(drop=True)
+    bins = result.get("event_bins", {})
+    frame["observed_week_min"] = [bins.get(k, {}).get("min", k) for k in frame["k"]]
+    frame["observed_week_max"] = [bins.get(k, {}).get("max", k) for k in frame["k"]]
+    frame["observed_week_count"] = [bins.get(k, {}).get("nunique", 1) for k in frame["k"]]
+    frame["pooled_tail"] = (frame["observed_week_min"] != frame["k"]) | (
+        frame["observed_week_max"] != frame["k"]
+    )
+    return frame
 
 
 def pretrend_test(coefs: pd.DataFrame, result: dict) -> tuple[float, float, int] | None:
-    """Joint test that pre-period thetas are zero (Wald, using the diagonal SEs
+    """Joint zero-lead Wald test using the full link-cluster covariance.
 
-    as an approximation - the full off-diagonal covariance isn't threaded
-    through coef_frame). A quick, honest screen: if this rejects, don't trust
-    the pre-trend picture even if it looks flat.
+    Shared reference periods make lead estimates correlated; summing their
+    squared individual t statistics does not have a chi-square null law.
+    Singular covariance cannot test all requested leads and is recorded as
+    untestable, never as a pass with a silently reduced hypothesis.
     """
-    pre = coefs[(coefs["k"] < REFERENCE_K)]
-    if pre.empty:
+    pre = coefs[coefs["k"] < REFERENCE_K]
+    lead_names = [f"k_m{abs(int(k))}" for k in pre["k"]]
+    info = {
+        "test_method": PRETREND_METHOD,
+        "lead_count": len(lead_names),
+        "covariance_rank": 0,
+        "test_status": "UNTESTABLE",
+        "test_reason": "no pre-reference event bins",
+    }
+    result["pretrend_metadata"] = info
+    if not lead_names:
         return None
-    z = (pre["coef"] / pre["se"]).to_numpy()
-    stat = float(np.sum(z**2))
-    dof = len(z)
+    positions = [result["dummy_cols"].index(name) for name in lead_names]
+    beta = np.asarray(result["beta"])[positions]
+    covariance = np.asarray(result["vcov"])[np.ix_(positions, positions)]
+    covariance = (covariance + covariance.T) / 2
+    if not np.isfinite(beta).all() or not np.isfinite(covariance).all():
+        info["test_reason"] = "nonfinite lead estimates or covariance"
+        return None
+    rank = int(np.linalg.matrix_rank(covariance))
+    info["covariance_rank"] = rank
+    if rank != len(lead_names) or np.linalg.eigvalsh(covariance).min() <= 0:
+        info["test_reason"] = "lead covariance is singular or not positive definite"
+        return None
+    stat = float(beta @ np.linalg.solve(covariance, beta))
+    dof = len(lead_names)
     p = float(stats.chi2.sf(stat, dof))
+    info.update(test_status="VALID", test_reason="")
     return stat, p, dof
 
 
@@ -185,18 +233,32 @@ def record_pretrend(
     pipeline runs unattended, so each run upserts a row keyed on the sample.
     One file answers "can we quote a number yet, and on how much data".
     """
-    if pt is None:
-        return
-    stat, p, dof = pt
+    stat, p, dof = pt if pt is not None else (np.nan, np.nan, 0)
     dates = pd.to_datetime(df[TIME_KEY] if TIME_KEY in df else df["date"])
-    pre = df[df["event_week"] < REFERENCE_K]
+    observed = df[df[OUTCOME].notna() & df["treated"]]
+    pre = observed[observed["event_week"] < REFERENCE_K]
+    pre_dates = pd.to_datetime(pre[TIME_KEY] if TIME_KEY in pre else pre["date"])
+    horizon = result.get("horizon")
+    pre_tail = pre[pre["event_week"] <= -horizon] if horizon else pre.iloc[:0]
     row = {
         "sample": sample,
-        "chi2": round(stat, 4),
+        "chi2": stat,
         "dof": dof,
-        "p_value": round(p, 6),
-        "verdict": "PASS" if p > 0.05 else "FAIL",
+        "p_value": p,
+        "verdict": "UNTESTABLE" if pt is None else "PASS" if p > 0.05 else "FAIL",
         "pre_weeks": int(pre["event_week"].nunique()) if not pre.empty else 0,
+        "reference_week": REFERENCE_K,
+        "horizon": horizon,
+        "tested_bin_min": int(pre["k"].min()) if not pre.empty else None,
+        "tested_bin_max": int(pre["k"].max()) if not pre.empty else None,
+        "observed_pre_week_min": int(pre["event_week"].min()) if not pre.empty else None,
+        "observed_pre_week_max": int(pre["event_week"].max()) if not pre.empty else None,
+        "tested_pre_start": str(pre_dates.min().date()) if not pre.empty else None,
+        "tested_pre_end": str(pre_dates.max().date()) if not pre.empty else None,
+        "pre_tail_pooled": bool(horizon and (pre["event_week"] < -horizon).any()),
+        "pre_tail_observed_weeks": int(pre_tail["event_week"].nunique()),
+        "post_tail_pooled": bool(horizon and (observed["event_week"] > horizon).any()),
+        **result.get("pretrend_metadata", {}),
         "panel_start": str(dates.min().date()),
         "panel_end": str(dates.max().date()),
         "n_obs": int(result["n_obs"]),
@@ -259,7 +321,7 @@ def plot(coefs: pd.DataFrame, sample: str) -> None:
     ax.text(
         0,
         1.02,
-        "95% CI, clustered by link. Flat pre-period supports parallel trends.",
+        "95% CI, clustered by link. Endpoint bins pool earlier/later weeks when present.",
         transform=ax.transAxes,
         color=INK_MUTED,
         fontsize=9.5,
@@ -273,7 +335,12 @@ def main() -> None:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     ap.add_argument("--sample", default="all", choices=["all", "peak", "offpeak", "weekend"])
-    ap.add_argument("--horizon", type=int, default=12, help="max |weeks| from treatment")
+    ap.add_argument(
+        "--horizon",
+        type=int,
+        default=12,
+        help="endpoint bins (>=2); earlier/later weeks are pooled, not dropped",
+    )
     ap.add_argument(
         "--weather", action="store_true", help="add treated x weather controls (Phase 9)"
     )
@@ -307,19 +374,19 @@ def main() -> None:
             "PASS (fail to reject flat pre-trend)" if p > 0.05 else "FAIL (pre-trend not flat)"
         )
         log.info(
-            "pre-trend joint test (approx Wald, diag-only): chi2=%.2f, dof=%d, p=%.4f -> %s",
+            "pre-trend joint test (full cluster covariance): chi2=%.2f, dof=%d, p=%.4f -> %s",
             stat,
             dof,
             p,
             verdict,
         )
     else:
-        log.warning("no pre-period weeks available for a pre-trend test")
+        log.warning("pre-trend UNTESTABLE: %s", result["pretrend_metadata"]["test_reason"])
 
     tag = f"{args.sample}{'_weather' if controls else ''}"
     record_pretrend(tag, pt, df, result)
     out_csv = TABLES_DIR / f"event_study_{tag}.csv"
-    coefs.round(6).to_csv(out_csv, index=False)
+    coefs.to_csv(out_csv, index=False)
     plot(coefs, tag)
     log.info("wrote %s and outputs/figures/event_study_%s.png", out_csv, tag)
     log.info(

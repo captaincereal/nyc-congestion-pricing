@@ -40,6 +40,7 @@ outputs/figures/*
 outputs/tables/*
 !outputs/**/.gitkeep
 !outputs/tables/*.csv
+!outputs/tables/*.json
 !outputs/figures/*.png
 
 # Local run logs (scheduled catch-up downloads, etc.)

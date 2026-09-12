@@ -31,9 +31,9 @@ RANGES=(
   "2024-01-01 2024-07-01"  # deepens the pre-period to 2024-01
   "2023-07-01 2024-01-01"  # deepens to 2023-07, skipping COVID-recovery H1 2023
   "2024-10-01 2025-05-01"  # the priority window; a no-op where it is already held
+  "2023-01-01 2023-07-01"  # finishes the frozen pre-period before extending post
   "2025-05-01 2026-01-01"  # extends the post period
   "2026-01-01 "            # post period through the present
-  "2023-01-01 2023-07-01"  # completes the frozen window back to 2023-01
 )
 
 deadline=0

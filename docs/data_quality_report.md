@@ -1,7 +1,7 @@
-# Data-quality report — DOT Traffic Speeds staging
+# Data-quality report — E-Z Pass local-street staging
 
-Generated: 2026-09-09T22:25:13+00:00
-Source DB: `nyc_cp.duckdb`  ·  raw manifest: `present`
+Generated: 2026-09-12T16:51:24+00:00
+Source DB: `nyc_cp.duckdb`  ·  raw manifest: `ezpass_manifest.json` (present; presence alone does not establish verification)
 
 > Observed problems only. Handling decisions are in the last section and are applied elsewhere, never by this script.
 
@@ -9,7 +9,7 @@ Source DB: `nyc_cp.duckdb`  ·  raw manifest: `present`
 
 |   total_rows |   distinct_links | ts_min              | ts_max              |
 |-------------:|-----------------:|:--------------------|:--------------------|
-|      5162965 |              336 | 2024-10-01 00:00:48 | 2025-04-30 23:59:03 |
+|      5977804 |              338 | 2024-06-01 00:00:57 | 2025-04-30 23:59:03 |
 
 ## `null_rates`
 
@@ -29,19 +29,19 @@ _(no rows)_
 
 |   zero_speed |   negative_speed |   over_60 |   over_80 |   over_100 |   zero_speed_pct |   over_80_pct |   max_speed_mph |
 |-------------:|-----------------:|----------:|----------:|-----------:|-----------------:|--------------:|----------------:|
-|          301 |                0 |     25677 |      4679 |       1041 |            0.006 |        0.0906 |          7043.9 |
+|          333 |                0 |     34314 |      6727 |       1164 |            0.006 |        0.1125 |          7043.9 |
 
 ## `sample_depth`
 
 |   mean_samples |   min_samples |   p05 |   p50 |   p95 |   max_samples |   readings_with_le_1_sample |   le_3_samples_pct |
 |---------------:|--------------:|------:|------:|------:|--------------:|----------------------------:|-------------------:|
-|          35.02 |             2 |     2 |    18 |   120 |           707 |                           0 |              11.17 |
+|          36.06 |             2 |     2 |    18 |   125 |           713 |                           0 |              10.97 |
 
 ## `speed_vs_travel_time`
 
 |   comparable_rows |   p50_abs_diff_mph |   p95_abs_diff_mph |   pct_disagree_gt_5mph |
 |------------------:|-------------------:|-------------------:|-----------------------:|
-|       5.16266e+06 |              0.002 |              0.003 |                      0 |
+|       5.97747e+06 |              0.002 |              0.003 |                      0 |
 
 ## `dst_spring_forward`
 
@@ -55,25 +55,25 @@ _(no rows)_
 
 |   mean_readings_per_link_hour |   min_n |   p50_n |   p95_n |   max_n |   link_hours |   link_hours_over_4 |
 |------------------------------:|--------:|--------:|--------:|--------:|-------------:|--------------------:|
-|                          3.76 |       1 |       4 |       4 |       4 |  1.37378e+06 |                   0 |
+|                          3.76 |       1 |       4 |       4 |       4 |  1.58792e+06 |                   0 |
 
 ## `link_coverage_span`
 
 |   links |   links_gone_before_treatment |   links_new_after_treatment |   mean_active_days |
 |--------:|------------------------------:|----------------------------:|-------------------:|
-|     336 |                            11 |                           6 |              185.7 |
+|     338 |                            13 |                           0 |              212.8 |
 
 ## `daily_link_count`
 
-212 rows (series; not inlined — plot separately).
+242 rows (series; not inlined — plot separately).
 
 Head / tail:
 
 | day                 |   links |   readings |
 |:--------------------|--------:|-----------:|
-| 2024-10-01 00:00:00 |     320 |      26452 |
-| 2024-10-02 00:00:00 |     310 |      26598 |
-| 2024-10-03 00:00:00 |     310 |      26574 |
+| 2024-06-01 00:00:00 |     327 |      28110 |
+| 2024-06-02 00:00:00 |     327 |      27643 |
+| 2024-06-03 00:00:00 |     327 |      27419 |
 …
 | day                 |   links |   readings |
 |:--------------------|--------:|-----------:|
@@ -91,12 +91,10 @@ Head / tail:
 
 _(no rows)_
 
-## Proposed handling (human-edited — not yet applied)
+## Handling decisions
 
-_Fill in after reviewing the observed problems above. Each row: problem →
-proposed rule → why → where it will be applied. Nothing here is applied until
-it is written down and reviewed._
-
-| Problem | Proposed rule | Rationale | Applied in |
-|---|---|---|---|
-| _e.g._ zero speeds | treat as missing | 0 mph is an artifact | `sql/03_hourly_panel.sql` |
+D1 in `docs/decision_register.md` remains open. The primary panel applies no
+speed ceiling or probe-depth threshold. Separate robustness specifications
+exclude low-depth hours and hours containing readings above 80 mph; they do not
+alter the raw data or the primary outcome. A zero speed alone is not evidence
+of an invalid reading. See `outputs/tables/robustness_comparison.csv`.

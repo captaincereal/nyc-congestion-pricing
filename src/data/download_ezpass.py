@@ -15,8 +15,8 @@ dataset covers it (``EZPASS_SPLIT_DATE``). July 2024 straddles the boundary and
 is fetched from both, then concatenated.
 
 Strategy mirrors ``src.data.download`` — one parquet part per calendar month,
-resumable, with a per-month row-count check against a live ``count(1)`` and a
-manifest rewritten after every month:
+resumable, with optional raw-page counts and deterministic sample replay, and
+a manifest rewritten after every month:
 
     data/raw/ezpass_speeds/ezpass_speeds_YYYY-MM.parquet
     data/raw/ezpass_manifest.json
@@ -37,9 +37,10 @@ from __future__ import annotations
 
 import argparse
 import io
+import json
 import logging
 import time
-from dataclasses import asdict
+from dataclasses import asdict, dataclass, fields
 from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
@@ -63,7 +64,6 @@ from src.config import (
     STUDY_START,
 )
 from src.data.download import (
-    _PART_FIELDS,
     HTTP_TIMEOUT,
     PAGE_SIZE,
     PartRecord,
@@ -89,6 +89,27 @@ DATASET_AFTER_SPLIT = "6a2s-2t65"
 # requests regardless of size), which is why retries below are now logged
 # rather than silent - a stall now shows as visible backoff, not a hang.
 EZPASS_PAGE_SIZE = 400_000
+
+# Bump this when replay or sampling semantics change. Receipts bind this
+# algorithm to an immutable parquet hash; they are evidence at their recorded
+# check times, not a guarantee that the upstream feed can never be revised.
+VERIFICATION_METHOD = "raw-count-and-deterministic-replay-v1"
+
+
+@dataclass
+class EzpassPartRecord(PartRecord):
+    verified: bool = False
+    verification_method: str | None = None
+    verified_at: str | None = None
+    source_rows: int | None = None
+    verification_error: str | None = None
+
+
+_EZPASS_PART_FIELDS = frozenset(f.name for f in fields(EzpassPartRecord))
+
+
+class VerificationError(RuntimeError):
+    """Raw paging or the retained sample disagrees with its independent check."""
 
 
 def _datasets_for_month(month: date) -> list[str]:
@@ -232,11 +253,14 @@ def _fetch_pages(
     *,
     select: str | None = None,
     page_size: int = PAGE_SIZE,
+    deadline: float | None = None,
 ) -> list[pd.DataFrame]:
     """Page through one dataset for one filter, ordered for stable offset paging."""
     frames: list[pd.DataFrame] = []
     offset = 0
     while True:
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeBudgetExceeded("budget spent before the next API page")
         params = {
             "$where": where,
             "$order": f"{EZPASS_TIME_COL},sid",
@@ -264,14 +288,59 @@ def _fetch_day(session: requests.Session, day: date, datasets: list[str]) -> pd.
     EZPASS_PAGE_SIZE (~a day's worth of rows) means the common case is ONE
     request per dataset per day rather than ~7 offset pages.
     """
+    return _read_day(session, day, datasets)[0]
+
+
+def _read_day(
+    session: requests.Session,
+    day: date,
+    datasets: list[str],
+    *,
+    check_count: bool = False,
+    deadline: float | None = None,
+) -> tuple[pd.DataFrame, int]:
+    """Count raw pages before sampling; compare like units when requested."""
     where = _day_where(day)
     select = ",".join(EZPASS_READING_COLS)
     frames: list[pd.DataFrame] = []
+    raw_rows = 0
     for ds in datasets:
-        frames.extend(_fetch_pages(session, ds, where, select=select, page_size=EZPASS_PAGE_SIZE))
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeBudgetExceeded("budget spent before the next dataset")
+        expected = _count(session, ds, where) if check_count else None
+        pages = _fetch_pages(
+            session, ds, where, select=select, page_size=EZPASS_PAGE_SIZE, deadline=deadline
+        )
+        seen = sum(len(page) for page in pages)
+        if expected is not None and seen != expected:
+            raise VerificationError(f"{day} {ds}: {seen} raw rows fetched; expected {expected}")
+        frames.extend(pages)
+        raw_rows += seen
     if not frames:
-        return pd.DataFrame(columns=list(EZPASS_READING_COLS))
-    return _downsample(pd.concat(frames, ignore_index=True))
+        return pd.DataFrame(columns=list(EZPASS_READING_COLS)), raw_rows
+    sampled = _downsample(pd.concat(frames, ignore_index=True))
+    log.info("  %s: %s raw -> %s sampled rows (one per sid/window)", day, raw_rows, len(sampled))
+    return sampled, raw_rows
+
+
+def _canonical_sample(df: pd.DataFrame) -> pd.DataFrame:
+    """Compare typed retained values, independently of row order or CSV spelling."""
+    out = df.loc[:, list(EZPASS_READING_COLS)].copy()
+    out["sid"] = out["sid"].astype("string")
+    out[EZPASS_TIME_COL] = pd.to_datetime(out[EZPASS_TIME_COL], errors="raise")
+    if out["sid"].isna().any() or out[EZPASS_TIME_COL].isna().any():
+        raise VerificationError("sample contains a missing sid or timestamp")
+    for col in ("median_speed_fps", "median_tt_sec", "n_samples"):
+        out[col] = pd.to_numeric(out[col], errors="raise").astype("float64")
+    return out.sort_values(list(EZPASS_READING_COLS)).reset_index(drop=True)
+
+
+def _assert_same_sample(disk: pd.DataFrame, replay: pd.DataFrame, label: str) -> None:
+    if not _canonical_sample(disk).equals(_canonical_sample(replay)):
+        raise VerificationError(
+            f"{label}: retained sample differs from counted raw replay "
+            f"(disk={len(disk)}, replay={len(replay)}); raw part left unchanged"
+        )
 
 
 def download_month(
@@ -282,19 +351,27 @@ def download_month(
     prior: dict | None = None,
     do_count: bool = False,
     deadline: float | None = None,
-) -> PartRecord:
+) -> EzpassPartRecord:
+    if month.replace(day=1) >= date.today().replace(day=1):
+        raise ValueError("only completed calendar months can be downloaded or verified")
     dest = EZPASS_PARTS_DIR / f"ezpass_speeds_{month:%Y-%m}.parquet"
     where = _where(month)
     datasets = _datasets_for_month(month)
 
     if dest.exists() and not force:
+        if do_count:
+            return _verify_part(session, month, prior=prior, deadline=deadline)
         log.info("skip %s (exists)", dest.name)
         sha = _sha256(dest)
         if prior and prior.get("sha256") == sha:
-            return PartRecord(**{k: prior[k] for k in _PART_FIELDS if k in prior})
+            rec = EzpassPartRecord(**{k: prior[k] for k in _EZPASS_PART_FIELDS if k in prior})
+            # Older flags came from incomparable raw/sample counts, or from
+            # PartRecord's default True. Neither establishes replay verification.
+            rec.verified = bool(rec.verified and rec.verification_method == VERIFICATION_METHOD)
+            return rec
         rows = int(pd.read_parquet(dest, columns=[EZPASS_TIME_COL]).shape[0])
         expected = prior["rows_expected"] if prior and "rows_expected" in prior else rows
-        return PartRecord(
+        return EzpassPartRecord(
             part=dest.name,
             month=f"{month:%Y-%m}",
             where=where,
@@ -306,16 +383,11 @@ def download_month(
             complete=rows == expected,
         )
 
-    # The minute filter puts a function on the timestamp column, which stops
-    # Socrata using its index: a whole-month count(1) then runs for many minutes
-    # and can time out. The count only verifies completeness, so it is off by
-    # default here and available on demand via --count / --verify.
-    expected = sum(_count(session, ds, where) for ds in datasets) if do_count else None
     log.info(
         "GET %s from %s (%s)",
         f"{month:%Y-%m}",
         "+".join(datasets),
-        f"expected {expected:,} rows" if expected is not None else "row count not pre-checked",
+        "daily raw counts enabled" if do_count else "row count not pre-checked",
     )
 
     # Each day is checkpointed to disk as it lands. Before this, a month was
@@ -325,9 +397,18 @@ def download_month(
     day_paths: list[Path] = []
     resumed = 0
     raw_seen = 0
+    source_rows = 0
     for day in _days_in_month(month):
         dpath = _day_part_path(day)
         if dpath.exists() and not force:
+            if do_count:
+                if deadline is not None and time.monotonic() >= deadline:
+                    raise TimeBudgetExceeded(f"{month:%Y-%m}: budget spent; checkpoints kept")
+                replay, seen = _read_day(
+                    session, day, datasets, check_count=True, deadline=deadline
+                )
+                _assert_same_sample(pd.read_parquet(dpath), replay, str(day))
+                source_rows += seen
             day_paths.append(dpath)
             raw_seen += int(pd.read_parquet(dpath, columns=[EZPASS_TIME_COL]).shape[0])
             resumed += 1
@@ -337,7 +418,11 @@ def download_month(
                 f"{month:%Y-%m}: budget spent after {len(day_paths)} day(s); "
                 "checkpoints kept, resuming next run"
             )
-        chunk = _fetch_day(session, day, datasets)
+        if do_count:
+            chunk, seen = _read_day(session, day, datasets, check_count=True, deadline=deadline)
+            source_rows += seen
+        else:
+            chunk = _fetch_day(session, day, datasets)
         _write_parquet_atomic(chunk, dpath)
         day_paths.append(dpath)
         raw_seen += len(chunk)
@@ -350,31 +435,26 @@ def download_month(
     _write_parquet_atomic(df, dest)
 
     rows = len(df)
-    if expected is None:
-        # Paging ran to a short page, so the month is as complete as the feed
-        # will give us — but unverified against a live count.
-        complete, verified = True, False
-    else:
-        complete, verified = rows == expected, True
-        if not complete:
-            log.warning("%s: got %s rows, expected %s", dest.name, f"{rows:,}", f"{expected:,}")
     log.info("wrote %s (%s rows, %.1f MB)", dest.name, f"{rows:,}", dest.stat().st_size / 1e6)
 
     # The month part is durable now, so the day checkpoints have done their job.
     for p in day_paths:
         p.unlink(missing_ok=True)
 
-    return PartRecord(
+    return EzpassPartRecord(
         part=dest.name,
         month=f"{month:%Y-%m}",
         where=where,
         rows=rows,
-        rows_expected=expected if expected is not None else rows,
+        rows_expected=rows,
         bytes=dest.stat().st_size,
         sha256=_sha256(dest),
         pulled_at=datetime.now(UTC).isoformat(timespec="seconds"),
-        complete=complete,
-        verified=verified,
+        complete=True,
+        verified=do_count,
+        verification_method=VERIFICATION_METHOD if do_count else None,
+        verified_at=datetime.now(UTC).isoformat(timespec="seconds") if do_count else None,
+        source_rows=source_rows if do_count else None,
     )
 
 
@@ -396,7 +476,10 @@ SEGMENT_SAMPLE_DAYS = (
 
 
 def fetch_segments(
-    session: requests.Session, sample_days: tuple[date, ...] = SEGMENT_SAMPLE_DAYS
+    session: requests.Session,
+    sample_days: tuple[date, ...] = SEGMENT_SAMPLE_DAYS,
+    *,
+    deadline: float | None = None,
 ) -> pd.DataFrame:
     """Fetch the per-segment attribute table (sid -> name, borough, geometry).
 
@@ -411,7 +494,11 @@ def fetch_segments(
     for day in sample_days:
         for ds in _datasets_for_month(day):
             try:
-                frames.extend(_fetch_pages(session, ds, _day_where(day), select=cols))
+                frames.extend(
+                    _fetch_pages(session, ds, _day_where(day), select=cols, deadline=deadline)
+                )
+            except TimeBudgetExceeded:
+                raise
             except Exception:  # noqa: BLE001 - one bad sample day must not lose the rest
                 log.exception("segment sample failed for %s on %s", day, ds)
         log.info("  segments: %s sampled", day)
@@ -438,28 +525,137 @@ def _write(parts_by_month: dict[str, dict]) -> None:
     )
 
 
-def verify(session: requests.Session, start: date, end: date) -> None:
-    """Check each on-disk part in ``[start, end]`` against the live API count."""
+def _receipt_path(month: date) -> Path:
+    return EZPASS_MANIFEST_PATH.parent / "ezpass_verification" / f"ezpass_verify_{month:%Y-%m}.json"
+
+
+def _save_receipt(path: Path, receipt: dict) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    tmp = path.with_suffix(".json.part")
+    tmp.write_text(json.dumps(receipt, indent=2))
+    tmp.replace(path)
+
+
+def _verify_part(
+    session: requests.Session,
+    month: date,
+    *,
+    prior: dict | None = None,
+    deadline: float | None = None,
+) -> EzpassPartRecord:
+    """Replay a part day by day, resuming receipts bound to its hash and method.
+
+    A receipt establishes equivalence at its ``checked_at`` time. Historical
+    revisions after that time require removing the receipt and clearing the
+    manifest's verified flag before a fresh audit. Raw parquet is never changed.
+    """
+    rec = download_month(session, month, force=False, prior=prior)
+    if rec.verified and rec.complete and rec.verification_method == VERIFICATION_METHOD:
+        log.info("%s: already verified at %s (unchanged hash)", rec.month, rec.verified_at)
+        return rec
+    dest = EZPASS_PARTS_DIR / rec.part
+    disk = pd.read_parquet(dest, columns=list(EZPASS_READING_COLS))
+    ts = pd.to_datetime(disk[EZPASS_TIME_COL], errors="raise")
+    lo, hi = _month_bounds(month)
+    if ts.isna().any() or not ((ts >= lo) & (ts < hi)).all():
+        raise VerificationError(f"{rec.month}: part contains missing or out-of-month timestamps")
+    path = _receipt_path(month)
+    identity = {"part_sha256": rec.sha256, "verification_method": VERIFICATION_METHOD}
+    try:
+        receipt = json.loads(path.read_text())
+    except (OSError, json.JSONDecodeError):
+        receipt = {}
+    if any(receipt.get(k) != v for k, v in identity.items()):
+        receipt = {**identity, "month": rec.month, "days": {}}
+    days = list(_days_in_month(month))
+    source_rows = 0
+    for day in days:
+        tag = str(day)
+        held = disk.loc[(ts >= str(day)) & (ts < str(day + timedelta(days=EZPASS_CHUNK_DAYS)))]
+        cached = receipt["days"].get(tag)
+        if cached and cached.get("sample_rows") == len(held):
+            source_rows += cached["source_rows"]
+            continue
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeBudgetExceeded(
+                f"verify {rec.month}: budget spent after {len(receipt['days'])}/{len(days)} "
+                "checked days; receipts kept"
+            )
+        replay, seen = _read_day(
+            session, day, _datasets_for_month(month), check_count=True, deadline=deadline
+        )
+        _assert_same_sample(held, replay, tag)
+        receipt["days"][tag] = {
+            "source_rows": seen,
+            "sample_rows": len(replay),
+            "checked_at": datetime.now(UTC).isoformat(timespec="seconds"),
+        }
+        _save_receipt(path, receipt)
+        source_rows += seen
+        log.info("verify %s: %d/%d days checked", rec.month, len(receipt["days"]), len(days))
+    rec.rows_expected = rec.rows
+    rec.complete = True
+    rec.verified = True
+    rec.verification_method = VERIFICATION_METHOD
+    rec.verified_at = datetime.now(UTC).isoformat(timespec="seconds")
+    rec.source_rows = source_rows
+    rec.verification_error = None
+    return rec
+
+
+def verify(
+    session: requests.Session,
+    start: date,
+    end: date,
+    *,
+    deadline: float | None = None,
+    existing_only: bool = False,
+) -> None:
+    """Count raw pages and replay the immutable sample, saving monthly results.
+
+    Existing verified hashes and successful day receipts resume earlier audits.
+    A budget exit is clean; mismatches, missing parts and network errors fail.
+    """
     problems: list[str] = []
+    budget_spent = False
+    parts = _load_existing_parts(EZPASS_MANIFEST_PATH)
     for month in _iter_months(start, end):
         tag = f"{month:%Y-%m}"
         dest = EZPASS_PARTS_DIR / f"ezpass_speeds_{tag}.parquet"
         if not dest.exists():
+            if existing_only:
+                continue
             log.warning("%s  MISSING on disk", tag)
             problems.append(tag)
+            if tag in parts:
+                parts[tag].update(complete=False, verified=False, verification_error="missing part")
+                _write(parts)
             continue
-        where = _where(month)
-        disk = int(pd.read_parquet(dest, columns=[EZPASS_TIME_COL]).shape[0])
-        api = sum(_count(session, ds, where) for ds in _datasets_for_month(month))
-        ok = disk == api
-        log.info(
-            "%s  disk=%s  api=%s  %s", tag, f"{disk:,}", f"{api:,}", "OK" if ok else "MISMATCH"
-        )
-        if not ok:
+        prior = parts.get(tag, {})
+        try:
+            # Persist an honest state before a replay that may be interrupted.
+            rec = download_month(session, month, force=False, prior=prior)
+            parts[tag] = {**prior, **asdict(rec)}
+            _write(parts)
+            rec = _verify_part(session, month, prior=parts[tag], deadline=deadline)
+            parts[tag].update(asdict(rec))
+            _write(parts)
+        except TimeBudgetExceeded as exc:
+            log.info("%s", exc)
+            budget_spent = True
+            break
+        except Exception as exc:  # noqa: BLE001 - downgrade stale verification on failure
+            log.exception("verify failed for %s", tag)
+            if tag in parts:
+                parts[tag].update(
+                    complete=False, verified=False, verified_at=None, verification_error=str(exc)
+                )
+                _write(parts)
             problems.append(tag)
     if problems:
         raise SystemExit(f"verify: {len(problems)} problem month(s): {', '.join(problems)}")
-    log.info("verify OK - every part matches the live API")
+    if not budget_spent:
+        log.info("verify: checked all requested parts (or resumed prior verified hashes)")
 
 
 def main() -> None:
@@ -467,14 +663,28 @@ def main() -> None:
         description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
     )
     parser.add_argument("--start", type=date.fromisoformat, default=STUDY_START)
-    parser.add_argument("--end", type=date.fromisoformat, default=None)
+    parser.add_argument(
+        "--end",
+        type=date.fromisoformat,
+        default=None,
+        help="exclusive upper bound on month starts; capped at the current month (default)",
+    )
     parser.add_argument("--force", action="store_true", help="re-download existing months")
-    parser.add_argument("--verify", action="store_true", help="check disk vs live API, no download")
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="count raw pages and replay retained samples; resume prior verified hashes/days",
+    )
+    parser.add_argument(
+        "--verify-existing",
+        action="store_true",
+        help="with --verify, check only present parts; archive coverage remains a separate check",
+    )
     parser.add_argument(
         "--count",
         action="store_true",
-        help="pre-check each month against a live count(1); adds a slow "
-        "aggregate query per month and is off by default",
+        help="check fetched raw day counts before sampling; replay existing samples; "
+        "adds count queries and is off by default",
     )
     parser.add_argument(
         "--segments",
@@ -500,25 +710,38 @@ def main() -> None:
         "boundaries, where nothing is in flight.",
     )
     args = parser.parse_args()
+    if args.verify_existing and not args.verify:
+        parser.error("--verify-existing requires --verify")
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
 
-    end = args.end or date.today().replace(day=1)
+    # Shared secondary-feed iteration is inclusive. Primary callers and the
+    # priority script use an exclusive end; never freeze an in-progress month
+    # into a supposedly complete immutable part that future runs would skip.
+    exclusive_end = min(args.end or date.today().replace(day=1), date.today().replace(day=1))
+    end = exclusive_end - timedelta(days=1)
     session = _session()
+    deadline = time.monotonic() + args.max_runtime * 60 if args.max_runtime else None
 
     if args.segments:
-        fetch_segments(session)
+        try:
+            fetch_segments(session, deadline=deadline)
+        except TimeBudgetExceeded as exc:
+            log.info("%s", exc)
         return
 
     if args.verify:
-        verify(session, args.start, end)
+        verify(session, args.start, end, deadline=deadline, existing_only=args.verify_existing)
         return
 
     if not EZPASS_SEGMENTS_PATH.exists():
         log.info("segment table missing - fetching it first")
-        fetch_segments(session)
+        try:
+            fetch_segments(session, deadline=deadline)
+        except TimeBudgetExceeded as exc:
+            log.info("%s", exc)
+            return
 
-    deadline = time.monotonic() + args.max_runtime * 60 if args.max_runtime else None
     parts_by_month = _load_existing_parts(EZPASS_MANIFEST_PATH)
     failures: list[str] = []
     remaining: list[str] = []

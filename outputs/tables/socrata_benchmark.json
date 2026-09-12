@@ -1,0 +1,67 @@
+{
+  "run_at": "2026-09-12T16:44:46.160288+00:00",
+  "probes": [
+    {
+      "dataset": "erdf-2akx",
+      "mode": "export",
+      "bytes": 16810886,
+      "auth": "anonymous",
+      "status": 200,
+      "content_length": null,
+      "first_byte_seconds": 2.2613400000000183,
+      "stopped_at_cap": true,
+      "elapsed_seconds": 9.757327599999826,
+      "mb_per_second": 1.7228985936682397
+    },
+    {
+      "dataset": "erdf-2akx",
+      "mode": "timestamp_sid",
+      "bytes": 0,
+      "auth": "anonymous",
+      "error": "HTTPSConnectionPool(host='data.cityofnewyork.us', port=443): Read timed out. (read timeout=35)",
+      "elapsed_seconds": 35.72639930000014,
+      "mb_per_second": 0.0
+    },
+    {
+      "dataset": "erdf-2akx",
+      "mode": "internal_id",
+      "bytes": 0,
+      "auth": "anonymous",
+      "error": "HTTPSConnectionPool(host='data.cityofnewyork.us', port=443): Read timed out. (read timeout=35)",
+      "elapsed_seconds": 35.989532300000064,
+      "mb_per_second": 0.0
+    },
+    {
+      "dataset": "6a2s-2t65",
+      "mode": "export",
+      "bytes": 16807178,
+      "auth": "anonymous",
+      "status": 200,
+      "content_length": null,
+      "first_byte_seconds": 2.242631000000074,
+      "stopped_at_cap": true,
+      "elapsed_seconds": 7.957354499999838,
+      "mb_per_second": 2.1121564962325534
+    },
+    {
+      "dataset": "6a2s-2t65",
+      "mode": "timestamp_sid",
+      "bytes": 0,
+      "auth": "anonymous",
+      "error": "HTTPSConnectionPool(host='data.cityofnewyork.us', port=443): Read timed out. (read timeout=35)",
+      "elapsed_seconds": 36.66793199999984,
+      "mb_per_second": 0.0
+    },
+    {
+      "dataset": "6a2s-2t65",
+      "mode": "internal_id",
+      "bytes": 2722110,
+      "auth": "anonymous",
+      "status": 200,
+      "content_length": null,
+      "first_byte_seconds": 10.26285310000003,
+      "elapsed_seconds": 11.85185219999994,
+      "mb_per_second": 0.22967802450320918
+    }
+  ]
+}
