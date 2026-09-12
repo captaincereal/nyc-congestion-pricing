@@ -1,16 +1,27 @@
 # Future data sources (Phase 10 — do not add yet)
 
-The core analysis uses **only** the NYC DOT Traffic Speeds feed (`i4gi-tjb9`).
-These sources are deferred until the speed-based DiD / event study is stable and
-has passed its diagnostics. Each is added only to answer a *specific* question.
+The core analysis uses **only** the speed feeds: the NYC DOT E-Z Pass
+local-street feeds (`erdf-2akx` + `6a2s-2t65`, primary) and the Traffic Speeds
+NBE feed (`i4gi-tjb9`, secondary — spillover onto the toll-exempt highways).
+The sources below are deferred until the speed-based DiD / event study is stable
+and has passed its diagnostics. Each is added only to answer a *specific*
+question.
 
 | Source | Socrata / access | Question it would answer |
 |---|---|---|
 | MTA Congestion Relief Zone vehicle entries | `data.ny.gov` resource `t6yz-b64h` | Did *volume* entering the zone fall? Does it corroborate the speed change (mechanism check)? |
 | NYC DOT Traffic Volume Counts | `data.cityofnewyork.us` resource `7ym2-wayt` | Segment-level volume near the boundary — spillover in counts, not just speeds. |
 | NYC TLC trip records (yellow / green / FHV) | TLC monthly parquet files | Trip times, fares, pickup/dropoff shifts across the cordon. |
-| Weather (Open-Meteo / NOAA, Central Park) | API | Confounder control if descriptive analysis shows weather imbalance across the treatment date. |
 
 The earlier scaffold wired all of these into `download.py` and the SQL at once.
-That was rolled back on 2026-09-07 to keep Phases 1–9 to a single, well-understood
-source. The dataset ids above are recorded here so the work isn't lost.
+That was rolled back on 2026-09-07 to keep Phases 1–9 to the speed feeds alone.
+The dataset ids above are recorded here so the work isn't lost.
+
+## Already added
+
+- **Weather (Open-Meteo ERA5, Central Park).** Added in Phase 7 —
+  `src/data/download_weather.py`, hourly, requested in local time so it joins
+  `ts_hour` with no conversion, and not hosted on `data.cityofnewyork.us` so it
+  costs the speed backfill nothing. The post period is materially colder/snowier
+  than the pre period, which biases the DiD estimate *downward*; used only as a
+  robustness check (treated × weather interactions), never as a level control.

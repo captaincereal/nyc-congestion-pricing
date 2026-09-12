@@ -2,12 +2,22 @@
 
 **NYC Congestion Relief Zone · speed study**
 
-Compiled 2026-09-09 · treatment date 2025-01-05 · head `692f0c9` · 54 tests passing
+Compiled 2026-09-09, updated 2026-09-10 · treatment date 2025-01-05 ·
+head `50baf8c` · 54 tests passing
 
-Seven decisions are open and blocking the causal work. Everything below them is
-settled, verified and reproducible. Each open decision changes what the study
-reports, so all seven are deliberately left unmade rather than defaulted into
-the panel.
+Six decisions are open. Everything below them is settled, verified and
+reproducible. Each open decision changes what the study reports, so it is
+deliberately left unmade rather than defaulted into the panel.
+
+> **Update 2026-09-10.** Since this register was first compiled the priority
+> window (2024-10 … 2025-04, seven months, three either side of the toll) has
+> been ingested and staged, the panel rebuilt with a post-treatment period, and
+> **Phases 6 (descriptives) and 7 (difference-in-differences) run** — see "The
+> result so far" below. **D4 is resolved** (5763399). The full pre-period
+> backfill to 2023-01 is downloading again as of 2026-09-10. The Phase 7 DiD is
+> **not quotable**: it rests on a 7-month window, parallel trends has no formal
+> test yet (Phase 8, needs the backfill), control selection is still open (D2),
+> and there is no placebo test.
 
 ---
 
@@ -16,42 +26,97 @@ the panel.
 | Phase | | Status |
 |---|---|---|
 | 1 | Setup | Complete |
-| 2 | Ingestion | **4 of 45 months** (primary source) |
-| 3 | Data quality | Checks written and run |
-| 4 | Panel | Built — but no post-treatment period yet |
-| 5 | Controls | Blocked on **D2** |
-| 6–11 | Causal work | Not started |
+| 2 | Ingestion | **7 of ~45 months** on disk (2024-10 … 2025-04, the priority window); full backfill to 2023-01 downloading |
+| 3 | Data quality | Checks written and run on the seven months |
+| 4 | Panel | Built, with a post-treatment period (2025-01-05 onward) |
+| 5 | Controls | Naive pool used as a documented interim; **D2** still open |
+| 6 | Descriptives | Run — weekly series, pre-trend gap, hourly profile, coverage |
+| 7 | Difference-in-differences | Run on the 7-month window (not quotable — see below) |
+| 8 | Event study | Rewritten and run (2026-09-10); formal pre-trend test now exists, and it fails on the full/offpeak samples — see below |
+| 9–11 | Robustness, mechanism, deliverables | Not started |
 
-The pipeline runs end to end on real data. What it does not have is a
-post-treatment period: every row currently sits before 2025-01-05, so no effect
-can be estimated. The month crossing the toll start is downloading now.
+The pipeline runs end to end on real data, including a post-treatment period.
+The binding constraint now is the **length of the pre-period**: seven months
+is too short for a credible parallel-trends test, so the backfill to 2023-01
+gates Phase 8 and any quotable estimate.
 
 ---
 
-## The one result so far
+## The result so far
 
-Median speed by treatment group, **pre-tolling** (Oct–Nov 2024, 406,479
-link-hours). These are levels, not effects.
+### Pre-tolling levels (pipeline validation)
 
-| Group | Median mph | Links |
-|---|---:|---:|
-| treated | 8.06 | 130 |
-| boundary | 9.51 | 5 |
-| unassigned | 9.96 | 32 |
-| control | 15.50 | 149 |
-| exempt_in_zone | 18.41 | 6 |
-| crossing | 34.89 | 2 |
+Median speed by treatment group, **pre-tolling** (2024-10-01 … 2025-01-04).
+Levels, not effects. Source: `outputs/tables/descriptive_summary.csv`.
 
-**External corroboration.** In-zone surface streets sit at 8.06 mph before
+| Group | Median mph | Links | Link-hours |
+|---|---:|---:|---:|
+| treated | 7.86 | 148 | 286,229 |
+| boundary | 9.73 | 5 | 11,334 |
+| control | 15.64 | 169 | 315,695 |
+| exempt_in_zone | 19.43 | 6 | 11,731 |
+| crossing | 36.61 | 2 | 4,589 |
+
+**External corroboration.** In-zone surface streets sit near 8 mph before
 tolling, against roughly 8.2 mph published for the Manhattan CBD. Geometry, unit
 conversion, treatment assignment and hourly aggregation all have to be correct
 for that number to land there — it is the strongest evidence the pipeline
-measures what we think it measures.
+measures what we think it measures. The ordering also vindicates separating the
+groups: folding 37 mph bridge segments or 19 mph Route 9A into an 8 mph treated
+group would badly distort the estimate, and boundary segments land between
+treated and control, which is what straddling 60th Street should look like.
 
-The ordering also vindicates separating the groups: folding 34.89 mph bridge
-segments or 18.41 mph Route 9A into an 8.06 mph treated group would have badly
-distorted the estimate. Boundary segments land between treated and control,
-which is what straddling 60th Street should look like.
+### Phase 7 difference-in-differences — NOT quotable
+
+Frozen two-way FE spec, estimated on the 7-month window
+(`outputs/tables/did_estimates.csv`, 323 link clusters):
+
+| Sample | ATT mph | SE | p | 95% CI | % of pre-treated mean |
+|---|---:|---:|---:|---|---:|
+| all | +0.85 | 0.24 | 0.0004 | [+0.38, +1.32] | +8.9 |
+| weekday peak | +0.56 | 0.26 | 0.031 | [+0.05, +1.08] | +7.1 |
+| weekday off-peak | +0.72 | 0.23 | 0.0016 | [+0.27, +1.16] | +7.3 |
+| weekend | +1.30 | 0.28 | 6e-06 | [+0.75, +1.86] | +13.2 |
+
+Positive and significant in every cut; the weekend effect being ~2× the weekday
+peak effect independently matches published work. Weather robustness
+(`did_estimates_weather.csv`): the post period is colder and snowier, which
+biases the estimate *downward*, and treated × weather interactions move β by
+≤5%. **Why it is not quotable:** 7-month window, D2 open, no placebo, and —
+see below — the formal pre-trend test does not clear on this window either.
+
+### Phase 8 event study — first run, formal pre-trend test now exists
+
+`src/analysis/event_study.py` was a dead scaffold (referenced `volume`,
+`sensor_id`, `fuel_price`, `travel_time_index` — none exist; `linearmodels`
+isn't even a dependency) and has been rewritten against the real panel: same
+two-way FE absorption as `did.py`, generalized from one treatment dummy to one
+`treated x event_week` dummy per week, reference week `k = -1`, clustered by
+link. Control links are folded to the reference bin (tolling has one start
+date for everyone, so a bare, non-interacted week dummy would be collinear
+with the time fixed effects).
+
+**This replaces the Phase 6 weekly-slope eyeball check with an actual test**,
+and the result is more cautious than that check suggested:
+
+| Sample | Joint pre-trend test (k < -1, weeks -12..-2) | Verdict |
+|---|---|---|
+| all | χ²=26.6, df=11, p=0.0053 | **FAILS** — pre-period not flat |
+| peak | χ²=9.7, df=11, p=0.557 | passes |
+| offpeak | χ²=52.3, df=11, p≈0 | **FAILS hard** |
+| weekend | χ²=15.4, df=11, p=0.163 | passes |
+
+The post-period path (`outputs/tables/event_study_all.csv`) is directionally
+consistent with the Phase 7 DiD — mostly positive, growing from ~+0.6 mph at
+k=1 to ~+1.1 mph by k=7-11 — which is reassuring. But the pre-period, especially
+in the **offpeak** cut, is not flat: several weeks in the 7-month window's
+14-week pre-period are individually significant (k=-11, -4, -3), most plausibly
+because that window is Thanksgiving-through-New-Year, which is exactly the kind
+of atypical pre-period D2 already worried about, not genuine drift. **This
+means D2 is not merely "open" — the naive control pool has now failed a real
+test on part of the sample, which the Phase 6 check was too coarse to catch.**
+It should be re-run once the backfill gives a longer, less holiday-dominated
+pre-period before it is used to decide D2 either way.
 
 ---
 
@@ -65,11 +130,11 @@ Drive, West Side Highway) or a crossing. Zero on Broadway, Fifth, Park,
 Lexington, 34th, 42nd, Canal. The treated group was empty. Replaced by the EZ
 Pass local-street feeds; the old source retained for spillover.
 
-**Timestamps are naive America/New_York, not UTC.** On the fall-back date
-2024-11-03, segment `1004` carries 103 readings in hour 01 against 51 in each
-neighbouring hour, and 51 in that hour on the control Sunday — exactly the
-doubling expected when 01:00–01:59 runs twice. Under UTC no hour would double.
-Every hour-of-day cut, including the peak definitions, is correct as written.
+**Timestamps are naive America/New_York, not UTC.** Confirmed from both
+directions. Fall-back 2024-11-03: hour 01 doubles, 103 readings vs 51 on the
+control Sunday. Spring-forward 2025-03-09: hour 02 is empty, 0 vs 1,063 on the
+control Sunday. Under UTC neither signature would appear. Every hour-of-day cut,
+including the peak definitions, is correct as written.
 
 **The feed republishes a rolling median, not independent readings.** A
 900-second median re-emitted about every 61 seconds — 52 readings per
@@ -107,15 +172,22 @@ would need is carried on each row.
 ### D2 — How controls get selected — *blocks Phase 5*
 
 The frozen design requires controls chosen on pre-treatment trends, not
-geography. That is now load-bearing: treated sits at 8.06 mph, control at 15.50
-— a level gap of nearly 2×.
+geography. That is load-bearing: pre-tolling, treated sits at 7.86 mph and
+control at 15.64 — a level gap of nearly 2×.
 
-DiD identifies off changes, so the gap is not disqualifying. But a naive
-outer-borough control pool gives a weak counterfactual, and parallel trends is
-more plausible between comparably congested streets.
+DiD identifies off changes, so the gap is not disqualifying by itself. The
+Phase 6 eyeball check (treated−control gap slope ≈ +0.011 mph/week) suggested
+the naive pool might be a live option — but the **Phase 8 formal pre-trend
+test (2026-09-10) rejects flatness overall (p=0.005) and hard in the offpeak
+cut (p≈0)**, and passes only for peak and weekend. That is a real signal
+against the naive pool as-is, not just a weak counterfactual concern, though
+it is confounded with the pre-period being mostly Thanksgiving-New Year.
 
 > **Decide:** match on pre-treatment trend, restrict to Manhattan above 60th, or
-> build a synthetic control?
+> build a synthetic control? Re-run the Phase 8 pre-trend test on a longer,
+> less holiday-dominated pre-period once the backfill lands before deciding —
+> the current failure may be a short-window artifact rather than a real
+> parallel-trends violation, but it should not be waved off either.
 
 ### D3 — Is 11th Avenue actually exempt?
 
@@ -127,15 +199,13 @@ analysis, since exempt roads are where diverted traffic goes.
 > **Decide:** confirm or reverse. Four segments, a one-line change in
 > `EXEMPT_PATTERNS` (`src/data/geo.py`).
 
-### D4 — The 32 unassigned links
+### D4 — The 32 unassigned links — *RESOLVED 2026-09-09 (5763399)*
 
 324 distinct links appear in the readings but the segment attribute table held
-only 297 — so 32 links, **7.94% of readings**, carry no borough and no geometry,
-and therefore no treatment group. Cause: building that table from a single day;
-the roster changes over time.
-
-The fix is written (nine sample days across both datasets) but not yet run — it
-costs ~60 API requests and would compete with the download.
+only 297 — so 32 links, **7.94% of readings**, carried no borough and no
+geometry, and therefore no treatment group. Cause: building that table from a
+single day; the roster changes over time. The fix was to refetch it across nine
+sample days spanning both datasets.
 
 **Update 2026-09-09 — these are probably decommissioned sensors.** Of the 33
 unassigned links, 25 stop reporting entirely during autumn 2024 (last readings
@@ -150,16 +220,21 @@ costs control-pool size, not identification. Second, sensors decommissioning
 mid-window is itself a finding: link identity is not stable across the study
 period, which matters for D7 and for any balanced-panel claim.
 
-> **Pending:** refetch runs once the priority window finishes; then report how
-> many of the 33 are recovered.
+> **Resolved.** The refetch ran across nine sample days spread over the study
+> window: the segment attribute table went 297 → 346 segments and the 39
+> unassigned links (64,981 link-hours) dropped to **zero**. Treated grew
+> 130 → 148 links, control 154 → 175. Both hard data-quality checks
+> (`hard_duplicate_key`, `hard_unmatched_segments`) now pass. The decommissioned
+> sensors remain a finding: link identity is not stable across the window, which
+> still matters for D7 and any balanced-panel claim.
 
 ### D5 — What happens to the crossings
 
-Two Williamsburg Bridge segments measure the queue to *enter* the zone, not
-circulation within it — a different behaviour, at 34.89 mph against treated's
-8.06. Held separate rather than dropped. Published work reports the largest
-speed gains on crossings, so they are substantively interesting in their own
-right.
+Two Williamsburg Bridge segments (sid 194196 / 197195) measure the queue to
+*enter* the zone, not circulation within it — a different behaviour, near 37 mph
+against treated's ~8. Held separate rather than dropped. Published work reports
+the largest speed gains on crossings, so they are substantively interesting in
+their own right.
 
 > **Decide:** estimate crossings as a separate specification, or exclude them?
 
@@ -185,17 +260,19 @@ trend testing — at real cost, since throughput measured 3s–80s per page.
 
 ## Data on hand
 
-| Source | Role | Coverage | Months | Rows |
+| Source | Role | Coverage | Months | Rows (staged) |
 |---|---|---|---:|---:|
-| `erdf-2akx` + `6a2s-2t65` | Primary | 2024-10 … 2024-12 | 3 / 45 | 2,258,704 |
+| `erdf-2akx` + `6a2s-2t65` | Primary | 2024-10 … 2025-04 | 7 / ~45 | 5,162,965 |
 | `i4gi-tjb9` | Secondary (spillover) | 2023-01 … 2026-07 | 42 / 45 | 40,249,114 |
 
-The primary source is pulled **priority-window first** — 2024-10 through
-2025-03, three months either side of the toll — so analysis is not blocked
-behind a 45-month backfill. `2025-01` is downloading now and is the first month
-to cross 2025-01-05.
+The primary source was pulled **priority-window first** — 2024-10 through
+2025-04, three-plus months either side of the toll — so analysis was not blocked
+behind a 45-month backfill. The **full backfill to 2023-01 is running again as
+of 2026-09-10** (`python -m src.data.download_ezpass --start 2023-01-01`, logs in
+`logs/ezpass_backfill_*.log`); it is a multi-night pull and Socrata throttles
+sustained requests hard.
 
-**Caveat on the manifest.** All three primary parts are recorded
+**Caveat on the manifest.** All seven primary parts are recorded
 `verified: false`. Row counts were not pre-checked against a live `count(1)`,
 because that query defeats Socrata's index and ran for minutes. Completeness
 currently means "paging finished cleanly", not "the row count was confirmed".
@@ -205,21 +282,30 @@ Running `--verify` upgrades this, and should happen before any published result.
 
 ## Known risks
 
-- **No post-treatment data yet.** Nothing about the toll's effect can be said
-  until `2025-01` lands. Every current figure is a pre-period level.
+- **Pre-period is only ~3 months.** The panel now has a post-treatment period,
+  but the pre-period runs 2024-10 → 2025-01-04. That is enough for a descriptive
+  read and a provisional DiD, not for a credible parallel-trends test or placebo
+  dates. The backfill to 2023-01 lifts this; Phase 8 waits on it.
 - **Throughput is not under our control.** 3s–80s per page, load-sensitive and
   erratic. Concurrent requests make it markedly worse, so the download runs alone.
 - **A month is held in memory until complete.** Losing the process mid-month
   discards up to 30 minutes. The manifest protects across months, not within one.
-- **Segment roster drifts over time.** D4 is the visible symptom; the deeper
-  point is that link identity is not guaranteed stable across a four-year
-  window, which matters for a balanced panel.
+- **Segment roster drifts over time.** D4 (now resolved) was the visible
+  symptom; the deeper point is that link identity is not guaranteed stable
+  across a four-year window, which matters for a balanced panel.
+- **Primary parts are unverified.** Seven `verified: false` parts; run
+  `--verify` before any published number.
 
 ### Cleared
 
-- ~~**Links may drop out at the treatment boundary**~~ — checked 2026-09-09 and
-  the panel is balanced where it counts. Every analysis group has all its links
-  in both periods: control 154/154, treated 130/130, exempt 6/6, boundary 5/5,
-  crossings 2/2, **zero** dropouts. All 25 dropouts are `unassigned` links that
-  stopped reporting in autumn 2024, well before tolling — so they cannot
-  introduce a discontinuity at 2025-01-05.
+- ~~**Links may drop out at the treatment boundary**~~ — checked 2026-09-09
+  (pre-refetch counts: control 154/154, treated 130/130, exempt 6/6, boundary
+  5/5, crossings 2/2, zero dropouts). All dropouts were `unassigned` links that
+  stopped reporting in autumn 2024, well before tolling, so they cannot
+  introduce a discontinuity at 2025-01-05. **Recheck after the D4 refetch:** the
+  post-refetch descriptive summary shows treated 148→145 and control 169→167
+  links across pre/post (a link is counted if it has ≥1 link-hour in the
+  period), so a handful of links now appear in one period only. Whether that is
+  a genuine boundary discontinuity or just sparse coverage at the panel edges
+  needs a proper balance check on the current panel — carry as a small open
+  item, not a cleared one.

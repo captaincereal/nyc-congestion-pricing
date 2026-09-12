@@ -115,30 +115,38 @@ The secondary feed stages separately to `stg_dot_highway_readings` via
 Analysis-ready. One row per `link_id` × hour, built by `sql/03_hourly_panel.sql`
 (`python -m src.data.build_panel`). Excludes only the DST-ambiguous hour and
 null speeds; carries the diagnostics a cleaning rule would need
-(`n_obs`, `n_probe_samples`, `min_n_samples`, `n_zero_speed`, `n_over_80`)
-rather than applying thresholds, so exclusions stay documented and reversible.
-Treatment groups come from `data/interim/segment_treatment.parquet`
-(`python -m src.data.geo`): `treated`, `control`, `exempt_in_zone`, `boundary`,
-`crossing`.
+(`n_probe_samples`, `min_n_samples`, `n_zero_speed`, `n_over_80`) rather than
+applying thresholds, so exclusions stay documented and reversible. Treatment
+groups come from `data/interim/segment_treatment.parquet`
+(`python -m src.data.geo`, geometric — decoded polylines vs the 60th St line):
+`treated`, `control`, `exempt_in_zone`, `boundary`, `crossing`, and
+`unassigned` for links absent from the segment attribute table.
 
 | Column | Type | Description |
 |---|---|---|
-| `link_id` | string | Segment |
+| `link_id` | string | Segment (`sid`) |
 | `ts_hour` | timestamp | Hour start, `America/New_York` |
 | `date` | date | Calendar date |
 | `hour` | int | 0–23 |
-| `dow` | int | Day of week, 0 = Monday |
-| `is_weekend` | bool | Saturday/Sunday |
-| `is_peak` | bool | Within AM (07–09) or PM (16–18) peak |
+| `dow` | int | Day of week, 0 = Sunday (DuckDB `date_part('dow', …)`) |
+| `is_weekend` | bool | `dow IN (0, 6)` — Saturday/Sunday |
+| `is_am_peak` / `is_pm_peak` | bool | Hour in 07–09 / 16–18 |
+| `is_peak` | bool | `is_am_peak OR is_pm_peak` |
 | `median_speed_mph` | float | **Primary outcome** — hourly median of link speed |
 | `mean_speed_mph` | float | Secondary |
-| `n_obs` | int | Sub-hourly readings aggregated into the cell |
+| `min_speed_mph` / `max_speed_mph` | float | Diagnostic range within the hour |
+| `n_obs` | int | Sub-hourly (15-min-window) readings aggregated into the cell |
+| `n_probe_samples` | int | Sum of `n_samples` behind the hour |
+| `min_n_samples` | int | Thinnest reading behind the hour |
+| `n_zero_speed` / `n_over_80` | int | Readings at 0 mph / above 80 mph — for coverage filters |
 | `borough` | string | Borough label |
-| `treated` | bool | Segment inside the Congestion Relief Zone (Phase 5) |
-| `is_boundary` | bool | Near-boundary / spillover segment (Phase 5) |
+| `link_name` | string | Segment description |
+| `roadway` | string | Roadway the segment runs along (name subject, from the treatment table) |
+| `treatment_group` | string | `treated` · `control` · `exempt_in_zone` · `boundary` · `crossing` · `unassigned` |
+| `treated` | bool | `treatment_group = 'treated'` |
 | `post` | bool | `ts_hour >= 2025-01-05` |
 | `treated_post` | bool | `treated & post` — the DiD interaction |
-| `event_time` | int | Weeks relative to 2025-01-05 |
+| `event_week` | int | Weeks relative to the 2025-01-05 treatment week |
 
 ## Secondary sources (Phase 10 only — not yet used)
 

@@ -4,8 +4,13 @@ Estimating the causal effect of NYC's Congestion Relief Zone toll (tolling began
 **2025-01-05**) on traffic speeds inside the zone, and testing whether congestion
 shifted to nearby areas.
 
-> **Status:** Phase 1–2 (setup + ingestion). No causal results yet. This README
-> is a skeleton; the sections below fill in as the analysis progresses.
+> **Status:** Phases 1–8 run on the 2024-10 … 2025-04 priority window
+> (descriptives, a provisional difference-in-differences, and a first event
+> study). **No quotable result yet** — the pre-period is ~3 months, the formal
+> event-study pre-trend test fails on the full and off-peak samples, and
+> control selection (D2) is open. The full pre-period/post-period backfill to
+> 2023-01 is downloading, prioritized for analytical value. Robustness
+> (Phase 9) not started. See `docs/decision_register.md`.
 
 ---
 
@@ -85,7 +90,7 @@ docs/         brief · data dictionary · methodology · reproducibility · data
 sql/          DuckDB: 01 staging · 02 quality checks · 03 hourly panel
 src/
   data/       download · inspect_schema · build_staging · quality_report
-  analysis/   descriptive · did · event_study        (stale scaffold — rewritten Phase 6+)
+  analysis/   descriptive (Phase 6) · did (Phase 7) · event_study (Phase 8)
   visualization/
 notebooks/    exploratory analysis (orchestrate + narrate only)
 tests/        unit tests for src/ transformations
@@ -98,8 +103,8 @@ outputs/      figures/ · tables/
 python -m venv .venv && .venv\Scripts\Activate.ps1   # Windows
 pip install -e ".[dev]"
 
-python -m src.data.download --start 2023-01-01       # needs NYC_OPENDATA_APP_TOKEN
-python -m src.data.inspect_schema
+python -m src.data.download_ezpass --start 2023-01-01   # primary; needs NYC_OPENDATA_APP_TOKEN
+python -m src.data.download        --start 2023-01-01   # secondary (DOT highways, spillover)
 ```
 
 Full pipeline and environment variables: `docs/reproducibility.md`.

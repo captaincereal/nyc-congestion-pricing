@@ -29,27 +29,52 @@ token is never written to disk by this project.
 ## Pipeline
 
 ```bash
-# Phase 2 — ingest the raw speed feed (immutable, manifest-tracked)
-python -m src.data.download --start 2023-01-01
+# Phase 2 — ingest the raw speed feeds (immutable, manifest-tracked)
+python -m src.data.download_ezpass --start 2023-01-01   # PRIMARY  (E-Z Pass local streets)
+python -m src.data.download        --start 2023-01-01   # SECONDARY (DOT highways, spillover)
+python -m src.data.download_ezpass --start 2023-01-01 --verify   # disk vs live count(1)
 
 # Phase 2 — inspect the real schema, timezone, cardinality, duplicates
-python -m src.data.inspect_schema
+python -m src.data.inspect_schema        # note: still points at the secondary DOT feed
 
 # Phase 3 — stage + run data-quality checks + write the report
-python -m src.data.build_staging          # runs sql/01_stage_speeds.sql (DuckDB)
-python -m src.data.quality_report         # runs sql/02 + writes docs/data_quality_report.md
+python -m src.data.build_staging               # sql/01_stage_ezpass.sql -> stg_speed_readings
+python -m src.data.build_staging --source dot  # sql/01_stage_speeds.sql -> stg_dot_highway_readings
+python -m src.data.quality_report              # runs sql/02 + writes docs/data_quality_report.md
 
-# Phase 4+ (not yet implemented)
-# python -m src.data.build_panel
+# Phase 4 — geometric CRZ treatment assignment, then the link x hour panel
+python -m src.data.geo            # decode polylines -> data/interim/segment_treatment.parquet
+python -m src.data.build_panel    # sql/03_hourly_panel.sql -> data/processed/hourly_panel.parquet
+
+# Optional enrichment — hourly weather for the weather robustness check (not on
+# data.cityofnewyork.us, so it costs the speed backfill nothing)
+python -m src.data.download_weather
+
+# Phase 6 — descriptive series (no causal claims)
+python -m src.analysis.descriptive
+
+# Phase 7 — difference-in-differences
+python -m src.analysis.did
+python -m src.analysis.did --weather      # robustness: treated x weather interactions
+
+# Phase 8 — event study
+python -m src.analysis.event_study
+python -m src.analysis.event_study --sample peak    # also: offpeak, weekend
+python -m src.analysis.event_study --weather         # robustness: treated x weather
 ```
+
+`src/data/validate.py` (panel sanity checks) is written but not yet wired in.
 
 ## Determinism
 
 - `RANDOM_SEED = 20250105` (`src/config.py`) for anything stochastic.
 - SQL transforms are deterministic: same raw input + same commit ⇒ same output.
 - The raw pull is *not* bit-identical across dates (the feed grows), so each
-  pull is dated and recorded in `data/raw/manifest.json`. Analyses cite the
-  manifest entry (SHA-256 + row count) they were run against.
+  pull is dated and recorded in a manifest — `data/raw/ezpass_manifest.json`
+  (primary) and `data/raw/manifest.json` (secondary). Analyses cite the
+  manifest entry (SHA-256 + row count) they were run against. Primary parts
+  currently carry `verified: false` (row counts not yet checked against a live
+  `count(1)`); run `--verify` before quoting any result.
 
 ## Row-count tracking
 
