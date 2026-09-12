@@ -32,14 +32,14 @@ prediction and acceptance criteria to be written first.
 - **Outcome weighting.** Hourly median speed treats a lightly used link the
   same as a heavy corridor. Whether a flow- or length-weighted outcome changes
   the picture bears on how the result should be described, whatever it is.
-- **D2 control construction with held-out validation.** Blocked until the
-  contiguous pre-period lands; see `docs/owner_decisions.md`.
+
 
 ## 2026-09-12 — registration appended
 
 | ID | Title | Status | Registered | Verdict |
 |---|---|---|---|---|
 | [H003](H003-temporal-aggregation.md) | Does temporal aggregation change the association or its precision? | answered | 2026-09-12 | Refutes: daily is stable (<=0.14 mph, SE ratio <=1.39) but collapsing to one pre/post per link inflates SEs 3.8-6.2x, every CI covers zero, offpeak flips sign |
+| [H004](H004-control-construction.md) | Can controls chosen on pre-treatment behaviour produce flat held-out leads? | proposed | 2026-09-12 | — |
 
 The serial-correlation-collapse queue entry above is now represented by H003;
 the historical queue and the other registrations are preserved. Three
