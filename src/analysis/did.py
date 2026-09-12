@@ -203,7 +203,9 @@ def main() -> None:
             df, controls = attach_weather(df)
         log.info(
             "--- sample: %s (%s link-hours%s) ---",
-            s, f"{len(df):,}", ", weather-controlled" if controls else "",
+            s,
+            f"{len(df):,}",
+            ", weather-controlled" if controls else "",
         )
         r = estimate(df, controls)
         r["weather_controls"] = bool(controls)
@@ -211,14 +213,32 @@ def main() -> None:
         rows.append(r)
         log.info(
             "  ATT %+.4f mph  (SE %.4f, t %+.2f, p %.4g)  95%% CI [%+.4f, %+.4f]  = %+.2f%%",
-            r["beta_mph"], r["se_mph"], r["t"], r["p_value"],
-            r["ci_low"], r["ci_high"], r["pct_of_pre_treated_mean"],
+            r["beta_mph"],
+            r["se_mph"],
+            r["t"],
+            r["p_value"],
+            r["ci_low"],
+            r["ci_high"],
+            r["pct_of_pre_treated_mean"],
         )
 
     out = pd.DataFrame(rows)
-    cols = ["sample", "weather_controls", "beta_mph", "se_mph", "t", "p_value",
-            "ci_low", "ci_high", "pct_of_pre_treated_mean", "pre_treated_mean_mph",
-            "n_obs", "n_links", "n_clusters", "n_periods"]
+    cols = [
+        "sample",
+        "weather_controls",
+        "beta_mph",
+        "se_mph",
+        "t",
+        "p_value",
+        "ci_low",
+        "ci_high",
+        "pct_of_pre_treated_mean",
+        "pre_treated_mean_mph",
+        "n_obs",
+        "n_links",
+        "n_clusters",
+        "n_periods",
+    ]
     out = out[cols]
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
     path = TABLES_DIR / ("did_estimates_weather.csv" if args.weather else "did_estimates.csv")
@@ -227,7 +247,8 @@ def main() -> None:
     log.info(
         "\nTreatment date %s. Errors clustered by %s. "
         "Pre-period is short - see docs/decision_register.md before quoting these.",
-        TREATMENT_DATE, CLUSTER_VAR,
+        TREATMENT_DATE,
+        CLUSTER_VAR,
     )
 
 

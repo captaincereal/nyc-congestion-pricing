@@ -137,9 +137,7 @@ def _day_where(day: date) -> str:
 
 def _days_in_month(month: date):
     cur = month.replace(day=1)
-    nxt = (
-        date(month.year + 1, 1, 1) if month.month == 12 else date(month.year, month.month + 1, 1)
-    )
+    nxt = date(month.year + 1, 1, 1) if month.month == 12 else date(month.year, month.month + 1, 1)
     while cur < nxt:
         yield cur
         cur += timedelta(days=EZPASS_CHUNK_DAYS)
@@ -532,7 +530,9 @@ def main() -> None:
             if left < args.month_budget:
                 log.info(
                     "stopping before %s: %.0f min left, under the %.0f min a month needs",
-                    tag, max(left, 0), args.month_budget,
+                    tag,
+                    max(left, 0),
+                    args.month_budget,
                 )
                 remaining = [f"{m:%Y-%m}" for m in months[i:]]
                 break

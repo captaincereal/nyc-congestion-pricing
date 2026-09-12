@@ -123,22 +123,33 @@ def estimate(df: pd.DataFrame, dummy_cols: list[str], controls: list[str] | None
     p = 2 * stats.t.sf(np.abs(beta / se), dof)
 
     return {
-        "beta": beta, "se": se, "p": p, "crit": crit,
-        "n_obs": n, "n_links": int(n_unit), "n_periods": int(n_time), "n_clusters": int(n_clusters),
+        "beta": beta,
+        "se": se,
+        "p": p,
+        "crit": crit,
+        "n_obs": n,
+        "n_links": int(n_unit),
+        "n_periods": int(n_time),
+        "n_clusters": int(n_clusters),
     }
 
 
 def coef_frame(result: dict, dummy_cols: list[str]) -> pd.DataFrame:
-    rows = [{"k": REFERENCE_K, "coef": 0.0, "se": 0.0, "p_value": np.nan,
-             "ci_low": 0.0, "ci_high": 0.0}]
+    rows = [
+        {"k": REFERENCE_K, "coef": 0.0, "se": 0.0, "p_value": np.nan, "ci_low": 0.0, "ci_high": 0.0}
+    ]
     crit = result["crit"]
     for col, b, s, p in zip(dummy_cols, result["beta"], result["se"], result["p"], strict=True):
         sign, mag = col.split("_")[1][0], int(col.split("_")[1][1:])
         kk = -mag if sign == "m" else mag
         rows.append(
             {
-                "k": kk, "coef": b, "se": s, "p_value": p,
-                "ci_low": b - crit * s, "ci_high": b + crit * s,
+                "k": kk,
+                "coef": b,
+                "se": s,
+                "p_value": p,
+                "ci_low": b - crit * s,
+                "ci_high": b + crit * s,
             }
         )
     return pd.DataFrame(rows).sort_values("k").reset_index(drop=True)
@@ -209,15 +220,27 @@ def plot(coefs: pd.DataFrame, sample: str) -> None:
     fig, ax = plt.subplots(figsize=(10, 5.2))
     ax.axhline(0, color=GRID, linewidth=1, zorder=1)
     ax.errorbar(
-        coefs["k"], coefs["coef"],
+        coefs["k"],
+        coefs["coef"],
         yerr=[coefs["coef"] - coefs["ci_low"], coefs["ci_high"] - coefs["coef"]],
-        fmt="o-", color=SERIES_COLOR["treated"], linewidth=2, markersize=4.5,
-        capsize=3, ecolor=INK_MUTED, elinewidth=1, zorder=3,
+        fmt="o-",
+        color=SERIES_COLOR["treated"],
+        linewidth=2,
+        markersize=4.5,
+        capsize=3,
+        ecolor=INK_MUTED,
+        elinewidth=1,
+        zorder=3,
     )
     ax.axvline(-0.5, color=INK, linewidth=1.2, linestyle=(0, (4, 3)), zorder=2)
     ax.annotate(
-        "tolling begins", xy=(-0.5, ax.get_ylim()[1]),
-        xytext=(6, -4), textcoords="offset points", color=INK, fontsize=8.5, va="top",
+        "tolling begins",
+        xy=(-0.5, ax.get_ylim()[1]),
+        xytext=(6, -4),
+        textcoords="offset points",
+        color=INK,
+        fontsize=8.5,
+        va="top",
     )
     ax.set_facecolor(SURFACE)
     fig.set_facecolor(SURFACE)
@@ -234,8 +257,13 @@ def plot(coefs: pd.DataFrame, sample: str) -> None:
         f"Event study: {sample}", color=INK, fontsize=13, fontweight="bold", loc="left", pad=24
     )
     ax.text(
-        0, 1.02, "95% CI, clustered by link. Flat pre-period supports parallel trends.",
-        transform=ax.transAxes, color=INK_MUTED, fontsize=9.5, va="bottom",
+        0,
+        1.02,
+        "95% CI, clustered by link. Flat pre-period supports parallel trends.",
+        transform=ax.transAxes,
+        color=INK_MUTED,
+        fontsize=9.5,
+        va="bottom",
     )
     _save(fig, f"event_study_{sample}.png")
 
@@ -262,7 +290,10 @@ def main() -> None:
     df, dummy_cols = build_dummies(df, args.horizon)
     log.info(
         "sample %s: %s link-hours, %d event-week dummies, horizon +/-%d weeks%s",
-        args.sample, f"{len(df):,}", len(dummy_cols), args.horizon,
+        args.sample,
+        f"{len(df):,}",
+        len(dummy_cols),
+        args.horizon,
         ", weather-controlled" if controls else "",
     )
 
@@ -277,7 +308,10 @@ def main() -> None:
         )
         log.info(
             "pre-trend joint test (approx Wald, diag-only): chi2=%.2f, dof=%d, p=%.4f -> %s",
-            stat, dof, p, verdict,
+            stat,
+            dof,
+            p,
+            verdict,
         )
     else:
         log.warning("no pre-period weeks available for a pre-trend test")
@@ -291,7 +325,9 @@ def main() -> None:
     log.info(
         "Treatment date %s. %s clusters, %s link-hours. See docs/decision_register.md "
         "before quoting - pre-period length and D2 (control selection) both bear on this.",
-        TREATMENT_DATE, result["n_clusters"], f"{result['n_obs']:,}",
+        TREATMENT_DATE,
+        result["n_clusters"],
+        f"{result['n_obs']:,}",
     )
 
 

@@ -74,9 +74,7 @@ def test_post_and_treated_post_flags(con):
 
 
 def test_peak_flags(con):
-    hours = con.execute(
-        "SELECT DISTINCT hour, is_peak, is_am_peak FROM hourly_panel"
-    ).fetchall()
+    hours = con.execute("SELECT DISTINCT hour, is_peak, is_am_peak FROM hourly_panel").fetchall()
     for hour, is_peak, is_am in hours:
         assert is_peak == (7 <= hour <= 9 or 16 <= hour <= 18)
         assert is_am == (7 <= hour <= 9)

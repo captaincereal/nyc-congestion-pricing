@@ -17,8 +17,12 @@ def _panel():
     rng = np.random.default_rng(0)
     rows = []
     weeks = [-2, -1, 0, 1]
-    for link, treated, base in (("T1", True, 10.0), ("T2", True, 12.0),
-                                 ("C1", False, 20.0), ("C2", False, 22.0)):
+    for link, treated, base in (
+        ("T1", True, 10.0),
+        ("T2", True, 12.0),
+        ("C1", False, 20.0),
+        ("C2", False, 22.0),
+    ):
         for w in weeks:
             jump = 2.0 if (treated and w >= 0) else 0.0
             for h in range(4):

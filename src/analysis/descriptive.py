@@ -77,8 +77,14 @@ def _style(ax, *, ylabel: str, title: str, subtitle: str = "") -> None:
     ax.set_title(title, color=INK, fontsize=13, fontweight="bold", loc="left", pad=30)
     if subtitle:
         ax.text(
-            0, 1.015, subtitle, transform=ax.transAxes, color=INK_MUTED,
-            fontsize=9.5, va="bottom", wrap=True,
+            0,
+            1.015,
+            subtitle,
+            transform=ax.transAxes,
+            color=INK_MUTED,
+            fontsize=9.5,
+            va="bottom",
+            wrap=True,
         )
 
 
@@ -190,10 +196,22 @@ def plot_gap(gap: pd.DataFrame) -> None:
         log.warning("gap series empty - skipping figure")
         return
     fig, ax = plt.subplots(figsize=(10, 5.2))
-    ax.plot(gap["week"], gap["treated_minus_control_mph"], color=SERIES_COLOR["treated"],
-            linewidth=2, zorder=3)
-    ax.scatter(gap["week"], gap["treated_minus_control_mph"], s=26,
-               color=SERIES_COLOR["treated"], zorder=4, edgecolor=SURFACE, linewidth=1.4)
+    ax.plot(
+        gap["week"],
+        gap["treated_minus_control_mph"],
+        color=SERIES_COLOR["treated"],
+        linewidth=2,
+        zorder=3,
+    )
+    ax.scatter(
+        gap["week"],
+        gap["treated_minus_control_mph"],
+        s=26,
+        color=SERIES_COLOR["treated"],
+        zorder=4,
+        edgecolor=SURFACE,
+        linewidth=1.4,
+    )
     _style(
         ax,
         ylabel="treated − control (mph)",
@@ -227,14 +245,25 @@ def plot_hourly(prof: pd.DataFrame) -> None:
             if s.empty:
                 continue
             ax.plot(
-                s["hour"], s["median_mph"], color=SERIES_COLOR[g], linewidth=2,
-                linestyle=dash or "-", zorder=3,
+                s["hour"],
+                s["median_mph"],
+                color=SERIES_COLOR[g],
+                linewidth=2,
+                linestyle=dash or "-",
+                zorder=3,
                 label=f"{g} · {'post' if post else 'pre'}",
             )
     for lo, hi, lab in ((min(AM_PEAK_HOURS), max(AM_PEAK_HOURS), "AM peak"), (16, 18, "PM peak")):
         ax.axvspan(lo - 0.5, hi + 0.5, color=GRID, alpha=0.55, zorder=1)
-        ax.text((lo + hi) / 2, ax.get_ylim()[0], lab, ha="center", va="bottom",
-                fontsize=8.5, color=INK_MUTED)
+        ax.text(
+            (lo + hi) / 2,
+            ax.get_ylim()[0],
+            lab,
+            ha="center",
+            va="bottom",
+            fontsize=8.5,
+            color=INK_MUTED,
+        )
     _style(
         ax,
         ylabel="median speed (mph)",
@@ -261,9 +290,16 @@ def plot_coverage(df: pd.DataFrame) -> None:
         if s.empty:
             continue
         ax.plot(s["week"], s["links"], color=SERIES_COLOR[g], linewidth=2, zorder=3)
-        ax.annotate(g, xy=(s["week"].iloc[-1], s["links"].iloc[-1]), xytext=(7, 0),
-                    textcoords="offset points", color=SERIES_COLOR[g], fontsize=9,
-                    va="center", fontweight="bold")
+        ax.annotate(
+            g,
+            xy=(s["week"].iloc[-1], s["links"].iloc[-1]),
+            xytext=(7, 0),
+            textcoords="offset points",
+            color=SERIES_COLOR[g],
+            fontsize=9,
+            va="center",
+            fontweight="bold",
+        )
     _style(
         ax,
         ylabel="links reporting",
@@ -279,8 +315,12 @@ def plot_coverage(df: pd.DataFrame) -> None:
 def main() -> None:
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
     df = load_panel()
-    log.info("panel: %s link-hours, %s .. %s", f"{len(df):,}",
-             df["date"].min().date(), df["date"].max().date())
+    log.info(
+        "panel: %s link-hours, %s .. %s",
+        f"{len(df):,}",
+        df["date"].min().date(),
+        df["date"].max().date(),
+    )
 
     summary = summary_table(df)
     _write_table(summary, "descriptive_summary.csv")
@@ -298,7 +338,12 @@ def main() -> None:
         post = gap[gap.period == "post"]["treated_minus_control_mph"]
         log.info(
             "gap: pre mean %.3f (sd %.3f, n=%d) | post mean %.3f (sd %.3f, n=%d)",
-            pre.mean(), pre.std(), len(pre), post.mean(), post.std(), len(post),
+            pre.mean(),
+            pre.std(),
+            len(pre),
+            post.mean(),
+            post.std(),
+            len(post),
         )
 
     prof = hourly_profile(df)
