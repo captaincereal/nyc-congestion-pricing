@@ -65,6 +65,47 @@ python -m src.analysis.event_study --weather         # robustness: treated x wea
 
 `src/data/validate.py` (panel sanity checks) is written but not yet wired in.
 
+```bash
+# Where the backfill has got to, and whether the pre-trend test clears yet
+python -m src.data.coverage_report
+```
+
+## Running it unattended
+
+The backfill is ~21 hours against a feed that throttles, so it runs on GitHub
+Actions rather than on anyone's machine.
+
+| Workflow | Trigger | What it does |
+|---|---|---|
+| `.github/workflows/backfill.yml` | every 6h, or manual | Downloads for ~5h, publishes what it got, exits |
+| `.github/workflows/analysis.yml` | after a backfill, on analysis changes, or manual | Rebuilds the panel, reruns Phases 6-8, commits `outputs/` |
+| `.github/workflows/tests.yml` | push and pull request | ruff, black, pytest |
+
+A job here is capped at six hours, so the backfill is a chain rather than one
+run. Each pass gets a wall-clock budget (`BACKFILL_BUDGET_MIN`, default 300)
+shared across `scripts/priority_backfill.sh`, and stops before starting a month
+it cannot finish. Nothing is in flight when it exits.
+
+State lives in the GitHub release tagged `data-raw`: month parts, the segment
+attribute table, the manifest, and the rebuilt panel. A runner's disk is wiped
+when the job ends, so what that release holds is exactly what the next pass
+skips. `scripts/data_release.sh pull|push` moves files between the two.
+
+Within a month, each day is checkpointed to `data/raw/ezpass_days/` as it
+lands, so an interruption costs one day rather than a month. Those checkpoints
+are cached between passes on a best-effort basis; a cache miss costs one month
+of re-downloading, not correctness.
+
+Two flags exist for this and are equally usable locally:
+
+```bash
+python -m src.data.download_ezpass --start 2023-01-01 --max-runtime 300
+BACKFILL_BUDGET_MIN=120 scripts/priority_backfill.sh
+```
+
+Local runs need `NYC_OPENDATA_APP_TOKEN` in `.env`; CI reads it from the
+repository secret of the same name.
+
 ## Determinism
 
 - `RANDOM_SEED = 20250105` (`src/config.py`) for anything stochastic.

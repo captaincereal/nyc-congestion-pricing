@@ -2,8 +2,8 @@
 
 **NYC Congestion Relief Zone · speed study**
 
-Compiled 2026-09-09, updated 2026-09-10 · treatment date 2025-01-05 ·
-head `50baf8c` · 54 tests passing
+Compiled 2026-09-09, updated 2026-09-12 · treatment date 2025-01-05 ·
+68 tests passing
 
 Six decisions are open. Everything below them is settled, verified and
 reproducible. Each open decision changes what the study reports, so it is
@@ -17,7 +17,53 @@ deliberately left unmade rather than defaulted into the panel.
 > backfill to 2023-01 is downloading again as of 2026-09-10. The Phase 7 DiD is
 > **not quotable**: it rests on a 7-month window, parallel trends has no formal
 > test yet (Phase 8, needs the backfill), control selection is still open (D2),
-> and there is no placebo test.
+> and there is no placebo test. (Phase 8 has since run and the pre-trend test
+> fails — see the 2026-09-12 entry below.)
+
+---
+
+## Update 2026-09-12 — the backfill no longer needs a machine left on
+
+The binding constraint was never Socrata's throughput on its own. It was
+throughput *times* the requirement that one machine stay awake for all of it.
+Ingestion had two properties that made an interruption expensive: a month was
+accumulated in memory and written only on completion, and nothing bounded a run
+against a clock. Killing it at minute 35 of 40 discarded all 35, which is how
+the partial 2024-07 and 2023-11 pulls were lost.
+
+Three changes remove that.
+
+**Day checkpoints.** Each day now lands in `data/raw/ezpass_days/` as it
+completes and the month part is assembled from those, so an interruption costs
+one day. Parquet writes go through a temp file and a rename, so no kill can
+leave a torn part that later reads as a complete month.
+
+**A wall-clock budget.** `--max-runtime` stops a run cleanly and `--month-budget`
+keeps it from starting a month it cannot finish, so a scheduled job ends by its
+own choice with nothing in flight rather than being hard-killed.
+
+**Scheduled execution.** `.github/workflows/backfill.yml` runs every six hours,
+downloads for about five, publishes to the `data-raw` release and exits;
+`analysis.yml` rebuilds the panel and reruns Phases 6-8 whenever data lands.
+The release is the resume state, since a runner's disk does not survive the job.
+
+Two instruments came with it, because a pipeline nobody watches has to report
+on itself. `src/data/coverage_report.py` answers how far the backfill is from
+what the study needs — leading with pre-period depth rather than month count,
+since post-treatment months do not help the pre-trend test. And
+`event_study.py` now upserts its verdict into
+`outputs/tables/pretrend_tests.csv`, so the gate on every estimate in this
+project is a file rather than a line in a log. `outputs/` is tracked from now
+on, which makes each increment of data a visible diff.
+
+The four pre-trend tests reproduce exactly after the rewrite (all chi2=26.58
+p=0.0053, offpeak 52.32 p~0, peak 9.71 p=0.557, weekend 15.44 p=0.163),
+confirming the checkpointing changed nothing about what the pipeline computes.
+
+**Nothing about the analysis changed.** Eight months are still on disk, two of
+four samples still fail the pre-trend test, and D2 is still open. This entry
+records that the project can now make progress while nobody is watching, not
+that it has made any.
 
 ---
 

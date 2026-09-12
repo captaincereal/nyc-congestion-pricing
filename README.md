@@ -8,9 +8,10 @@ shifted to nearby areas.
 > (descriptives, a provisional difference-in-differences, and a first event
 > study). **No quotable result yet** — the pre-period is ~3 months, the formal
 > event-study pre-trend test fails on the full and off-peak samples, and
-> control selection (D2) is open. The full pre-period/post-period backfill to
-> 2023-01 is downloading, prioritized for analytical value. Robustness
-> (Phase 9) not started. See `docs/decision_register.md`.
+> control selection (D2) is open. The backfill to 2023-01 runs on a schedule in
+> GitHub Actions, prioritized for analytical value; `outputs/tables/pretrend_tests.csv`
+> carries the current verdict on whether anything here is quotable yet.
+> Robustness (Phase 9) not started. See `docs/decision_register.md`.
 
 ---
 

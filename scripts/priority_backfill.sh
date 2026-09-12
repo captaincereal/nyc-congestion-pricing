@@ -21,11 +21,16 @@ PY="${PYTHON:-python}"
 BUDGET_MIN="${BACKFILL_BUDGET_MIN:-0}"
 MONTH_BUDGET_MIN="${MONTH_BUDGET_MIN:-50}"
 
-# start-date  end-date(exclusive, blank = through the present)
+# start-date  end-date (exclusive; blank = through the present)
+#
+# The union covers the whole frozen window, so a fresh environment with no
+# data at all converges on complete coverage without anyone listing what is
+# missing. Months already on disk cost one skip each.
 RANGES=(
   "2024-07-01 2024-10-01"  # closes the hole; makes 2024-06..2025-04 contiguous
-  "2024-01-01 2024-06-01"  # deepens the pre-period to 2024-01
+  "2024-01-01 2024-07-01"  # deepens the pre-period to 2024-01
   "2023-07-01 2024-01-01"  # deepens to 2023-07, skipping COVID-recovery H1 2023
+  "2024-10-01 2025-05-01"  # the priority window; a no-op where it is already held
   "2025-05-01 2026-01-01"  # extends the post period
   "2026-01-01 "            # post period through the present
   "2023-01-01 2023-07-01"  # completes the frozen window back to 2023-01
