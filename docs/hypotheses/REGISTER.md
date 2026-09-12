@@ -39,7 +39,7 @@ prediction and acceptance criteria to be written first.
 | ID | Title | Status | Registered | Verdict |
 |---|---|---|---|---|
 | [H003](H003-temporal-aggregation.md) | Does temporal aggregation change the association or its precision? | answered | 2026-09-12 | Refutes: daily is stable (<=0.14 mph, SE ratio <=1.39) but collapsing to one pre/post per link inflates SEs 3.8-6.2x, every CI covers zero, offpeak flips sign |
-| [H004](H004-control-construction.md) | Can controls chosen on pre-treatment behaviour produce flat held-out leads? | proposed | 2026-09-12 | — |
+| [H004](H004-control-construction.md) | Can controls chosen on pre-treatment behaviour produce flat held-out leads? | answered | 2026-09-12 | Refutes: both rules reject out of sample everywhere. Nearest-neighbour made it worse; synthetic weights halved chi2, fit the matching window exactly, and still rejected at p=4.4e-07 |
 
 The serial-correlation-collapse queue entry above is now represented by H003;
 the historical queue and the other registrations are preserved. Three

@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | proposed |
+| **Status** | answered |
 | **Registered** | 2026-09-12 |
 | **Registered by** | Claude Opus 5 session, at owner direction to work on D2 |
-| **Answered by** | — |
+| **Answered by** | Claude Opus 5 session, 2026-09-12 |
 | **Supersedes / superseded by** | none |
 
 > This is the construction work behind **D2**. Registering and running it does
@@ -145,11 +145,74 @@ window, and this analysis should be re-run when the backfill reaches 2023-01.
 
 ## Result
 
-*Empty until run.*
+`src/analysis/control_construction.py`, run on the 12-month verified archive.
+Matching window k = −36 … −13 (24 weeks), held-out window k = −12 … −2.
+148 treated links, 183 controls in the donor pool. The 500 m boundary rule
+excluded **zero** controls, as the distance audit predicted — no control link
+lies within 500 m of the line.
+
+Rule A kept 60 donors. Rule B put weight above 0.001 on 78 donors and fit the
+treated matching-window trajectory to a squared loss of **0.0000** — an exact
+in-sample match, since 78 free weights against 24 weekly targets is
+overdetermined.
+
+Joint pre-trend Wald test on the held-out window only:
+
+| Control set | all | peak | offpeak | weekend |
+|---|---|---|---|---|
+| naive pool (183) | χ²=84.8, p=1.8e-13 | χ²=63.9, p=1.7e-09 | χ²=87.1, p=6.2e-14 | χ²=43.6, p=8.5e-06 |
+| **A — nearest 60** | χ²=120.8, p=1.3e-20 | χ²=69.7, p=1.4e-10 | χ²=109.3, p=2.5e-18 | χ²=89.7, p=1.9e-14 |
+| **B — synthetic 78** | χ²=50.8, p=4.4e-07 | **χ²=28.6, p=0.0026** | χ²=62.3, p=3.4e-09 | χ²=39.6, p=4.3e-05 |
+
+Every cell rejects. The best result anywhere is rule B on peak at p = 0.0026,
+two orders of magnitude below the 0.05 threshold.
 
 ## Verdict
 
-*Empty until run.*
+**Refutes.** Both registered rules still reject on the held-out window, in every
+sample. Pre-treatment matching on this link roster does not deliver parallel
+trends.
+
+Three things in the pattern are worth more than the verdict itself.
+
+**Rule A made it worse, everywhere.** Nearest-neighbour matching raised χ²
+against the naive pool in all four samples, by a factor of two on weekend.
+Selecting the 60 donors whose matching-window trajectories most resemble the
+treated average produced a *less* parallel comparison out of sample. That is a
+concrete instance of the failure mode this design was built to catch: similarity
+on one stretch of pre-period does not transport.
+
+**Rule B helped substantially and still failed.** Synthetic weights roughly
+halved χ² relative to the naive pool in every cut. The direction is real and
+says the approach is not worthless — it is simply nowhere near sufficient here.
+
+**Rule B fit the matching window perfectly and still rejected out of sample.**
+Squared loss 0.0000 in-sample, p = 4.4e-07 out. Judged on the window it was
+fitted to, this rule would have looked like a complete success. The held-out
+split is the only thing standing between that appearance and the truth, which is
+the clearest possible argument for having registered it in advance.
+
+**What this licenses.** Under the registered criteria, the study should report
+that the available link panel cannot support the frozen design, rather than
+continue searching for a control set that passes. Each further attempt is
+another draw against the same data, and the register would have to carry the
+count.
+
+**What it does not license.** This is not evidence that congestion pricing had
+no effect, nor that control construction is hopeless in principle. The held-out
+window is October–December 2024 and carries the holiday dynamics already
+suspected of driving part of the problem, so a failure here is confounded with
+them. The matching window is 24 weeks where the frozen design asks for two
+years. Both limitations point the same way: repeat this split on a non-holiday
+held-out window once the backfill reaches 2023-01, before concluding anything
+permanent.
+
+**Recommendation to the owner on D2 — not an adoption.** Do not promote any of
+these three control sets. Rule B is the only one worth carrying forward, as a
+sensitivity specification rather than a primary, and only after the longer
+pre-period allows a cleaner split. The honest current statement remains that the
+design cannot identify the effect, now supported by a direct attempt to fix the
+comparison group rather than only by diagnostics on the old one.
 
 ## Notes
 
