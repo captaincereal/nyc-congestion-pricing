@@ -10,44 +10,51 @@ alwaysApply: true
 
 # Data science rules
 
+Standing conventions live in `AGENTS.md` at the repo root. This file exists so
+Cursor picks them up too; where the two differ, `AGENTS.md` is authoritative.
+
 ## Frozen research design
-- See `docs/project_brief.md`. Do not silently change the research question,
-  treatment/control definitions, intervention date (2025-01-05), primary outcome
-  (hourly median link speed), exclusion rules, or the statistical spec.
-- Primary data source for Phases 1-9 is NYC DOT Traffic Speeds NBE (`i4gi-tjb9`)
-  ONLY. Secondary sources come in Phase 10 with a specific question.
+
+- `docs/project_brief.md` holds the frozen definitions: research question,
+  treatment/control definitions, intervention date (2025-01-05), primary
+  outcome (hourly median link speed), exclusion rules, statistical spec.
+  Changing any of them requires a dated justification in
+  `docs/methodology.md`.
+- The primary data source is the NYC DOT **E-Z Pass local-street** speed feeds
+  (Socrata `erdf-2akx` + `6a2s-2t65`). The Traffic Speeds NBE feed
+  (`i4gi-tjb9`) was primary until 2026-09-08 and is now secondary, used for the
+  spillover/diversion analysis — it carries ~123 links city-wide and none on
+  tolled CRZ surface streets, so the treated group under it is empty. The
+  decision record is in `docs/methodology.md`.
 
 ## Project layout
-- Raw, immutable inputs live in `data/raw/` and are never edited in place.
-- `data/interim/` holds typed staging; `data/processed/` holds analysis-ready
-  panels only.
-- Reusable logic goes in `src/`; notebooks orchestrate and narrate, they do not
+
+- `data/raw/` is immutable and never edited in place. `data/interim/` holds
+  typed staging; `data/processed/` holds analysis-ready panels.
+- Reusable logic goes in `src/`. Notebooks orchestrate and narrate; they do not
   define core functions.
-- Generated figures go to `outputs/figures/`, tables to `outputs/tables/`.
+- Figures go to `outputs/figures/`, tables to `outputs/tables/`.
 
 ## Python
-- Target Python 3.11+. Type hints on public functions.
+
+- Python 3.11+, type hints on public functions, ruff + black at line length 100.
 - `pandas` for wrangling, `duckdb` for large tabular transforms, `statsmodels`
-  (and later `linearmodels`) for econometrics, `matplotlib` for plots.
-- Every script exposes a `main()` and is runnable as `python -m src....`.
-- Read paths / dataset ids / the treatment date from `src/config.py`, never
-  hard-code them.
-- Set and log `RANDOM_SEED` for anything stochastic.
+  for econometrics, `matplotlib` for plots.
+- Every script exposes `main()` and runs as `python -m src....`.
+- Read paths, dataset ids and the treatment date from `src/config.py`.
+- Log `RANDOM_SEED` for anything stochastic.
 
 ## Data handling
-- Never invent dataset columns; verify against the real schema first.
-- Do not clean values before documenting the problem in the data-quality report.
-- Track row counts through every transformation (log `rows in -> rows out`).
+
+- Verify columns against the real schema before using them.
+- Document a data-quality problem before cleaning it.
+- Log `rows in -> rows out` and the reason for every drop.
 - Missing numeric values are `NaN`, never `0` or `-999`.
 
 ## Analysis
-- DiD / event-study specs state treatment date, control group, clustering level,
-  and fixed effects in the docstring.
-- Report robust / clustered standard errors; never rely on default OLS SEs.
-- Report effect sizes and confidence intervals. Preserve null results.
-- Statistical significance is not practical significance.
 
-## Reproducibility
-- No manual spreadsheet edits. Transformations are code.
-- Deterministic outputs: same inputs + same commit => same figures/tables.
-- Add a test in `tests/` for each non-trivial transformation in `src/`.
+- DiD and event-study specs state treatment date, control group, clustering
+  level and fixed effects in the docstring.
+- Report clustered standard errors, effect sizes and confidence intervals.
+- Preserve null and inconvenient results. Statistical significance is not
+  practical significance.

@@ -43,7 +43,7 @@ dev = [
 ]
 
 [project.urls]
-Repository = "https://github.com/hanu-p098/nyc-congestion-pricing"
+Repository = "https://github.com/captaincereal/nyc-congestion-pricing"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src"]
