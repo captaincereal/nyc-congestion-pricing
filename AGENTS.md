@@ -15,8 +15,24 @@ link × hour panel of hourly median speeds.
 | Panel schema, column meanings | `docs/data_dictionary.md` |
 | A pipeline command | `docs/reproducibility.md` |
 | Paths, dataset ids, treatment date, column names | `src/config.py` |
+| Running a new specification against this data | `docs/hypotheses/README.md` — register it first |
 
 Read what the task needs. There is no required pre-read.
+
+## Before running a new specification
+
+This study is worked on across many sessions by different models. The dataset
+is fixed, so every specification tried against it is another draw, and enough
+draws will produce a clean-looking result by chance.
+
+Any analysis whose output could end up in the README gets a hypothesis record
+committed **before** it runs, with its prediction and acceptance criteria
+written down while they are still guesses. Exploratory poking around does not.
+The protocol is in `docs/hypotheses/README.md`; the `research-prompt` skill
+writes the record and the prompt together.
+
+Failed and abandoned attempts stay in the register. The number of attempts is
+part of what a reader needs in order to interpret the one that worked.
 
 ## Permissions
 
