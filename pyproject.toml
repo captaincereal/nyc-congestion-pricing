@@ -25,6 +25,7 @@ dependencies = [
     "tabulate>=0.9",       # DataFrame.to_markdown for generated reports
     "matplotlib>=3.8",     # diagnostics / QC plots
     "statsmodels>=0.14",   # descriptive + baseline models (Phase 6+)
+    "diff-diff>=3.12",     # Rambachan-Roth sensitivity (H002); maintained HonestDiD port
     "pyyaml>=6.0",
     "tqdm>=4.66",
 ]

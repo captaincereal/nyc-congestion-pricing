@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | proposed — deferred until the contiguous pre-period lands |
+| **Status** | answered |
 | **Registered** | 2026-09-12 |
 | **Registered by** | Claude Opus 5 session (methodology review) |
-| **Answered by** | — |
+| **Answered by** | Claude Opus 5 session, 2026-09-12, on the 12-month verified archive |
 | **Supersedes / superseded by** | none |
 
 ## Question
@@ -103,11 +103,72 @@ because the observed violations it calibrates against will change.
 
 ## Result
 
-*Empty until run.*
+Run on the rebuilt 12-month panel (2024-05 … 2025-04) from the verified
+release archive: 36 contiguous pre-treatment weeks, so every tested bin from
+k = −12 to −2 is a genuinely observed week rather than a pooled endpoint. 11
+pre bins, 13 post bins, 331 link clusters. Covariance positive definite in every
+sample (minimum eigenvalue 2.3e-03 to 5.4e-03), so the bounds are identified.
+
+`src/analysis/honest_did.py`; artefacts `outputs/tables/H002_honest_did.csv`,
+`H002_honest_did_grid.csv`, `outputs/figures/H002_honest_did_*.png`.
+
+**Breakdown values** — the smallest violation at which the robust confidence
+set stops excluding zero:
+
+| Sample | relative magnitudes | smoothness |
+|---|---:|---:|
+| all | **0.083** | 0.034 |
+| peak | **0.044** | 0.024 |
+| offpeak | **0.054** | 0.024 |
+| weekend | **0.151** | 0.034 |
+
+**Robust confidence sets** across the grid (relative magnitudes, mph):
+
+| Sample | M = 0 | M = 0.5 | M = 1 | M = 2 |
+|---|---|---|---|---|
+| all | [0.50, 1.65] | [−2.42, 4.57] | [−5.35, 7.49] | [−11.19, 13.34] |
+| peak | [0.22, 1.66] | [−2.10, 3.97] | [−4.42, 6.29] | [−9.06, 10.93] |
+| offpeak | [0.33, 1.50] | [−2.93, 4.76] | [−6.19, 8.02] | [−12.72, 14.55] |
+| weekend | [0.91, 2.07] | [−2.08, 5.07] | [−5.08, 8.07] | [−11.08, 14.07] |
+
+At M = 0 — parallel trends imposed exactly — every interval excludes zero, which
+simply restates the Phase 7 result. Allowing any appreciable violation destroys
+it: by M = 0.5 the intervals are two to five mph wide on either side of zero,
+an order of magnitude wider than the estimate they are bounding.
 
 ## Verdict
 
-*Empty until run.*
+**Refutes.** Breakdown values run 0.044 to 0.151, far below the registered
+threshold of 1 and below any value that could be called robust.
+
+Read plainly: the estimate survives only if post-treatment differential drift
+stays under roughly 4 to 15 percent of the largest differential movement already
+visible in the pre-period. The pre-period violations are not small — the joint
+tests reject hard in every sample — so this is a demand that the counterfactual
+behave far better after tolling than it demonstrably did before. Nothing about
+this setting justifies that assumption.
+
+The prediction was right on magnitude and half right on ordering. It expected
+values "below 0.5, plausibly at or near zero", which held everywhere. It guessed
+weekend and peak might rank highest; weekend is indeed highest at 0.151, while
+peak came out lowest at 0.044. The record flagged that ordering as a guess.
+
+**This strengthens rather than replaces the existing finding.** The README
+already says the implemented design cannot support a causal claim. That rested
+on a binary test rejection, which Roth (2022) warns is a weak basis. It now
+rests on a magnitude: the conclusion breaks under violations an order of
+magnitude smaller than the ones the data already exhibit.
+
+**It is not a causal null.** A low breakdown value says this design cannot
+distinguish the effect from plausible differential drift. It says nothing about
+whether congestion pricing raised speeds. A better control construction could
+still recover an answer; that is D2, and it remains open.
+
+**The true breakdown values are probably lower still.** H001 found the analytic
+clustered standard errors too tight by up to a factor of 1.5. That same
+covariance is the input here, so these robust sets are, if anything, too narrow.
+The interaction anticipated in the Notes below runs in the direction that makes
+the refutation stronger, not weaker.
 
 ## Notes
 
