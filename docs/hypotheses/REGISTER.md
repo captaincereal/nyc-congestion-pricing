@@ -34,3 +34,13 @@ prediction and acceptance criteria to be written first.
   the picture bears on how the result should be described, whatever it is.
 - **D2 control construction with held-out validation.** Blocked until the
   contiguous pre-period lands; see `docs/owner_decisions.md`.
+
+## 2026-09-12 — registration appended
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H003](H003-temporal-aggregation.md) | Does temporal aggregation change the association or its precision? | proposed — source verification gate | 2026-09-12 | Pending |
+
+The serial-correlation-collapse queue entry above is now represented by H003;
+the historical queue and the other registrations are preserved. Three
+hypotheses are registered. H002 remains deferred until the contiguous pre-period.
