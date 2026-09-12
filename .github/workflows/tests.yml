@@ -7,6 +7,9 @@ name: Tests
 on:
   push:
     branches: [main]
+    # The Analysis workflow commits results to main. Those cannot break tests.
+    paths-ignore:
+      - 'outputs/**'
   pull_request:
   workflow_dispatch:
 
