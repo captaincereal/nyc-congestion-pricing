@@ -32,7 +32,8 @@ token is never written to disk by this project.
 # Phase 2 — ingest the raw speed feeds (immutable, manifest-tracked)
 python -m src.data.download_ezpass --start 2023-01-01   # PRIMARY  (E-Z Pass local streets)
 python -m src.data.download        --start 2023-01-01   # SECONDARY (DOT highways, spillover)
-python -m src.data.download_ezpass --start 2023-01-01 --verify   # disk vs live count(1)
+python -m src.data.download_ezpass --start 2023-01-01 --verify   # raw count + retained-row replay
+python -m src.data.download_ezpass --verify --verify-existing --max-runtime 45
 
 # Phase 2 — inspect the real schema, timezone, cardinality, duplicates
 python -m src.data.inspect_schema        # note: still points at the secondary DOT feed
@@ -61,6 +62,17 @@ python -m src.analysis.did --weather      # robustness: treated x weather intera
 python -m src.analysis.event_study
 python -m src.analysis.event_study --sample peak    # also: offpeak, weekend
 python -m src.analysis.event_study --weather         # robustness: treated x weather
+
+# Phase 9 — separate exploratory sensitivities and original-window lead test
+python -m src.analysis.robustness
+python -m src.analysis.assignment_audit       # geometry evidence for owner decision D2
+
+# Phase 10 diagnostic only — requires the secondary raw archive
+python -m src.analysis.spillover_diagnostics
+# Optional --secondary-parts '/path/to/dot_speeds/*.parquet' reads another archive.
+
+# Capture exact input/code/table hashes after generating the outputs
+python -m src.analysis.provenance
 ```
 
 `src/data/validate.py` (panel sanity checks) is written but not yet wired in.
@@ -82,9 +94,11 @@ Actions rather than on anyone's machine.
 | `.github/workflows/tests.yml` | push and pull request | ruff, black, pytest |
 
 A job here is capped at six hours, so the backfill is a chain rather than one
-run. Each pass gets a wall-clock budget (`BACKFILL_BUDGET_MIN`, default 300)
+run. Each pass gets a download budget (`BACKFILL_BUDGET_MIN`, hosted default 255)
 shared across `scripts/priority_backfill.sh`, and stops before starting a month
-it cannot finish. Nothing is in flight when it exits.
+it cannot finish. Hosted runs reserve a further 45 minutes for verification.
+Budgets are checked between requests/days; a request already in flight can run
+past that budget, so the job retains a larger 350-minute hard limit.
 
 State lives in the GitHub release tagged `data-raw`: month parts, the segment
 attribute table, the manifest, and the rebuilt panel. A runner's disk is wiped
@@ -114,8 +128,15 @@ repository secret of the same name.
   pull is dated and recorded in a manifest — `data/raw/ezpass_manifest.json`
   (primary) and `data/raw/manifest.json` (secondary). Analyses cite the
   manifest entry (SHA-256 + row count) they were run against. Primary parts
-  currently carry `verified: false` (row counts not yet checked against a live
-  `count(1)`); run `--verify` before quoting any result.
+  currently carry `verified: false`; run `--verify` before quoting any result.
+  Verification first compares raw pages with live raw counts, then repeats the
+  deterministic downsample and compares all retained reading fields. It never
+  compares a sampled row count with an unsampled count. Completed daily receipts
+  in `data/raw/ezpass_verification/` bind to the part hash and method version and
+  persist in the release. A month is upgraded only after all its days match.
+  `verified_at` dates this source audit; it is not a guarantee against future
+  upstream revisions. `--verify-existing` skips absent months but verifies held
+  parts. End dates are exclusive and ingestion refuses in-progress months.
 
 ## Row-count tracking
 

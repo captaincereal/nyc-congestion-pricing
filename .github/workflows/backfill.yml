@@ -3,9 +3,9 @@ name: Backfill
 # Pulls the E-Z Pass speed history without anyone's machine being on.
 #
 # The backfill is ~20-25 hours of Socrata requests and a job here is capped at
-# 6 hours, so this is deliberately not one long run: each pass downloads for
-# about five hours, publishes what it got, and exits. The schedule starts the
-# next one. Because download_ezpass skips months already on disk and
+# 6 hours, so each pass spends about five hours downloading and verifying,
+# publishes what it got, and exits. The schedule starts the next one.
+# Because download_ezpass skips months already on disk and
 # checkpoints each day it fetches, stopping is cheap and resuming is automatic.
 #
 # The release tagged `data-raw` holds the state between passes.
@@ -19,7 +19,10 @@ on:
     inputs:
       budget_minutes:
         description: Wall-clock minutes to spend downloading
-        default: '300'
+        default: '255'
+      verify_minutes:
+        description: Wall-clock minutes to verify existing parts against the source
+        default: '45'
       month_budget_minutes:
         description: Do not start a month with less than this left
         default: '50'
@@ -35,6 +38,9 @@ permissions:
 
 jobs:
   backfill:
+    # Standard hosted runners are free for public repositories. Do not consume
+    # a private repository's paid minutes if visibility changes later.
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     # Below the 6h hard cap, and above the download budget, so the job ends by
     # its own choice with nothing in flight.
@@ -72,9 +78,17 @@ jobs:
       - name: Download
         env:
           NYC_OPENDATA_APP_TOKEN: ${{ secrets.NYC_OPENDATA_APP_TOKEN }}
-          BACKFILL_BUDGET_MIN: ${{ inputs.budget_minutes || '300' }}
+          BACKFILL_BUDGET_MIN: ${{ inputs.budget_minutes || '255' }}
           MONTH_BUDGET_MIN: ${{ inputs.month_budget_minutes || '50' }}
         run: scripts/priority_backfill.sh
+
+      - name: Verify existing parts within the remaining budget
+        env:
+          NYC_OPENDATA_APP_TOKEN: ${{ secrets.NYC_OPENDATA_APP_TOKEN }}
+          VERIFY_MINUTES: ${{ inputs.verify_minutes || '45' }}
+        run: |
+          python -m src.data.download_ezpass --verify --verify-existing \
+            --max-runtime "$VERIFY_MINUTES"
 
       - name: Publish what landed
         if: always()

@@ -1,0 +1,11 @@
+treatment_group,post,link_hours,links,first_hour,last_hour,mean_hourly_median_mph,interpretation
+boundary,False,14741,5,2024-06-01,2025-01-04 23:00:00,11.88876918736236,descriptive levels; unverified primary parts; no causal claim
+boundary,True,12985,5,2025-01-05,2025-04-30 23:00:00,12.753075401687239,descriptive levels; unverified primary parts; no causal claim
+control,False,427428,177,2024-06-01,2025-01-04 23:00:00,17.8680536147714,descriptive levels; unverified primary parts; no causal claim
+control,True,378175,167,2025-01-05,2025-04-30 23:00:00,17.90346706671395,descriptive levels; unverified primary parts; no causal claim
+crossing,False,5739,2,2024-06-01,2025-01-04 23:00:00,28.956253267119667,descriptive levels; unverified primary parts; no causal claim
+crossing,True,4622,2,2025-01-05,2025-04-30 23:00:00,33.55145622713507,descriptive levels; unverified primary parts; no causal claim
+exempt_in_zone,False,14547,6,2024-06-01,2025-01-04 23:00:00,19.959689673597175,descriptive levels; unverified primary parts; no causal claim
+exempt_in_zone,True,12219,6,2025-01-05,2025-04-30 23:00:00,22.661796922081145,descriptive levels; unverified primary parts; no causal claim
+treated,False,381261,148,2024-06-01,2025-01-04 23:00:00,9.59555897463222,descriptive levels; unverified primary parts; no causal claim
+treated,True,335913,145,2025-01-05,2025-04-30 23:00:00,10.413816239756992,descriptive levels; unverified primary parts; no causal claim

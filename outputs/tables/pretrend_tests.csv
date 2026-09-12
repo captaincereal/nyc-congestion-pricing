@@ -1,5 +1,5 @@
-sample,chi2,dof,p_value,verdict,pre_weeks,panel_start,panel_end,n_obs,n_clusters,run_at
-all,26.5809,11,0.005314,FAIL,12,2024-10-01,2025-04-30,1316012,323,2026-09-12T16:22:22+00:00
-offpeak,52.3166,11,0.0,FAIL,12,2024-10-01,2025-04-30,705830,323,2026-09-12T16:24:53+00:00
-peak,9.7079,11,0.556838,PASS,12,2024-10-01,2025-04-30,244984,323,2026-09-12T16:24:42+00:00
-weekend,15.4442,11,0.163052,PASS,12,2024-10-05,2025-04-27,365198,323,2026-09-12T16:25:01+00:00
+sample,chi2,dof,p_value,verdict,pre_weeks,panel_start,panel_end,n_obs,n_clusters,run_at,reference_week,horizon,tested_bin_min,tested_bin_max,observed_pre_week_min,observed_pre_week_max,tested_pre_start,tested_pre_end,pre_tail_pooled,pre_tail_observed_weeks,post_tail_pooled,test_method,lead_count,covariance_rank,test_status,test_reason
+all,78.05035794729254,11,3.51111433828156e-12,FAIL,19,2024-06-01,2025-04-30,1522777,325,2026-09-12T16:57:01+00:00,-1.0,12.0,-12.0,-2.0,-32.0,-2.0,2024-06-01,2024-12-28,True,9.0,True,cluster_robust_wald_chi2,11.0,11.0,VALID,
+offpeak,79.36034572869096,11,1.9617119119258284e-12,FAIL,17,2024-06-03,2025-04-30,808303,325,2026-09-12T16:57:18+00:00,-1.0,12.0,-12.0,-2.0,-31.0,-2.0,2024-06-03,2024-12-27,True,7.0,True,cluster_robust_wald_chi2,11.0,11.0,VALID,
+peak,57.15770319168722,11,3.1120318855548195e-08,FAIL,17,2024-06-03,2025-04-30,280194,325,2026-09-12T16:57:08+00:00,-1.0,12.0,-12.0,-2.0,-31.0,-2.0,2024-06-03,2024-12-27,True,7.0,True,cluster_robust_wald_chi2,11.0,11.0,VALID,
+weekend,42.11425083176417,11,1.547592408703244e-05,FAIL,19,2024-06-01,2025-04-27,434280,325,2026-09-12T16:57:26+00:00,-1.0,12.0,-12.0,-2.0,-32.0,-2.0,2024-06-01,2024-12-28,True,9.0,True,cluster_robust_wald_chi2,11.0,11.0,VALID,

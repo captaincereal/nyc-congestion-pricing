@@ -6,6 +6,18 @@ automatically; this file is the mission.
 
 ---
 
+> **Takeover audit, 2026-09-12.** Read the newest decision-register entry before
+> the historical status below. The old event-week boundary and joint pre-trend
+> test were incorrect. Corrected tests reject in all four samples, including
+> on the original contiguous window. Twelve exploratory robustness specs now
+> exist, but source verification and owner decisions remain open. The old
+> `--verify` compared sampled counts with raw counts; the replacement performs
+> resumable raw-count plus deterministic replay. Backfill had never run and
+> Analysis failed on an absent release; consult the register for actual rollout
+> status. The README records that the current design cannot support a causal
+> claim, while the full frozen study remains incomplete. No D1–D7 decision was
+> newly adopted. Review `docs/owner_decisions.md` with the owner before doing so.
+
 You are taking over a causal-inference study that is most of the way to an
 answer and stuck on one thing. Finish it.
 

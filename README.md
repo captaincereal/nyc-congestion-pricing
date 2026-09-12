@@ -4,14 +4,12 @@ Estimating the causal effect of NYC's Congestion Relief Zone toll (tolling began
 **2025-01-05**) on traffic speeds inside the zone, and testing whether congestion
 shifted to nearby areas.
 
-> **Status:** Phases 1–8 run on the 2024-10 … 2025-04 priority window
-> (descriptives, a provisional difference-in-differences, and a first event
-> study). **No quotable result yet** — the pre-period is ~3 months, the formal
-> event-study pre-trend test fails on the full and off-peak samples, and
-> control selection (D2) is open. The backfill to 2023-01 runs on a schedule in
-> GitHub Actions, prioritized for analytical value; `outputs/tables/pretrend_tests.csv`
-> carries the current verdict on whether anything here is quotable yet.
-> Robustness (Phase 9) not started. See `docs/decision_register.md`.
+**Research finding, 2026-09-12:** the current comparison design cannot support
+a causal claim about the toll's effect on speed or nearby diversion. The
+positive speed association survives several sensitivities, but corrected
+pre-period tests reject in every sample. This is not evidence of zero effect.
+The full frozen study remains incomplete; owner decisions are laid out in
+[the decision memo](docs/owner_decisions.md).
 
 ---
 
@@ -26,29 +24,85 @@ entry and TLC data support the mechanism? (Phase 10.)
 
 ## Result
 
-_TBD — Phase 7–8._
+Observed speeds improved relative to the candidate control streets, but this
+study cannot presently attribute that change to congestion pricing. The
+comparison groups already differ in their pre-treatment evolution, the
+required 2023–24 archive is incomplete, and primary source verification is
+pending. A larger archive or a validated control design could change this
+assessment; the current result does not establish a causal benefit or a null.
+
+Nearby diversion is also unidentified. The five primary links labelled
+`boundary` straddle 60th Street, so they do not directly measure streets wholly
+outside the zone. Secondary highway/crossing speeds are summarized
+descriptively, without assigning their changes to diverted traffic.
 
 ## Evidence
 
-_TBD — difference-in-differences estimate with clustered standard errors; event
-study of dynamic effects around 2025-01-05._
+The contiguous October 2024–April 2025 diagnostic window and the expanded
+archive including June both produce positive two-way fixed-effects
+coefficients. The output tables preserve link-clustered standard errors and
+confidence intervals for reproducibility, but **effect magnitudes are withheld
+from this report until the primary archive completes live verification**.
+These outputs are exploratory computations, not validated effect estimates.
+
+The corrected joint pre-period tests reject on the contiguous window, so
+adding June does not explain the failure. On all available months, every
+sample rejects: overall, peak, off-peak and weekend.
+The earlier “peak and weekend pass” claim used an invalid joint test and an
+incorrect event-week boundary and is superseded.
+
+See the [corrected pre-trend results](outputs/tables/pretrend_tests.csv),
+[contiguous-window test](outputs/tables/robustness_pretrend_contiguous.csv),
+[event-study figure](outputs/figures/event_study_all.png), and
+[input/code provenance](outputs/tables/analysis_provenance.json).
 
 ## Robustness
 
-_TBD — Phase 9: alternative controls, placebo dates, pre/post windows, sensor
-quality filters, aggregation level._
+The [12-specification comparison](outputs/tables/robustness_comparison.csv)
+includes control geography, alternative windows, a common link roster,
+transition exclusion, probe-depth and extreme-speed filters, an hourly mean
+outcome, two placebo dates, and the four 11th Avenue links as a separate
+treatment sensitivity. Non-placebo coefficients remain positive, while their
+magnitude is sensitive to the control pool and quality filters.
+
+The November 17 and December 1, 2024 placebos, using only actual pre-tolling
+observations, do not reject a zero coefficient. These null placebos do not
+repair the joint lead rejection. Weather interactions have little effect on
+the all-hours coefficient. None of these
+exploratory comparisons validates D2 or demonstrates parallel trends. Daily
+aggregation, held-out trend matching and a full-year placebo remain unfinished.
 
 ## Limitations
 
-- The NYC DOT speed feed is highway/arterial-biased; surface-street coverage
-  inside the CRZ is thinner. Coverage is quantified in the data-quality report.
-- Parallel-trends is an assumption, tested but not proven, via pre-period
-  event-study coefficients.
-- Speed is a proxy for congestion; volume (MTA entries) is a separate check.
+- Only eight of 44 complete target months are held: June 2024 and October
+  2024–April 2025. July–September are missing; the longest contiguous
+  pre-treatment run is three full months, versus the frozen 24-month design.
+- Default event-study endpoints pool weeks earlier/later than ±12. A longer
+  download alone does not yield a week-by-week year-long test. Holidays are
+  an untested explanation for the lead rejection, and passing a test would
+  not prove parallel trends.
+- All primary parts remain unverified. Probe quality, sensor turnover, uneven
+  coverage and the nearly twofold pre-treatment level gap limit interpretation.
+  The [quality report](docs/data_quality_report.md) documents the current archive.
+- Treatment classification still reserves D3 for the owner. The generic
+  11th Avenue exemption likely misclassifies four local-street segments;
+  the corresponding sensitivity changes the contiguous coefficient only slightly.
+- The feed measures selected link speeds, not network-wide congestion,
+  vehicle volumes, welfare or mode shift. MTA entries and TLC mechanism checks
+  have not been run. The secondary link-month series supports coverage review,
+  not a causal spillover estimate.
 
 ## Recommendation
 
-_TBD — executive summary, recommendation-first._
+Report this as a documented failure of the current design to identify a causal
+effect. Do not use its positive coefficients to claim the toll improved speed,
+or its lack of spillover identification to claim no diversion occurred.
+
+Complete and verify the frozen archive on the free hosted backfill, then
+develop trend-based controls with a held-out pre-treatment validation period.
+Resolve the near-boundary definition and the 11th Avenue assignment before
+re-estimation. [D1, D2, D3, D5, D6 and D7 recommendations](docs/owner_decisions.md)
+await owner approval; no open decision was silently adopted.
 
 ---
 
@@ -91,7 +145,7 @@ docs/         brief · data dictionary · methodology · reproducibility · data
 sql/          DuckDB: 01 staging · 02 quality checks · 03 hourly panel
 src/
   data/       download · inspect_schema · build_staging · quality_report
-  analysis/   descriptive (Phase 6) · did (Phase 7) · event_study (Phase 8)
+  analysis/   descriptive · did · event_study · robustness · spillover_diagnostics · provenance
   visualization/
 notebooks/    exploratory analysis (orchestrate + narrate only)
 tests/        unit tests for src/ transformations

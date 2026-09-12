@@ -21,27 +21,54 @@ set -euo pipefail
 TAG="${DATA_TAG:-data-raw}"
 PARTS_DIR="data/raw/ezpass_speeds"
 RAW_DIR="data/raw"
+VERIFY_DIR="$RAW_DIR/ezpass_verification"
 LOOSE=(ezpass_manifest.json ezpass_segments.parquet weather_hourly.parquet)
 
-release_exists() { gh release view "$TAG" >/dev/null 2>&1; }
+# Read the catalogue once: an API/authentication failure must fail the job,
+# rather than being mistaken for an empty archive and overwriting its manifest.
+release_exists() {
+  local tags
+  tags=$(gh release list --limit 10000 --json tagName --jq '.[].tagName') || return 2
+  [[ $'\n'"$tags"$'\n' == *$'\n'"$TAG"$'\n'* ]]
+}
+
+check_release() {
+  local status=0
+  release_exists || status=$?
+  if [[ "$status" -gt 1 ]]; then
+    echo "could not read the release catalogue; refusing to treat it as empty" >&2
+    exit "$status"
+  fi
+  return "$status"
+}
 
 pull() {
-  mkdir -p "$PARTS_DIR"
-  if ! release_exists; then
+  mkdir -p "$PARTS_DIR" "$VERIFY_DIR"
+  if ! check_release; then
     echo "no '$TAG' release yet - starting from an empty data tree"
     return 0
   fi
-  gh release download "$TAG" --dir "$PARTS_DIR" \
-    --pattern 'ezpass_speeds_*.parquet' --clobber || true
+  local assets
+  assets=$(gh release view "$TAG" --json assets --jq '.assets[].name')
+  if [[ "$assets" == *ezpass_speeds_*.parquet* ]]; then
+    gh release download "$TAG" --dir "$PARTS_DIR" \
+      --pattern 'ezpass_speeds_*.parquet' --clobber
+  fi
+  if [[ "$assets" == *ezpass_verify_*.json* ]]; then
+    gh release download "$TAG" --dir "$VERIFY_DIR" \
+      --pattern 'ezpass_verify_*.json' --clobber
+  fi
   for f in "${LOOSE[@]}"; do
-    gh release download "$TAG" --dir "$RAW_DIR" --pattern "$f" --clobber || true
+    if [[ $'\n'"$assets"$'\n' == *$'\n'"$f"$'\n'* ]]; then
+      gh release download "$TAG" --dir "$RAW_DIR" --pattern "$f" --clobber
+    fi
   done
   echo "pulled $(find "$PARTS_DIR" -name '*.parquet' | wc -l) month part(s) from '$TAG'"
 }
 
 push() {
   local marker="${1:-}"
-  if ! release_exists; then
+  if ! check_release; then
     gh release create "$TAG" \
       --title "Raw data parts" \
       --notes "Month-partitioned E-Z Pass speed parts, the segment attribute table and the ingestion manifest. Written by the backfill workflow; this is the resume state it reads on its next run, not a software release."
@@ -61,6 +88,11 @@ push() {
   for f in "${LOOSE[@]}"; do
     [[ -f "$RAW_DIR/$f" ]] && files+=("$RAW_DIR/$f")
   done
+  # Day-level verification receipts let later hosted passes resume raw replay.
+  # They are small; upload all receipts so even a budget-limited run persists.
+  while IFS= read -r f; do files+=("$f"); done < <(
+    find "$VERIFY_DIR" -name 'ezpass_verify_*.json' 2>/dev/null || true
+  )
 
   if [[ ${#files[@]} -eq 0 ]]; then
     echo "nothing new to publish"

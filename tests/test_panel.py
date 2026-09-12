@@ -78,3 +78,31 @@ def test_peak_flags(con):
     for hour, is_peak, is_am in hours:
         assert is_peak == (7 <= hour <= 9 or 16 <= hour <= 18)
         assert is_am == (7 <= hour <= 9)
+
+
+def test_event_weeks_align_with_sunday_treatment_boundary(con, tmp_path):
+    # Every pre-treatment hour must have a negative event week. In particular,
+    # DuckDB date_diff('week', ...) truncates negative partial weeks to zero.
+    dates = pd.DataFrame(
+        {
+            "ts": pd.to_datetime(
+                [
+                    "2024-12-28 23:00",
+                    "2024-12-29 00:00",
+                    "2025-01-04 23:00",
+                    "2025-01-05 00:00",
+                    "2025-01-11 23:00",
+                    "2025-01-12 00:00",
+                ]
+            )
+        }
+    )
+    con.register("event_dates", dates)
+    con.execute("DELETE FROM stg_speed_readings")
+    con.execute(
+        "INSERT INTO stg_speed_readings SELECT '1004', ts, ts, 10.0, 20, "
+        "false, 'manhattan', 'X St' FROM event_dates"
+    )
+    con.execute(SQL, {"treatment_path": str(tmp_path / "seg.parquet")})
+    rows = con.execute("SELECT event_week, post FROM hourly_panel ORDER BY ts_hour").fetchall()
+    assert rows == [(-2, False), (-1, False), (-1, False), (0, True), (0, True), (1, True)]

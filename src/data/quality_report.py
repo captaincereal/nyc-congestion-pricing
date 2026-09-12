@@ -22,7 +22,7 @@ from datetime import UTC, datetime
 
 import duckdb
 
-from src.config import DOCS_DIR, DUCKDB_PATH, PROJECT_ROOT, RAW_MANIFEST_PATH
+from src.config import DOCS_DIR, DUCKDB_PATH, EZPASS_MANIFEST_PATH, PROJECT_ROOT
 
 log = logging.getLogger(__name__)
 
@@ -35,15 +35,13 @@ _NAME_RE = re.compile(r"^--\s*name:\s*(\w+)\s*$", re.MULTILINE)
 LARGE_BLOCKS = {"daily_link_count"}
 
 PROPOSED_HANDLING = """\
-## Proposed handling (human-edited — not yet applied)
+## Handling decisions
 
-_Fill in after reviewing the observed problems above. Each row: problem →
-proposed rule → why → where it will be applied. Nothing here is applied until
-it is written down and reviewed._
-
-| Problem | Proposed rule | Rationale | Applied in |
-|---|---|---|---|
-| _e.g._ zero speeds | treat as missing | 0 mph is an artifact | `sql/03_hourly_panel.sql` |
+D1 in `docs/decision_register.md` remains open. The primary panel applies no
+speed ceiling or probe-depth threshold. Separate robustness specifications
+exclude low-depth hours and hours containing readings above 80 mph; they do not
+alter the raw data or the primary outcome. A zero speed alone is not evidence
+of an invalid reading. See `outputs/tables/robustness_comparison.csv`.
 """
 
 
@@ -64,10 +62,12 @@ def render(con: duckdb.DuckDBPyConnection) -> tuple[str, bool]:
     now = datetime.now(UTC).isoformat(timespec="seconds")
 
     parts = [
-        "# Data-quality report — DOT Traffic Speeds staging\n",
+        "# Data-quality report — E-Z Pass local-street staging\n",
         f"Generated: {now}",
         f"Source DB: `{DUCKDB_PATH.name}`  ·  raw manifest: "
-        f"`{'present' if RAW_MANIFEST_PATH.exists() else 'MISSING'}`\n",
+        f"`{EZPASS_MANIFEST_PATH.name}` "
+        f"({'present' if EZPASS_MANIFEST_PATH.exists() else 'MISSING'}; "
+        "presence alone does not establish verification)\n",
         "> Observed problems only. Handling decisions are in the last section "
         "and are applied elsewhere, never by this script.\n",
     ]

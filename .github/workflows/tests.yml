@@ -19,6 +19,7 @@ concurrency:
 
 jobs:
   test:
+    if: github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -31,9 +32,9 @@ jobs:
 
       - run: pip install -e ".[dev]"
 
-      - run: ruff check src tests
+      - run: ruff check src tests scripts
 
-      - run: black --check src tests
+      - run: black --check src tests scripts
 
       - run: pytest
 

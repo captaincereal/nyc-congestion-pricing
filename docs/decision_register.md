@@ -3,11 +3,109 @@
 **NYC Congestion Relief Zone · speed study**
 
 Compiled 2026-09-09, updated 2026-09-12 · treatment date 2025-01-05 ·
-68 tests passing
+Validation details are recorded in the latest dated entry below.
 
-Six decisions are open. Everything below them is settled, verified and
-reproducible. Each open decision changes what the study reports, so it is
+Six decisions are open. Earlier entries are historical and are superseded
+where the latest audit says so. Each open decision changes what the study reports, so it is
 deliberately left unmade rather than defaulted into the panel.
+
+## Update 2026-09-12 — inference corrected; the current design cannot identify the effect
+
+The takeover audit found two statistical implementation errors, an unusable
+verification command, and an unstarted hosted backfill. The mission was not
+blocked only by throughput. No open owner decision or frozen definition was
+changed. Recommendations are in [owner_decisions.md](owner_decisions.md).
+
+**Current answer.** The implemented comparison design cannot support a causal
+claim about speed improvements or nearby diversion. This is not a causal null
+and does not establish that a better control design will fail. The README now
+reports this finding, withholds effect magnitudes until source verification
+completes, and identifies the remaining work. Files in `outputs/tables/` are
+explicitly provisional computational diagnostics on the stored archive.
+
+**Invalid old gate.** The event-study joint test had summed squared individual
+t statistics, ignoring covariance between the leads. It now uses the full
+link-cluster covariance in a Wald test and records method, rank and tested bins.
+DuckDB's integer week difference also put January 1–4 into event week zero;
+the corrected floor-of-elapsed-days definition keeps every pre-tolling hour
+negative. The weather event study no longer allocates an N×N projection.
+Regression tests compare the covariance calculation and weather residualization
+with independent matrix/explicit fixed-effects calculations.
+
+**Rerun.** All four corrected pre-period tests reject on the current eight-month
+archive. Rejection also occurs on the original contiguous October–April window,
+so the isolated June month is not the explanation. Exact diagnostics are in
+`pretrend_tests.csv` and `robustness_pretrend_contiguous.csv`. These supersede
+every earlier joint test and pass/fail label in this register. Holidays remain
+an untested explanation. The ±12-week endpoint bins pool more distant weeks;
+new metadata makes that explicit rather than implying a full-year weekly test.
+
+**Robustness.** Twelve separate specifications now run reproducibly, including
+geographic controls, quality exclusions, hourly mean, transition removal,
+common-link roster, two pre-period placebos and a D3 assignment sensitivity.
+Non-placebo associations remain positive, but are sensitive to control choice.
+The two placebo tests do not reject zero. Neither finding repairs rejected
+leads. Matching with held-out validation, a full-year placebo and daily
+aggregation remain pending; D1/D2/D3 remain unadopted.
+
+**Spillover.** The five primary boundary links straddle the cordon. The distance
+audit finds no wholly outside Manhattan control within 500 m of the current
+line, and nine within 1 km. A 500 m outside-band analysis therefore has no
+primary units. This is a coverage limitation, not demonstrated control
+contamination at 500 m. The secondary archive actually holds 42,216,965 raw
+rows; the descriptive replay retains 42,210,837 readings after null/duplicate/DST
+handling, producing 3,532,556 link-hours and 5,199 link-months across 42 months.
+These summaries make no causal diversion claim. Both bridge directions are
+retained separately by link; the older claim that both measure entry was wrong.
+
+**Archive and quality.** Primary coverage remains eight of 44 complete target
+months: June 2024 and October 2024–April 2025. Staging now includes all held
+months: 5,977,804 readings produce 1,587,630 link-hours. The July–September gap
+leaves only three contiguous full pre-treatment months. The larger quality
+audit finds 10.97% of readings at three probes or fewer, 0.1125% above 80 mph,
+and a maximum of 7,043.9 mph. The common-link sensitivity is not a balanced
+hour-by-hour panel claim.
+
+**Verification repaired.** The old `--verify` compared retained 15-minute rows
+with the unsampled source count and never updated the manifest. Verification
+now compares raw-page totals with live raw counts, repeats deterministic
+downsampling, and compares the retained fields against immutable disk data.
+Day receipts bind to the raw part's hash and the versioned verification method.
+Only a completed matching replay upgrades a month. `--verify-existing` and a
+runtime budget allow hosted passes to resume. Legacy flags cannot become
+current verification evidence merely because a file exists or has a matching
+hash. End dates are exclusive, and in-progress months must never be finalized.
+The one-minute live verification probe completed and matched June 1–3 against
+the source, then exited cleanly before the next page (about 75 seconds elapsed,
+including an in-flight request). Three daily receipts are held; June remains
+unverified until all 30 days match. No raw part bytes changed.
+
+**Hosted diagnosis.** At 16:59 UTC there had been no Backfill run. The first
+Analysis run had failed because the `data-raw` release did not exist and DuckDB
+found no raw parquet files. The latest Tests run was green. Exact URLs and the
+failure excerpt are in `outputs/tables/workflow_audit.json`. Workflow fixes
+make absent/pre-only input explicit, fail on actual release download errors,
+persist verification receipts, and run sensitivity/provenance generation.
+The jobs use standard hosted runners and refuse private repositories, preserving
+the zero-dollar constraint. See the deployment entry below for actual rollout
+status; a YAML fix alone is not evidence that a hosted job succeeded.
+
+**Measured export experiment.** Sequential anonymous probes streamed the first
+16 MB of each full-dataset CSV at 1.72 and 2.11 MB/s, including startup. Three
+50,000-row paging probes exceeded a 35-second read timeout; the remaining
+`:id` probe achieved 0.23 MB/s. The sample is capped and not evidence of sustained
+whole-export throughput, total transfer size or identical retained data. The
+existing backfill is preserved. Commands and exact timings are in
+`scripts/benchmark_socrata.py` and `outputs/tables/socrata_benchmark.json`.
+
+**Local validation:** 121 synthetic tests pass, with one expected pandas warning
+from the deliberately malformed-timestamp fixture. Ruff and Black pass across
+source, tests and scripts. Bash/YAML validation passes. Staging, panel building,
+all four event studies, weather sensitivities, 12 robustness fits and the
+secondary summary completed on the actual stored data. Passing these checks
+does not substitute for source verification or the robustness assumptions.
+
+Everything below this entry is historical unless explicitly reconfirmed above.
 
 > **Update 2026-09-10.** Since this register was first compiled the priority
 > window (2024-10 … 2025-04, seven months, three either side of the toll) has

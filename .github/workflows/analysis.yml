@@ -1,6 +1,6 @@
 name: Analysis
 
-# Rebuilds the panel and reruns Phases 6-8 whenever new data lands or the
+# Rebuilds the panel and reruns Phases 6-9 whenever new data lands or the
 # analysis code changes, then commits the tables and figures.
 #
 # The point is that results track the data without anyone running anything.
@@ -23,7 +23,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: analysis
+  group: analysis-${{ github.event.workflow_run.head_branch || github.ref_name }}
   cancel-in-progress: true
 
 permissions:
@@ -31,11 +31,17 @@ permissions:
 
 jobs:
   analyse:
+    if: >-
+      github.event.repository.private == false &&
+      (github.event_name != 'workflow_run' ||
+       github.event.workflow_run.head_repository.full_name == github.repository)
     runs-on: ubuntu-latest
     timeout-minutes: 90
 
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_branch || github.ref_name }}
 
       - uses: actions/setup-python@v5
         with:
@@ -51,39 +57,67 @@ jobs:
           chmod +x scripts/*.sh
           scripts/data_release.sh pull
 
+      # A fresh repository has no release, and the pre-period is downloaded
+      # first. Wait explicitly until there are observations on both sides of
+      # treatment instead of trying to fit a model to absent or pre-only data.
+      - name: Check whether analysis inputs are ready
+        id: inputs
+        run: python scripts/check_analysis_inputs.py
+
       - name: Stage, assign treatment, build the panel
+        if: steps.inputs.outputs.ready == 'true'
         run: |
           python -m src.data.build_staging
           python -m src.data.geo
           python -m src.data.build_panel
 
       - name: Data quality report
+        if: steps.inputs.outputs.ready == 'true'
         run: python -m src.data.quality_report
 
       - name: Phase 6 — descriptives
+        if: steps.inputs.outputs.ready == 'true'
         run: python -m src.analysis.descriptive
 
       - name: Phase 7 — difference-in-differences
+        if: steps.inputs.outputs.ready == 'true'
         run: |
           python -m src.analysis.did
-          python -m src.analysis.did --weather
+          if [[ -f data/raw/weather_hourly.parquet ]]; then
+            python -m src.analysis.did --weather
+          else
+            python -c 'from pathlib import Path; Path("outputs/tables/did_estimates_weather.csv").unlink(missing_ok=True)'
+            echo 'Weather sensitivity not run: no weather release asset.' >> "$GITHUB_STEP_SUMMARY"
+          fi
 
       # Each sample writes its own row into pretrend_tests.csv. Off-peak is the
       # cut that fails hardest on the short window, so it is the one to watch.
       - name: Phase 8 — event study
+        if: steps.inputs.outputs.ready == 'true'
         run: |
           for sample in all peak offpeak weekend; do
             python -m src.analysis.event_study --sample "$sample"
           done
 
+      - name: Phase 9 — sensitivity specifications and input provenance
+        if: steps.inputs.outputs.ready == 'true'
+        run: |
+          python -m src.analysis.robustness
+          python -m src.analysis.provenance
+
       - name: Publish the rebuilt panel
+        if: >-
+          steps.inputs.outputs.ready == 'true' &&
+          (github.event.workflow_run.head_branch || github.ref_name) == github.event.repository.default_branch
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release upload data-raw data/processed/hourly_panel.parquet --clobber \
-            || echo "panel upload skipped"
+          gh release upload data-raw data/processed/hourly_panel.parquet --clobber
 
       - name: Commit the results
+        if: steps.inputs.outputs.ready == 'true'
+        env:
+          RESULTS_BRANCH: ${{ github.event.workflow_run.head_branch || github.ref_name }}
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
@@ -96,8 +130,8 @@ jobs:
           MSG="$MSG See the run summary for the pre-trend verdict, which gates"
           MSG="$MSG whether any of this is quotable."
           git commit -m "Rerun the analysis on the current data" -m "$MSG"
-          git pull --rebase --autostash
-          git push
+          git pull --rebase --autostash origin "$RESULTS_BRANCH"
+          git push origin "HEAD:$RESULTS_BRANCH"
 
       - name: Report where the study stands
         if: always()

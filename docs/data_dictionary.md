@@ -146,7 +146,7 @@ groups come from `data/interim/segment_treatment.parquet`
 | `treated` | bool | `treatment_group = 'treated'` |
 | `post` | bool | `ts_hour >= 2025-01-05` |
 | `treated_post` | bool | `treated & post` — the DiD interaction |
-| `event_week` | int | Weeks relative to the 2025-01-05 treatment week |
+| `event_week` | int | Floor of elapsed local calendar days since 2025-01-05 divided by 7; Sunday–Saturday weeks, including negative weeks |
 
 ## Secondary sources (Phase 10 only — not yet used)
 

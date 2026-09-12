@@ -66,8 +66,10 @@ flagged AS (
         (a.ts_hour >= TIMESTAMP '2025-01-05 00:00:00')         AS post,
         -- Event time in weeks relative to the treatment week; 0 is the week
         -- tolling started. Reference period k = -1 is set in the model, not here.
-        CAST(date_diff('week', DATE '2025-01-05',
-                       CAST(a.ts_hour AS DATE)) AS INTEGER)    AS event_week
+        -- Floor elapsed days, including negative values: DuckDB's week
+        -- difference truncates toward zero and puts Jan 1-4 in event week 0.
+        CAST(floor(date_diff('day', DATE '2025-01-05',
+                       CAST(a.ts_hour AS DATE)) / 7.0) AS INTEGER) AS event_week
     FROM agg a
 )
 SELECT
