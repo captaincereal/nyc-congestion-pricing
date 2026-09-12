@@ -1,0 +1,39 @@
+name: Tests
+
+# The two data workflows run unattended for hours at a time, so a broken
+# transformation would otherwise be discovered by a scheduled job at 01:25
+# rather than by the change that caused it.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - run: pip install -e ".[dev]"
+
+      - run: ruff check src tests
+
+      - run: black --check src tests
+
+      - run: pytest
+
+      # The workflows are bash and YAML, which nothing above would catch.
+      - name: Check the automation scripts parse
+        run: bash -n scripts/priority_backfill.sh scripts/data_release.sh

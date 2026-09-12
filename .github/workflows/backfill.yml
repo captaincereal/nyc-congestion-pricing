@@ -1,0 +1,94 @@
+name: Backfill
+
+# Pulls the E-Z Pass speed history without anyone's machine being on.
+#
+# The backfill is ~20-25 hours of Socrata requests and a job here is capped at
+# 6 hours, so this is deliberately not one long run: each pass downloads for
+# about five hours, publishes what it got, and exits. The schedule starts the
+# next one. Because download_ezpass skips months already on disk and
+# checkpoints each day it fetches, stopping is cheap and resuming is automatic.
+#
+# The release tagged `data-raw` holds the state between passes.
+
+on:
+  schedule:
+    # Every six hours. Passes overlap the cap comfortably and GitHub delays
+    # scheduled runs under load, so this is a floor, not a promise.
+    - cron: '25 1,7,13,19 * * *'
+  workflow_dispatch:
+    inputs:
+      budget_minutes:
+        description: Wall-clock minutes to spend downloading
+        default: '300'
+      month_budget_minutes:
+        description: Do not start a month with less than this left
+        default: '50'
+
+# Socrata throttles hard and concurrent requests measurably worsen throughput,
+# so passes queue rather than overlap.
+concurrency:
+  group: socrata-backfill
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    # Below the 6h hard cap, and above the download budget, so the job ends by
+    # its own choice with nothing in flight.
+    timeout-minutes: 350
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+
+      - run: pip install -e .
+
+      - name: Fetch what previous passes already downloaded
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          chmod +x scripts/*.sh
+          scripts/data_release.sh pull
+
+      # Best-effort: day checkpoints for a month left half-finished. A miss
+      # costs one month of re-downloading, not correctness.
+      - name: Restore in-flight day checkpoints
+        uses: actions/cache/restore@v4
+        with:
+          path: data/raw/ezpass_days
+          key: ezpass-days-${{ github.run_id }}
+          restore-keys: ezpass-days-
+
+      - name: Mark the start, so only new parts get published
+        run: touch /tmp/run-start
+
+      - name: Download
+        env:
+          NYC_OPENDATA_APP_TOKEN: ${{ secrets.NYC_OPENDATA_APP_TOKEN }}
+          BACKFILL_BUDGET_MIN: ${{ inputs.budget_minutes || '300' }}
+          MONTH_BUDGET_MIN: ${{ inputs.month_budget_minutes || '50' }}
+        run: scripts/priority_backfill.sh
+
+      - name: Publish what landed
+        if: always()
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: scripts/data_release.sh push /tmp/run-start
+
+      - name: Save day checkpoints for the next pass
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: data/raw/ezpass_days
+          key: ezpass-days-${{ github.run_id }}
+
+      - name: Report coverage
+        if: always()
+        run: python -m src.data.coverage_report >> "$GITHUB_STEP_SUMMARY"

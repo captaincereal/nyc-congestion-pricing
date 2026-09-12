@@ -34,10 +34,13 @@ data/processed/*
 # ...but keep the raw manifest so pulls are auditable in git history
 !data/raw/manifest.json
 
-# Outputs — keep the folders, ignore generated artifacts
+# Outputs — the results ARE the deliverable and the Analysis workflow commits
+# them, so tables and figures are tracked. Scratch files here are not.
 outputs/figures/*
 outputs/tables/*
 !outputs/**/.gitkeep
+!outputs/tables/*.csv
+!outputs/figures/*.png
 
 # Local run logs (scheduled catch-up downloads, etc.)
 logs/
