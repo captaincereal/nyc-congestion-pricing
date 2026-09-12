@@ -58,7 +58,7 @@ def manifest_part():
 
 
 def test_count_compares_raw_pages_before_downsample(monkeypatch):
-    monkeypatch.setattr(dl, "_count", lambda *args: 2)
+    monkeypatch.setattr(dl, "_count", lambda *args, **kwargs: 2)
     monkeypatch.setattr(dl, "_fetch_pages", lambda *args, **kwargs: [raw_day(date(2024, 1, 1))])
     sampled, source_rows = dl._read_day(None, date(2024, 1, 1), ["old"], check_count=True)
     assert source_rows == 2
@@ -67,7 +67,7 @@ def test_count_compares_raw_pages_before_downsample(monkeypatch):
 
 
 def test_raw_count_mismatch_cannot_be_hidden_by_sampling(monkeypatch):
-    monkeypatch.setattr(dl, "_count", lambda *args: 3)
+    monkeypatch.setattr(dl, "_count", lambda *args, **kwargs: 3)
     monkeypatch.setattr(dl, "_fetch_pages", lambda *args, **kwargs: [raw_day(date(2024, 1, 1))])
     with pytest.raises(dl.VerificationError, match="2 raw rows fetched; expected 3"):
         dl._read_day(None, date(2024, 1, 1), ["old"], check_count=True)
@@ -183,6 +183,90 @@ def test_counted_download_and_checkpoint_replay_use_compatible_units(archive, mo
     assert rec.rows == rec.rows_expected == 2
     assert rec.source_rows == 4
     assert calls == archive, "a checkpoint without raw-count evidence needs independent replay"
+    receipt = json.loads(dl._receipt_path(archive[0]).read_text())
+    assert receipt["part_sha256"] == rec.sha256
+    assert receipt["verification_method"] == dl.VERIFICATION_METHOD
+    assert set(receipt["days"]) == {str(day) for day in archive}
+    assert sum(day["source_rows"] for day in receipt["days"].values()) == rec.source_rows
+    assert sum(day["sample_rows"] for day in receipt["days"].values()) == rec.rows
+    assert not list(dl.EZPASS_DAYS_DIR.glob("*.receipt.json"))
+
+
+def test_counted_download_resumes_checked_checkpoint_without_second_replay(archive, monkeypatch):
+    clock = {"now": 0}
+    monkeypatch.setattr(dl.time, "monotonic", lambda: clock["now"])
+    calls = []
+
+    def replay(session, day, datasets, **kwargs):
+        calls.append(day)
+        clock["now"] += 2
+        return dl._downsample(raw_day(day)), 2
+
+    monkeypatch.setattr(dl, "_read_day", replay)
+    with pytest.raises(dl.TimeBudgetExceeded):
+        dl.download_month(None, archive[0], force=False, do_count=True, deadline=1)
+    checkpoint = dl._day_part_path(archive[0])
+    original = checkpoint.read_bytes()
+    evidence = json.loads(dl._day_receipt_path(archive[0]).read_text())
+    assert evidence["checkpoint_sha256"] == dl._sha256(checkpoint)
+    assert evidence["sample_rows"] == 1 and evidence["source_rows"] == 2
+    rec = dl.download_month(None, archive[0], force=False, do_count=True, deadline=10)
+    assert calls == archive, "a counted checkpoint must survive a budget-limited hosted pass"
+    assert rec.verified and rec.source_rows == 4
+    assert original, "the first checkpoint was durable before the next pass"
+
+
+@pytest.mark.parametrize("changed", ["hash", "method", "count"])
+def test_stale_checkpoint_evidence_requires_replay(archive, monkeypatch, changed):
+    first = archive[0]
+    checkpoint = dl._day_part_path(first)
+    sample = dl._downsample(raw_day(first))
+    dl._write_parquet_atomic(sample, checkpoint)
+    evidence = dl._record_checked_day(first, checkpoint, sample, 2)
+    if changed == "hash":
+        evidence["checkpoint_sha256"] = "old hash"
+    elif changed == "method":
+        evidence["verification_method"] = "old method"
+    else:
+        evidence["source_rows"] = -1
+    dl._save_receipt(dl._day_receipt_path(first), evidence)
+    calls = fake_api(monkeypatch)
+    rec = dl.download_month(None, first, force=False, do_count=True)
+    assert calls == archive
+    assert rec.verified
+
+
+def test_existing_verified_flag_without_receipts_still_replays(archive, monkeypatch):
+    seed_part(archive)
+    rec = asdict(dl.download_month(None, archive[0], force=False))
+    rec.update(verified=True, verification_method=dl.VERIFICATION_METHOD)
+    dl._write({"2024-01": rec})
+    calls = fake_api(monkeypatch)
+    dl.verify(None, archive[0], archive[0])
+    assert calls == archive
+    receipt = json.loads(dl._receipt_path(archive[0]).read_text())
+    assert len(receipt["days"]) == len(archive)
+
+
+@pytest.mark.parametrize("invalid", [{"source_rows": -1}, {"checked_at": "bad timestamp"}])
+def test_malformed_monthly_day_evidence_requires_replay(archive, monkeypatch, invalid):
+    seed_part(archive)
+    calls = fake_api(monkeypatch)
+    dl.verify(None, archive[0], archive[0])
+    receipt = json.loads(dl._receipt_path(archive[0]).read_text())
+    receipt["days"][str(archive[0])].update(invalid)
+    dl._save_receipt(dl._receipt_path(archive[0]), receipt)
+    dl.verify(None, archive[0], archive[0])
+    assert calls == archive + archive[:1]
+
+
+def test_malformed_receipt_shape_is_rebuilt(archive, monkeypatch):
+    seed_part(archive)
+    calls = fake_api(monkeypatch)
+    dl._save_receipt(dl._receipt_path(archive[0]), ["broken shape"])
+    dl.verify(None, archive[0], archive[0])
+    assert calls == archive
+    assert manifest_part()["verified"]
 
 
 def test_corrupt_checkpoint_is_never_silently_replaced(archive, monkeypatch):

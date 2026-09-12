@@ -46,7 +46,7 @@ from pathlib import Path
 
 import pandas as pd
 import requests
-from tenacity import before_sleep_log, retry, stop_after_attempt, wait_exponential
+from urllib3.util import Timeout
 
 from src.config import (
     EZPASS_AGG_PERIOD_SEC,
@@ -177,6 +177,64 @@ def _day_part_path(day: date) -> Path:
     return EZPASS_DAYS_DIR / f"ezpass_day_{day:%Y-%m-%d}.parquet"
 
 
+def _day_receipt_path(day: date) -> Path:
+    return EZPASS_DAYS_DIR / f"ezpass_day_{day:%Y-%m-%d}.receipt.json"
+
+
+def _valid_day_evidence(evidence: object, sample_rows: int) -> bool:
+    """Validate cached counts and check time before trusting a matching hash."""
+    if not isinstance(evidence, dict):
+        return False
+    source_rows = evidence.get("source_rows")
+    retained_rows = evidence.get("sample_rows")
+    if (
+        type(source_rows) is not int
+        or type(retained_rows) is not int
+        or source_rows < retained_rows
+        or retained_rows != sample_rows
+        or retained_rows < 0
+    ):
+        return False
+    try:
+        checked_at = datetime.fromisoformat(evidence["checked_at"])
+    except (KeyError, TypeError, ValueError):
+        return False
+    return checked_at.utcoffset() is not None
+
+
+def _checkpoint_evidence(day: date, path: Path, sample_rows: int) -> dict | None:
+    try:
+        evidence = json.loads(_day_receipt_path(day).read_text())
+    except (OSError, json.JSONDecodeError):
+        return None
+    if (
+        _valid_day_evidence(evidence, sample_rows)
+        and evidence.get("day") == str(day)
+        and evidence.get("verification_method") == VERIFICATION_METHOD
+        and evidence.get("checkpoint_sha256") == _sha256(path)
+    ):
+        return evidence
+    return None
+
+
+def _record_checked_day(day: date, path: Path, replay: pd.DataFrame, source_rows: int) -> dict:
+    # Verify what was persisted, so the receipt binds source-checked sample
+    # values to the actual checkpoint bytes used by a later month assembly.
+    _assert_same_sample(pd.read_parquet(path), replay, str(day))
+    evidence = {
+        "day": str(day),
+        "checkpoint_sha256": _sha256(path),
+        "verification_method": VERIFICATION_METHOD,
+        "source_rows": source_rows,
+        "sample_rows": len(replay),
+        "checked_at": datetime.now(UTC).isoformat(timespec="seconds"),
+    }
+    if not _valid_day_evidence(evidence, len(replay)):
+        raise VerificationError(f"{day}: invalid raw-count evidence for the retained sample")
+    _save_receipt(_day_receipt_path(day), evidence)
+    return evidence
+
+
 def _write_parquet_atomic(df: pd.DataFrame, dest: Path) -> None:
     """Write via a temp file and rename, so a kill never leaves a torn parquet."""
     dest.parent.mkdir(parents=True, exist_ok=True)
@@ -221,29 +279,90 @@ def _base(dataset_id: str) -> str:
     return f"https://{SOCRATA_DOMAIN}/resource/{dataset_id}"
 
 
-_retry_logged = retry(
-    stop=stop_after_attempt(5),
-    wait=wait_exponential(multiplier=2, min=2, max=60),
-    before_sleep=before_sleep_log(log, logging.WARNING),
-)
+def _time_left(deadline: float | None) -> float:
+    """Bound one HTTP attempt by the shared job budget, including its retries."""
+    if deadline is None:
+        return float(HTTP_TIMEOUT)
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeBudgetExceeded("budget spent before the next HTTP request or retry")
+    return remaining
 
 
-@_retry_logged
-def _count(session: requests.Session, dataset_id: str, where: str) -> int:
-    resp = session.get(
+def _request(
+    session: requests.Session,
+    url: str,
+    params: dict,
+    *,
+    deadline: float | None = None,
+    max_attempts: int = 5,
+) -> requests.Response:
+    """Retry transport failures without restarting the caller's time budget.
+
+    The total timeout shares a limit across connection and socket reads. Like
+    all Requests timeouts it is not a process watchdog; check the clock again
+    after each response and before every backoff or retry.
+    """
+    if max_attempts < 1:
+        raise ValueError("max_attempts must be positive")
+    for attempt in range(max_attempts):
+        request_budget = min(float(HTTP_TIMEOUT), _time_left(deadline))
+        response = None
+        try:
+            response = session.get(url, params=params, timeout=Timeout(total=request_budget))
+            response.raise_for_status()
+        except requests.RequestException as exc:
+            if response is not None:
+                response.close()
+            remaining = _time_left(deadline)
+            if attempt + 1 == max_attempts:
+                raise
+            backoff = min(60.0, 2.0 ** (attempt + 1))
+            if deadline is not None and backoff >= remaining:
+                raise TimeBudgetExceeded("insufficient budget for the next HTTP retry") from exc
+            log.warning(
+                "HTTP attempt %d/%d failed (%s); retrying in %.0fs",
+                attempt + 1,
+                max_attempts,
+                type(exc).__name__,
+                backoff,
+            )
+            time.sleep(backoff)
+        else:
+            if deadline is not None and time.monotonic() >= deadline:
+                response.close()
+                raise TimeBudgetExceeded("budget spent while waiting for the HTTP response")
+            return response
+    raise AssertionError("HTTP retry loop ended without a response or exception")
+
+
+def _count(
+    session: requests.Session, dataset_id: str, where: str, *, deadline: float | None = None
+) -> int:
+    resp = _request(
+        session,
         _base(dataset_id) + ".json",
         params={"$select": "count(1) as n", "$where": where},
-        timeout=HTTP_TIMEOUT,
+        deadline=deadline,
     )
-    resp.raise_for_status()
     return int(resp.json()[0]["n"])
 
 
-@_retry_logged
-def _get_page(session: requests.Session, dataset_id: str, params: dict) -> requests.Response:
-    resp = session.get(_base(dataset_id) + ".csv", params=params, timeout=HTTP_TIMEOUT)
-    resp.raise_for_status()
-    return resp
+def _get_page(
+    session: requests.Session,
+    dataset_id: str,
+    params: dict,
+    *,
+    deadline: float | None = None,
+    max_attempts: int = 5,
+) -> requests.Response:
+    return _request(
+        session,
+        _base(dataset_id) + ".csv",
+        params=params,
+        deadline=deadline,
+        max_attempts=max_attempts,
+    )
 
 
 def _fetch_pages(
@@ -269,8 +388,34 @@ def _fetch_pages(
         }
         if select:
             params["$select"] = select
-        resp = _get_page(session, dataset_id, params)
-        page = pd.read_csv(io.BytesIO(resp.content), dtype=str)
+        try:
+            resp = _get_page(
+                session,
+                dataset_id,
+                params,
+                deadline=deadline,
+                max_attempts=1 if page_size > PAGE_SIZE else 5,
+            )
+        except (
+            requests.Timeout,
+            requests.ConnectionError,
+            requests.exceptions.ChunkedEncodingError,
+        ):
+            if page_size <= PAGE_SIZE:
+                raise
+            log.warning(
+                "large CSV page failed at offset %d; reducing %d -> %d rows "
+                "and retrying that offset",
+                offset,
+                page_size,
+                PAGE_SIZE,
+            )
+            page_size = PAGE_SIZE
+            continue
+        try:
+            page = pd.read_csv(io.BytesIO(resp.content), dtype=str)
+        finally:
+            resp.close()
         if page.empty:
             break
         frames.append(page)
@@ -280,7 +425,9 @@ def _fetch_pages(
     return frames
 
 
-def _fetch_day(session: requests.Session, day: date, datasets: list[str]) -> pd.DataFrame:
+def _fetch_day(
+    session: requests.Session, day: date, datasets: list[str], *, deadline: float | None = None
+) -> pd.DataFrame:
     """Fetch and downsample one day across the dataset(s) covering it.
 
     Downsampling per day (rather than per month) keeps peak memory to one day of
@@ -288,7 +435,7 @@ def _fetch_day(session: requests.Session, day: date, datasets: list[str]) -> pd.
     EZPASS_PAGE_SIZE (~a day's worth of rows) means the common case is ONE
     request per dataset per day rather than ~7 offset pages.
     """
-    return _read_day(session, day, datasets)[0]
+    return _read_day(session, day, datasets, deadline=deadline)[0]
 
 
 def _read_day(
@@ -307,7 +454,10 @@ def _read_day(
     for ds in datasets:
         if deadline is not None and time.monotonic() >= deadline:
             raise TimeBudgetExceeded("budget spent before the next dataset")
-        expected = _count(session, ds, where) if check_count else None
+        expected = _count(session, ds, where, deadline=deadline) if check_count else None
+        if expected == 0:
+            log.info("  %s %s: live count is zero; no CSV fetch needed", day, ds)
+            continue
         pages = _fetch_pages(
             session, ds, where, select=select, page_size=EZPASS_PAGE_SIZE, deadline=deadline
         )
@@ -398,19 +548,24 @@ def download_month(
     resumed = 0
     raw_seen = 0
     source_rows = 0
+    checked_days: dict[str, dict] = {}
     for day in _days_in_month(month):
         dpath = _day_part_path(day)
         if dpath.exists() and not force:
+            held = pd.read_parquet(dpath)
             if do_count:
-                if deadline is not None and time.monotonic() >= deadline:
-                    raise TimeBudgetExceeded(f"{month:%Y-%m}: budget spent; checkpoints kept")
-                replay, seen = _read_day(
-                    session, day, datasets, check_count=True, deadline=deadline
-                )
-                _assert_same_sample(pd.read_parquet(dpath), replay, str(day))
-                source_rows += seen
+                evidence = _checkpoint_evidence(day, dpath, len(held))
+                if evidence is None:
+                    if deadline is not None and time.monotonic() >= deadline:
+                        raise TimeBudgetExceeded(f"{month:%Y-%m}: budget spent; checkpoints kept")
+                    replay, seen = _read_day(
+                        session, day, datasets, check_count=True, deadline=deadline
+                    )
+                    evidence = _record_checked_day(day, dpath, replay, seen)
+                checked_days[str(day)] = evidence
+                source_rows += evidence["source_rows"]
             day_paths.append(dpath)
-            raw_seen += int(pd.read_parquet(dpath, columns=[EZPASS_TIME_COL]).shape[0])
+            raw_seen += len(held)
             resumed += 1
             continue
         if deadline is not None and time.monotonic() >= deadline:
@@ -422,8 +577,10 @@ def download_month(
             chunk, seen = _read_day(session, day, datasets, check_count=True, deadline=deadline)
             source_rows += seen
         else:
-            chunk = _fetch_day(session, day, datasets)
+            chunk = _fetch_day(session, day, datasets, deadline=deadline)
         _write_parquet_atomic(chunk, dpath)
+        if do_count:
+            checked_days[str(day)] = _record_checked_day(day, dpath, chunk, seen)
         day_paths.append(dpath)
         raw_seen += len(chunk)
         log.info("  %s: %s kept rows so far", f"{month:%Y-%m}", f"{raw_seen:,}")
@@ -435,11 +592,28 @@ def download_month(
     _write_parquet_atomic(df, dest)
 
     rows = len(df)
+    part_sha256 = _sha256(dest)
+    if do_count:
+        _assert_same_sample(pd.read_parquet(dest), df, f"{month:%Y-%m}")
+        # Every day was counted before deterministic sampling and compared to
+        # persisted checkpoint bytes. Bind those same checks to the assembled
+        # month before publishing its verified manifest flag or deleting days.
+        receipt = {
+            "part_sha256": part_sha256,
+            "verification_method": VERIFICATION_METHOD,
+            "month": f"{month:%Y-%m}",
+            "days": {
+                tag: {key: evidence[key] for key in ("source_rows", "sample_rows", "checked_at")}
+                for tag, evidence in checked_days.items()
+            },
+        }
+        _save_receipt(_receipt_path(month), receipt)
     log.info("wrote %s (%s rows, %.1f MB)", dest.name, f"{rows:,}", dest.stat().st_size / 1e6)
 
     # The month part is durable now, so the day checkpoints have done their job.
     for p in day_paths:
         p.unlink(missing_ok=True)
+        p.with_suffix(".receipt.json").unlink(missing_ok=True)
 
     return EzpassPartRecord(
         part=dest.name,
@@ -448,7 +622,7 @@ def download_month(
         rows=rows,
         rows_expected=rows,
         bytes=dest.stat().st_size,
-        sha256=_sha256(dest),
+        sha256=part_sha256,
         pulled_at=datetime.now(UTC).isoformat(timespec="seconds"),
         complete=True,
         verified=do_count,
@@ -550,9 +724,6 @@ def _verify_part(
     manifest's verified flag before a fresh audit. Raw parquet is never changed.
     """
     rec = download_month(session, month, force=False, prior=prior)
-    if rec.verified and rec.complete and rec.verification_method == VERIFICATION_METHOD:
-        log.info("%s: already verified at %s (unchanged hash)", rec.month, rec.verified_at)
-        return rec
     dest = EZPASS_PARTS_DIR / rec.part
     disk = pd.read_parquet(dest, columns=list(EZPASS_READING_COLS))
     ts = pd.to_datetime(disk[EZPASS_TIME_COL], errors="raise")
@@ -560,20 +731,31 @@ def _verify_part(
     if ts.isna().any() or not ((ts >= lo) & (ts < hi)).all():
         raise VerificationError(f"{rec.month}: part contains missing or out-of-month timestamps")
     path = _receipt_path(month)
-    identity = {"part_sha256": rec.sha256, "verification_method": VERIFICATION_METHOD}
+    identity = {
+        "part_sha256": rec.sha256,
+        "verification_method": VERIFICATION_METHOD,
+        "month": rec.month,
+    }
     try:
         receipt = json.loads(path.read_text())
     except (OSError, json.JSONDecodeError):
         receipt = {}
-    if any(receipt.get(k) != v for k, v in identity.items()):
-        receipt = {**identity, "month": rec.month, "days": {}}
+    if (
+        not isinstance(receipt, dict)
+        or any(receipt.get(k) != v for k, v in identity.items())
+        or not isinstance(receipt.get("days"), dict)
+    ):
+        receipt = {**identity, "days": {}}
     days = list(_days_in_month(month))
+    day_tags = {str(day) for day in days}
+    receipt["days"] = {tag: value for tag, value in receipt["days"].items() if tag in day_tags}
     source_rows = 0
+    replayed = 0
     for day in days:
         tag = str(day)
         held = disk.loc[(ts >= str(day)) & (ts < str(day + timedelta(days=EZPASS_CHUNK_DAYS)))]
         cached = receipt["days"].get(tag)
-        if cached and cached.get("sample_rows") == len(held):
+        if _valid_day_evidence(cached, len(held)):
             source_rows += cached["source_rows"]
             continue
         if deadline is not None and time.monotonic() >= deadline:
@@ -591,13 +773,18 @@ def _verify_part(
             "checked_at": datetime.now(UTC).isoformat(timespec="seconds"),
         }
         _save_receipt(path, receipt)
+        replayed += 1
         source_rows += seen
         log.info("verify %s: %d/%d days checked", rec.month, len(receipt["days"]), len(days))
+    # Even a manifest already marked verified needs its complete day receipt:
+    # older counted downloads set the flag without publishing this evidence.
+    _save_receipt(path, receipt)
+    if not rec.verified or replayed:
+        rec.verified_at = datetime.now(UTC).isoformat(timespec="seconds")
     rec.rows_expected = rec.rows
     rec.complete = True
     rec.verified = True
     rec.verification_method = VERIFICATION_METHOD
-    rec.verified_at = datetime.now(UTC).isoformat(timespec="seconds")
     rec.source_rows = source_rows
     rec.verification_error = None
     return rec
