@@ -1,0 +1,157 @@
+{
+  "days": {
+    "2024-06-01": {
+      "checked_at": "2026-09-12T16:59:49+00:00",
+      "sample_rows": 28110,
+      "source_rows": 321998
+    },
+    "2024-06-02": {
+      "checked_at": "2026-09-12T17:00:03+00:00",
+      "sample_rows": 27643,
+      "source_rows": 317777
+    },
+    "2024-06-03": {
+      "checked_at": "2026-09-12T17:00:31+00:00",
+      "sample_rows": 27419,
+      "source_rows": 310715
+    },
+    "2024-06-04": {
+      "checked_at": "2026-09-12T20:16:32+00:00",
+      "sample_rows": 27662,
+      "source_rows": 317471
+    },
+    "2024-06-05": {
+      "checked_at": "2026-09-12T20:16:51+00:00",
+      "sample_rows": 27935,
+      "source_rows": 314980
+    },
+    "2024-06-06": {
+      "checked_at": "2026-09-12T20:17:39+00:00",
+      "sample_rows": 28029,
+      "source_rows": 321005
+    },
+    "2024-06-07": {
+      "checked_at": "2026-09-12T20:18:23+00:00",
+      "sample_rows": 28171,
+      "source_rows": 323353
+    },
+    "2024-06-08": {
+      "checked_at": "2026-09-12T20:18:47+00:00",
+      "sample_rows": 28545,
+      "source_rows": 328712
+    },
+    "2024-06-09": {
+      "checked_at": "2026-09-12T20:18:59+00:00",
+      "sample_rows": 28019,
+      "source_rows": 320614
+    },
+    "2024-06-10": {
+      "checked_at": "2026-09-12T20:19:11+00:00",
+      "sample_rows": 27982,
+      "source_rows": 317450
+    },
+    "2024-06-11": {
+      "checked_at": "2026-09-12T20:20:29+00:00",
+      "sample_rows": 27997,
+      "source_rows": 317557
+    },
+    "2024-06-12": {
+      "checked_at": "2026-09-12T20:21:40+00:00",
+      "sample_rows": 27778,
+      "source_rows": 316595
+    },
+    "2024-06-13": {
+      "checked_at": "2026-09-12T20:22:55+00:00",
+      "sample_rows": 27546,
+      "source_rows": 312918
+    },
+    "2024-06-14": {
+      "checked_at": "2026-09-12T20:23:52+00:00",
+      "sample_rows": 27907,
+      "source_rows": 318402
+    },
+    "2024-06-15": {
+      "checked_at": "2026-09-12T20:24:13+00:00",
+      "sample_rows": 27919,
+      "source_rows": 318877
+    },
+    "2024-06-16": {
+      "checked_at": "2026-09-12T20:25:11+00:00",
+      "sample_rows": 27514,
+      "source_rows": 313833
+    },
+    "2024-06-17": {
+      "checked_at": "2026-09-12T20:25:30+00:00",
+      "sample_rows": 27321,
+      "source_rows": 310675
+    },
+    "2024-06-18": {
+      "checked_at": "2026-09-12T20:26:06+00:00",
+      "sample_rows": 27235,
+      "source_rows": 306370
+    },
+    "2024-06-19": {
+      "checked_at": "2026-09-12T20:26:32+00:00",
+      "sample_rows": 28009,
+      "source_rows": 312100
+    },
+    "2024-06-20": {
+      "checked_at": "2026-09-12T20:27:22+00:00",
+      "sample_rows": 27645,
+      "source_rows": 304240
+    },
+    "2024-06-21": {
+      "checked_at": "2026-09-12T20:28:06+00:00",
+      "sample_rows": 26022,
+      "source_rows": 297270
+    },
+    "2024-06-22": {
+      "checked_at": "2026-09-12T20:28:18+00:00",
+      "sample_rows": 24925,
+      "source_rows": 285745
+    },
+    "2024-06-23": {
+      "checked_at": "2026-09-12T20:28:29+00:00",
+      "sample_rows": 24962,
+      "source_rows": 285848
+    },
+    "2024-06-24": {
+      "checked_at": "2026-09-12T20:29:22+00:00",
+      "sample_rows": 25090,
+      "source_rows": 287570
+    },
+    "2024-06-25": {
+      "checked_at": "2026-09-12T20:30:31+00:00",
+      "sample_rows": 25090,
+      "source_rows": 289099
+    },
+    "2024-06-26": {
+      "checked_at": "2026-09-12T20:31:51+00:00",
+      "sample_rows": 24917,
+      "source_rows": 287019
+    },
+    "2024-06-27": {
+      "checked_at": "2026-09-12T20:32:06+00:00",
+      "sample_rows": 26047,
+      "source_rows": 300775
+    },
+    "2024-06-28": {
+      "checked_at": "2026-09-12T20:32:23+00:00",
+      "sample_rows": 27708,
+      "source_rows": 315740
+    },
+    "2024-06-29": {
+      "checked_at": "2026-09-12T20:33:22+00:00",
+      "sample_rows": 27695,
+      "source_rows": 300023
+    },
+    "2024-06-30": {
+      "checked_at": "2026-09-12T20:33:28+00:00",
+      "sample_rows": 25997,
+      "source_rows": 159432
+    }
+  },
+  "month": "2024-06",
+  "part_sha256": "d3085973cfec9d1b191e414ac2c285dd1229914ec6eca7970a2f49835fd6a53b",
+  "verification_method": "raw-count-and-deterministic-replay-v1"
+}

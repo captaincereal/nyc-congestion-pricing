@@ -1,0 +1,5 @@
+sample,n_input_panel_hours,n_excluded_other_group_hours,n_excluded_sample_cut_hours,n_excluded_missing_outcome_hours,n_excluded_no_prepost_hours,n_excluded_no_prepost_links,n_common_hourly,n_pre_hours,n_post_hours,n_treated_links,n_control_links
+peak,1587630,64853,1242583,0,3194,13,277000,143622,133378,145,167
+all,1587630,64853,0,0,17947,13,1504830,790742,714088,145,167
+offpeak,1587630,64853,714474,0,9602,13,798701,415854,382847,145,167
+weekend,1587630,64853,1088497,0,5151,13,429129,231266,197863,145,167

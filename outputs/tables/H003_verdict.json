@@ -1,0 +1,24 @@
+{
+  "verdict": "refutes aggregation stability",
+  "primary_sample": "peak",
+  "lead_specification": "daily",
+  "magnitude_component": "refutes",
+  "precision_component": "refutes",
+  "failures": [],
+  "limitations": "These are descriptive speed associations. Aggregation does not establish causality, repair failed parallel trends, or address a common cordon-level shock. Hourly and daily link-cluster covariance already allows within-link serial dependence under its asymptotic assumptions. Daily equal-link-day weighting and date effects change temporal composition; collapsed equal-link weighting also changes the estimand. The registered 0.25 mph and 1.5 SE-ratio thresholds are descriptive alarms, not calibrated tests of estimator equality. CI inclusion of zero neither establishes zero effect nor validates spatial independence. The prospectively amended peak cut determines the summary, with daily peak as the lead metric; every secondary cut and failure is retained.",
+  "reason": "Prospectively amended peak descriptive criteria applied; secondary results retained separately.",
+  "references": [
+    {
+      "citation": "Bertrand, Marianne, Esther Duflo, and Sendhil Mullainathan (2004). How Much Should We Trust Differences-In-Differences Estimates? Quarterly Journal of Economics 119(1):249\u2013275, \u00a7IV.C and Table VI.",
+      "url": "https://doi.org/10.1162/003355304772839588"
+    },
+    {
+      "citation": "Cameron, A. Colin, and Douglas L. Miller (2015). A Practitioner's Guide to Cluster-Robust Inference. Journal of Human Resources 50(2):317\u2013372.",
+      "url": "https://doi.org/10.3368/jhr.50.2.317"
+    },
+    {
+      "citation": "MacKinnon, James G., and Matthew D. Webb (2020). Randomization inference for difference-in-differences with few treated clusters. Journal of Econometrics 218(2):435\u2013450.",
+      "url": "https://doi.org/10.1016/j.jeconom.2020.04.024"
+    }
+  ]
+}
