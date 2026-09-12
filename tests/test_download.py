@@ -52,7 +52,36 @@ def test_write_manifest_merge_keeps_earlier_months(tmp_path, monkeypatch):
     m = json.loads(path.read_text())
     assert [p["month"] for p in m["parts"]] == ["2024-01", "2024-02"]
     assert m["total_rows"] == 150
-    assert m["coverage"] == {"first_month": "2024-01", "last_month": "2024-02"}
+    assert m["coverage"] == {
+        "first_month": "2024-01",
+        "last_month": "2024-02",
+        "months_held": 2,
+        "contiguous": True,
+        "gaps": [],
+    }
+
+
+def test_manifest_coverage_names_the_gaps():
+    """Endpoints alone hid a three-month hole, so coverage names the holes.
+
+    2024-06 plus 2024-10..2025-04 reads as "2024-06 to 2025-04" on endpoints,
+    while a quarter of that span is missing. That is the real archive shape
+    this project ran on for days without noticing.
+    """
+    cov = dl._coverage(["2024-06", "2024-10", "2024-11"])
+    assert cov["contiguous"] is False
+    assert cov["gaps"] == ["2024-07", "2024-08", "2024-09"]
+    assert cov["months_held"] == 3
+
+
+def test_manifest_coverage_spans_a_year_boundary():
+    cov = dl._coverage(["2024-11", "2024-12", "2025-01"])
+    assert cov["contiguous"] is True
+    assert cov["gaps"] == []
+
+
+def test_manifest_coverage_of_nothing_is_empty():
+    assert dl._coverage([]) == {}
 
 
 def test_write_manifest_all_parts_complete_flag(tmp_path, monkeypatch):

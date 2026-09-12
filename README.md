@@ -95,7 +95,9 @@ src/
   visualization/
 notebooks/    exploratory analysis (orchestrate + narrate only)
 tests/        unit tests for src/ transformations
-outputs/      figures/ · tables/
+outputs/      figures/ · tables/ — tracked; the results are the deliverable
+scripts/      priority_backfill.sh (range order) · data_release.sh (CI storage)
+.github/      backfill · analysis · tests workflows
 ```
 
 ## Getting started
@@ -104,11 +106,20 @@ outputs/      figures/ · tables/
 python -m venv .venv && .venv\Scripts\Activate.ps1   # Windows
 pip install -e ".[dev]"
 
+python -m src.data.coverage_report    # how far the backfill is, and whether the
+                                      # pre-trend test clears yet
+```
+
+Ingestion runs on a schedule in GitHub Actions rather than locally — the
+backfill is ~21 hours against a feed that throttles, and it resumes itself
+across passes. To pull months locally anyway:
+
+```bash
 python -m src.data.download_ezpass --start 2023-01-01   # primary; needs NYC_OPENDATA_APP_TOKEN
 python -m src.data.download        --start 2023-01-01   # secondary (DOT highways, spillover)
 ```
 
-Full pipeline and environment variables: `docs/reproducibility.md`.
+Full pipeline, workflows and environment variables: `docs/reproducibility.md`.
 
 ## License
 

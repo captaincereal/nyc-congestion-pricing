@@ -1,8 +1,15 @@
 """Download the NYC DOT Traffic Speeds feed into ``data/raw/`` — immutably.
 
-Primary (and, for Phases 1-9, only) source:
+SECONDARY source since 2026-09-08:
     NYC DOT Traffic Speeds NBE, Socrata dataset ``i4gi-tjb9``
     https://data.cityofnewyork.us/Transportation/DOT-Traffic-Speeds-NBE/i4gi-tjb9
+
+This feed carries ~123 links city-wide and none on tolled CRZ surface streets,
+so it cannot support the primary specification — the treated group under it is
+empty. The primary source is now ``src.data.download_ezpass``. This one is kept
+because FDR Drive and the West Side Highway are the toll-EXEMPT roads traffic
+can divert onto, which makes it the right feed for the spillover analysis. See
+the 2026-09-08 decision record in ``docs/methodology.md``.
 
 Strategy
 --------
@@ -226,6 +233,31 @@ def download_month(
     )
 
 
+def _coverage(months: list[str]) -> dict:
+    """Coverage summary for the manifest: endpoints, count, and any gaps.
+
+    ``months`` are "YYYY-MM" strings, sorted. A reader that sees only
+    first_month and last_month cannot tell a contiguous archive from a holed
+    one, so the holes are named explicitly.
+    """
+    if not months:
+        return {}
+    expected = []
+    y, m = (int(x) for x in months[0].split("-"))
+    end_y, end_m = (int(x) for x in months[-1].split("-"))
+    while (y, m) <= (end_y, end_m):
+        expected.append(f"{y:04d}-{m:02d}")
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    gaps = [x for x in expected if x not in set(months)]
+    return {
+        "first_month": months[0],
+        "last_month": months[-1],
+        "months_held": len(months),
+        "contiguous": not gaps,
+        "gaps": gaps,
+    }
+
+
 def write_manifest(
     parts_by_month: dict[str, dict],
     *,
@@ -239,6 +271,11 @@ def write_manifest(
     run's ``--start``/``--end``, because the manifest is merged across runs.
     ``path`` / ``dataset_id`` / ``time_col`` default to the DOT speeds feed and
     are resolved at call time so the EZ Pass ingest can reuse this.
+
+    Coverage reports ``months_held`` and any ``gaps`` alongside the endpoints.
+    Endpoints alone are misleading: 2024-06 plus 2024-10..2025-04 reads as
+    "2024-06 to 2025-04" while missing a quarter of it, which is exactly how
+    the 2024-07..09 hole went unnoticed.
     """
     path = path or RAW_MANIFEST_PATH
     dataset_id = dataset_id or DOT_SPEEDS_DATASET_ID
@@ -249,7 +286,7 @@ def write_manifest(
         "dataset_id": dataset_id,
         "source_url": f"https://{SOCRATA_DOMAIN}/d/{dataset_id}",
         "time_column": time_col,
-        "coverage": {"first_month": months[0], "last_month": months[-1]} if months else {},
+        "coverage": _coverage(months),
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
         "total_rows": sum(p["rows"] for p in parts),
         "total_rows_expected": sum(p["rows_expected"] for p in parts),

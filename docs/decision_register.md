@@ -14,7 +14,7 @@ deliberately left unmade rather than defaulted into the panel.
 > been ingested and staged, the panel rebuilt with a post-treatment period, and
 > **Phases 6 (descriptives) and 7 (difference-in-differences) run** — see "The
 > result so far" below. **D4 is resolved** (5763399). The full pre-period
-> backfill to 2023-01 is downloading again as of 2026-09-10. The Phase 7 DiD is
+> backfill to 2023-01 now runs unattended in CI (see the 2026-09-12 entry). The Phase 7 DiD is
 > **not quotable**: it rests on a 7-month window, parallel trends has no formal
 > test yet (Phase 8, needs the backfill), control selection is still open (D2),
 > and there is no placebo test. (Phase 8 has since run and the pre-trend test
@@ -72,7 +72,7 @@ that it has made any.
 | Phase | | Status |
 |---|---|---|
 | 1 | Setup | Complete |
-| 2 | Ingestion | **7 of ~45 months** on disk (2024-10 … 2025-04, the priority window); full backfill to 2023-01 downloading |
+| 2 | Ingestion | **8 of 44 months** on disk (2024-06, then 2024-10 … 2025-04); the rest runs on a schedule in GitHub Actions |
 | 3 | Data quality | Checks written and run on the seven months |
 | 4 | Panel | Built, with a post-treatment period (2025-01-05 onward) |
 | 5 | Controls | Naive pool used as a documented interim; **D2** still open |
@@ -313,10 +313,11 @@ trend testing — at real cost, since throughput measured 3s–80s per page.
 
 The primary source was pulled **priority-window first** — 2024-10 through
 2025-04, three-plus months either side of the toll — so analysis was not blocked
-behind a 45-month backfill. The **full backfill to 2023-01 is running again as
-of 2026-09-10** (`python -m src.data.download_ezpass --start 2023-01-01`, logs in
-`logs/ezpass_backfill_*.log`); it is a multi-night pull and Socrata throttles
-sustained requests hard.
+behind a 44-month backfill. The rest now runs on a schedule in GitHub Actions
+(`.github/workflows/backfill.yml`), about five hours per pass, resuming from
+the `data-raw` release. Socrata still throttles sustained requests hard; what
+changed is that nobody has to sit through it. `python -m src.data.coverage_report`
+prints where it has got to.
 
 **Caveat on the manifest.** All seven primary parts are recorded
 `verified: false`. Row counts were not pre-checked against a live `count(1)`,
