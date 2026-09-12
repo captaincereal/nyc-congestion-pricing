@@ -39,7 +39,7 @@ prediction and acceptance criteria to be written first.
 
 | ID | Title | Status | Registered | Verdict |
 |---|---|---|---|---|
-| [H003](H003-temporal-aggregation.md) | Does temporal aggregation change the association or its precision? | proposed — source verification gate | 2026-09-12 | Pending |
+| [H003](H003-temporal-aggregation.md) | Does temporal aggregation change the association or its precision? | answered | 2026-09-12 | Refutes: daily is stable (<=0.14 mph, SE ratio <=1.39) but collapsing to one pre/post per link inflates SEs 3.8-6.2x, every CI covers zero, offpeak flips sign |
 
 The serial-correlation-collapse queue entry above is now represented by H003;
 the historical queue and the other registrations are preserved. Three

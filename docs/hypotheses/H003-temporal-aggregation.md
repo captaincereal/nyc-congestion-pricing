@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | proposed — blocked on original-eight source verification |
+| **Status** | answered |
 | **Registered** | 2026-09-12 |
 | **Registered by** | Codex coordinating session, before implementation or execution |
-| **Answered by** | Pending; independent fresh-context implementation |
+| **Answered by** | Hosted H003 workflow run, 2026-09-12T22:37Z (commit 00ed12d); record closed from committed artefacts by a Claude Opus 5 session |
 | **Supersedes / superseded by** | none |
 
 ## Question
@@ -98,11 +98,65 @@ The full January 2023 onward backfill remains a separate coverage requirement.
 
 ## Result
 
-Pending.
+Source gate passed on all eight original parts; the hosted H003 workflow ran on
+the common roster (145 treated, 167 control links; 1,504,830 common link-hours).
+Artefacts: `outputs/tables/H003_results.csv`, `H003_verdict.json`, per-month
+receipts `H003_receipt_*.json`.
+
+Differences and SE ratios are against each sample's own hourly reference.
+
+| Sample | Spec | beta (mph) | SE | p | diff vs hourly | SE ratio | CI incl. 0 |
+|---|---|---:|---:|---:|---:|---:|:--:|
+| **peak** | hourly | 0.605 | 0.229 | 0.0086 | — | 1.00 | no |
+| **peak** | **daily** | **0.665** | **0.248** | **0.0077** | **+0.060** | **1.08** | **no** |
+| **peak** | collapsed | 1.979 | 1.378 | 0.152 | +1.374 | 6.01 | yes |
+| all | hourly | 0.793 | 0.212 | 0.0002 | — | 1.00 | no |
+| all | daily | 0.732 | 0.269 | 0.0068 | −0.061 | 1.27 | no |
+| all | collapsed | 0.080 | 0.811 | 0.921 | −0.713 | 3.83 | yes |
+| offpeak | hourly | 0.688 | 0.205 | 0.0009 | — | 1.00 | no |
+| offpeak | daily | 0.548 | 0.284 | 0.0547 | −0.140 | 1.39 | yes |
+| offpeak | collapsed | −0.469 | 1.275 | 0.713 | −1.158 | 6.23 | yes |
+| weekend | hourly | 1.141 | 0.243 | 4e-06 | — | 1.00 | no |
+| weekend | daily | 1.170 | 0.297 | 0.0001 | +0.029 | 1.22 | no |
+| weekend | collapsed | 0.211 | 0.998 | 0.832 | −0.929 | 4.12 | yes |
+
+Every specification estimated cleanly; no cut returned a failure status.
 
 ## Verdict
 
-Pending.
+**Refutes aggregation stability.** Both magnitude and precision components fail.
+
+The criteria require *both* aggregate specifications to clear the thresholds.
+Daily does, nearly everywhere: point estimates sit within 0.14 mph of their
+hourly reference in all four cuts and SE ratios run 1.08 to 1.39, all inside the
+registered 1.5. On the owner-amended primary cut, daily peak is the closest
+match in the table — +0.060 mph, SE ratio 1.083.
+
+Collapsing to one pre and one post observation per link is where it breaks, in
+every cut. Standard errors inflate 3.8x to 6.2x, every collapsed confidence
+interval includes zero, and the offpeak point estimate changes sign to −0.469.
+That is the Bertrand, Duflo & Mullainathan (2004) result reproducing on this
+panel: much of the hourly specification's apparent precision comes from
+treating serially correlated within-link observations as independent
+information. With 312 observations, one per link, little remains.
+
+The prediction was wrong in the direction that matters. It expected both
+aggregates to stay within 0.25 mph and 1.5x SE with modest confidence; daily
+held and collapsed did not, by a wide margin.
+
+**What this does not say.** The collapsed estimator weights each link equally
+rather than each link-hour, so it does not estimate the same quantity and is not
+a like-for-like comparison. A wider interval is not evidence that the effect is
+absent, and the registered thresholds are descriptive alarms rather than
+calibrated tests of estimator equality. This is a statement about how much
+independent information the panel carries, not about the toll.
+
+**What it changes.** Read alongside H001 — which found the analytic clustered
+standard errors too tight by up to a factor of 1.5, with peak failing
+randomisation inference at p=0.092 — the reported precision of the Phase 7
+result is not defensible as it stands. The point estimates are robust to
+temporal aggregation; their stated uncertainty is not. Neither finding touches
+the rejected pre-period leads, which remain the binding identification problem.
 
 ## Notes
 
