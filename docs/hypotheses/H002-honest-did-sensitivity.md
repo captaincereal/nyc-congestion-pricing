@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | proposed |
+| **Status** | proposed — deferred until the contiguous pre-period lands |
 | **Registered** | 2026-09-12 |
 | **Registered by** | Claude Opus 5 session (methodology review) |
 | **Answered by** | — |
@@ -110,6 +110,18 @@ because the observed violations it calibrates against will change.
 *Empty until run.*
 
 ## Notes
+
+**Deferred 2026-09-12, same day as registration.** `M̄` is measured relative to
+the pre-treatment violations actually observed, and those currently come from
+three contiguous holiday-dominated months with endpoint bins pooling more
+distant weeks. The yardstick this analysis calibrates against will change
+substantially once the frozen window completes, so a result now would very
+likely be superseded — spending a registered attempt for little information.
+The "Uninformative" criterion above anticipated this; the sequencing judgement
+was the part that was wrong.
+
+Run this after the contiguous pre-period lands, not before. The question stands;
+only the timing was misjudged.
 
 Interacts with H001. If placebo-in-space shows the analytic standard errors
 understate the true spread, the covariance matrix fed into this analysis is

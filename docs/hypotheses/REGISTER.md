@@ -12,7 +12,7 @@ cannot tell the difference from the finding alone.
 | ID | Title | Status | Registered | Verdict |
 |---|---|---|---|---|
 | [H001](H001-placebo-in-space.md) | Is the DiD estimate larger than chance reassignment of control links? | running | 2026-09-12 | — |
-| [H002](H002-honest-did-sensitivity.md) | How large a parallel-trends violation would it take to overturn the estimate? | proposed | 2026-09-12 | — |
+| [H002](H002-honest-did-sensitivity.md) | How large a parallel-trends violation would it take to overturn the estimate? | deferred — needs contiguous pre-period | 2026-09-12 | — |
 
 ## Queue — considered, not yet registered
 
