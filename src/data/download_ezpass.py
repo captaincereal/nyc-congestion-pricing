@@ -43,7 +43,7 @@ from datetime import UTC, date, datetime, timedelta
 
 import pandas as pd
 import requests
-from tenacity import retry, stop_after_attempt, wait_exponential
+from tenacity import before_sleep_log, retry, stop_after_attempt, wait_exponential
 
 from src.config import (
     EZPASS_AGG_PERIOD_SEC,
@@ -76,6 +76,16 @@ log = logging.getLogger(__name__)
 
 DATASET_BEFORE_SPLIT = "erdf-2akx"
 DATASET_AFTER_SPLIT = "6a2s-2t65"
+
+# A single day of readings is ~320-375k rows (measured 2026-09-10), so a page
+# this size normally fetches a whole day in ONE request instead of the ~7 that
+# PAGE_SIZE=50_000 (src.data.download's default, tuned for the secondary feed)
+# would need. Fewer requests per day means less exposure to Socrata's
+# per-request throttling; it does NOT lift the underlying throughput ceiling
+# (measured: the server resets the connection after 2-3 consecutive big
+# requests regardless of size), which is why retries below are now logged
+# rather than silent - a stall now shows as visible backoff, not a hang.
+EZPASS_PAGE_SIZE = 400_000
 
 
 def _datasets_for_month(month: date) -> list[str]:
@@ -163,7 +173,14 @@ def _base(dataset_id: str) -> str:
     return f"https://{SOCRATA_DOMAIN}/resource/{dataset_id}"
 
 
-@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=2, min=2, max=60))
+_retry_logged = retry(
+    stop=stop_after_attempt(5),
+    wait=wait_exponential(multiplier=2, min=2, max=60),
+    before_sleep=before_sleep_log(log, logging.WARNING),
+)
+
+
+@_retry_logged
 def _count(session: requests.Session, dataset_id: str, where: str) -> int:
     resp = session.get(
         _base(dataset_id) + ".json",
@@ -174,7 +191,7 @@ def _count(session: requests.Session, dataset_id: str, where: str) -> int:
     return int(resp.json()[0]["n"])
 
 
-@retry(stop=stop_after_attempt(5), wait=wait_exponential(multiplier=2, min=2, max=60))
+@_retry_logged
 def _get_page(session: requests.Session, dataset_id: str, params: dict) -> requests.Response:
     resp = session.get(_base(dataset_id) + ".csv", params=params, timeout=HTTP_TIMEOUT)
     resp.raise_for_status()
@@ -182,7 +199,12 @@ def _get_page(session: requests.Session, dataset_id: str, params: dict) -> reque
 
 
 def _fetch_pages(
-    session: requests.Session, dataset_id: str, where: str, *, select: str | None = None
+    session: requests.Session,
+    dataset_id: str,
+    where: str,
+    *,
+    select: str | None = None,
+    page_size: int = PAGE_SIZE,
 ) -> list[pd.DataFrame]:
     """Page through one dataset for one filter, ordered for stable offset paging."""
     frames: list[pd.DataFrame] = []
@@ -191,7 +213,7 @@ def _fetch_pages(
         params = {
             "$where": where,
             "$order": f"{EZPASS_TIME_COL},sid",
-            "$limit": PAGE_SIZE,
+            "$limit": page_size,
             "$offset": offset,
         }
         if select:
@@ -202,7 +224,7 @@ def _fetch_pages(
             break
         frames.append(page)
         offset += len(page)
-        if len(page) < PAGE_SIZE:
+        if len(page) < page_size:
             break
     return frames
 
@@ -211,13 +233,15 @@ def _fetch_day(session: requests.Session, day: date, datasets: list[str]) -> pd.
     """Fetch and downsample one day across the dataset(s) covering it.
 
     Downsampling per day (rather than per month) keeps peak memory to one day of
-    raw readings — ~335k rows — instead of the ~10.4M a month would hold.
+    raw readings — ~335k rows — instead of the ~10.4M a month would hold. Using
+    EZPASS_PAGE_SIZE (~a day's worth of rows) means the common case is ONE
+    request per dataset per day rather than ~7 offset pages.
     """
     where = _day_where(day)
     select = ",".join(EZPASS_READING_COLS)
     frames: list[pd.DataFrame] = []
     for ds in datasets:
-        frames.extend(_fetch_pages(session, ds, where, select=select))
+        frames.extend(_fetch_pages(session, ds, where, select=select, page_size=EZPASS_PAGE_SIZE))
     if not frames:
         return pd.DataFrame(columns=list(EZPASS_READING_COLS))
     return _downsample(pd.concat(frames, ignore_index=True))
