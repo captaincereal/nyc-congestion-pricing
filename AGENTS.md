@@ -61,6 +61,12 @@ and a dated entry, rather than defaulting one into the panel.
 
 ## Facts about this data that are expensive to rediscover
 
+- **The primary feed is E-Z Pass local streets (`erdf-2akx` + `6a2s-2t65`).**
+  The Traffic Speeds NBE feed (`i4gi-tjb9`) was primary until 2026-09-08 and is
+  now secondary, for spillover only. It carries ~123 links city-wide and none on
+  tolled CRZ surface streets, so estimating the frozen specification on it
+  measures the effect of congestion pricing on roads exempt from congestion
+  pricing. Treated is empty by construction, not by accident.
 - **Timestamps are naive `America/New_York`.** Confirmed by DST signatures:
   2024-11-03 hour 01 doubles, 2025-03-09 hour 02 is empty. Converting them to
   UTC breaks every hour-of-day cut.
