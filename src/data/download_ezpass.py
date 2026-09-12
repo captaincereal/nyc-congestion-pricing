@@ -38,8 +38,10 @@ from __future__ import annotations
 import argparse
 import io
 import logging
+import time
 from dataclasses import asdict
 from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
 
 import pandas as pd
 import requests
@@ -49,6 +51,7 @@ from src.config import (
     EZPASS_AGG_PERIOD_SEC,
     EZPASS_CHUNK_DAYS,
     EZPASS_DATASET_IDS,
+    EZPASS_DAYS_DIR,
     EZPASS_MANIFEST_PATH,
     EZPASS_PARTS_DIR,
     EZPASS_READING_COLS,
@@ -140,6 +143,32 @@ def _days_in_month(month: date):
     while cur < nxt:
         yield cur
         cur += timedelta(days=EZPASS_CHUNK_DAYS)
+
+
+class TimeBudgetExceeded(RuntimeError):
+    """The wall-clock budget ran out mid-month.
+
+    Not an error: day checkpoints are on disk, so the next run resumes from
+    them. Raised so the caller stops cleanly instead of being hard-killed
+    partway through writing a part.
+    """
+
+
+def _day_part_path(day: date) -> Path:
+    return EZPASS_DAYS_DIR / f"ezpass_day_{day:%Y-%m-%d}.parquet"
+
+
+def _write_parquet_atomic(df: pd.DataFrame, dest: Path) -> None:
+    """Write via a temp file and rename, so a kill never leaves a torn parquet."""
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    tmp = dest.with_suffix(dest.suffix + ".part")
+    df.to_parquet(tmp, engine="pyarrow", index=False)
+    tmp.replace(dest)
+
+
+def _month_has_checkpoints(month: date) -> bool:
+    """Whether an interrupted run left day checkpoints for this month."""
+    return any(_day_part_path(day).exists() for day in _days_in_month(month))
 
 
 def _downsample(df: pd.DataFrame) -> pd.DataFrame:
@@ -254,6 +283,7 @@ def download_month(
     force: bool,
     prior: dict | None = None,
     do_count: bool = False,
+    deadline: float | None = None,
 ) -> PartRecord:
     dest = EZPASS_PARTS_DIR / f"ezpass_speeds_{month:%Y-%m}.parquet"
     where = _where(month)
@@ -290,19 +320,36 @@ def download_month(
         f"expected {expected:,} rows" if expected is not None else "row count not pre-checked",
     )
 
-    days: list[pd.DataFrame] = []
+    # Each day is checkpointed to disk as it lands. Before this, a month was
+    # held in memory and written only on completion, so a kill at minute 35 of
+    # 40 discarded all 35 -- which is how partial 2024-07 and 2023-11 pulls
+    # were lost. Now an interruption costs one day.
+    day_paths: list[Path] = []
+    resumed = 0
     raw_seen = 0
     for day in _days_in_month(month):
+        dpath = _day_part_path(day)
+        if dpath.exists() and not force:
+            day_paths.append(dpath)
+            raw_seen += int(pd.read_parquet(dpath, columns=[EZPASS_TIME_COL]).shape[0])
+            resumed += 1
+            continue
+        if deadline is not None and time.monotonic() >= deadline:
+            raise TimeBudgetExceeded(
+                f"{month:%Y-%m}: budget spent after {len(day_paths)} day(s); "
+                "checkpoints kept, resuming next run"
+            )
         chunk = _fetch_day(session, day, datasets)
-        days.append(chunk)
+        _write_parquet_atomic(chunk, dpath)
+        day_paths.append(dpath)
         raw_seen += len(chunk)
         log.info("  %s: %s kept rows so far", f"{month:%Y-%m}", f"{raw_seen:,}")
+    if resumed:
+        log.info("  %s: resumed %d day(s) from checkpoints", f"{month:%Y-%m}", resumed)
 
-    df = pd.concat(days, ignore_index=True) if days else pd.DataFrame()
-    EZPASS_PARTS_DIR.mkdir(parents=True, exist_ok=True)
-    tmp = dest.with_suffix(".parquet.part")
-    df.to_parquet(tmp, engine="pyarrow", index=False)
-    tmp.replace(dest)
+    frames = [pd.read_parquet(p) for p in day_paths]
+    df = pd.concat(frames, ignore_index=True) if frames else pd.DataFrame()
+    _write_parquet_atomic(df, dest)
 
     rows = len(df)
     if expected is None:
@@ -314,6 +361,10 @@ def download_month(
         if not complete:
             log.warning("%s: got %s rows, expected %s", dest.name, f"{rows:,}", f"{expected:,}")
     log.info("wrote %s (%s rows, %.1f MB)", dest.name, f"{rows:,}", dest.stat().st_size / 1e6)
+
+    # The month part is durable now, so the day checkpoints have done their job.
+    for p in day_paths:
+        p.unlink(missing_ok=True)
 
     return PartRecord(
         part=dest.name,
@@ -432,6 +483,24 @@ def main() -> None:
         action="store_true",
         help="fetch only the per-segment attribute table and exit",
     )
+    parser.add_argument(
+        "--max-runtime",
+        type=float,
+        default=None,
+        metavar="MINUTES",
+        help="stop cleanly after this long, leaving day checkpoints for the "
+        "next run. Set it below the CI job limit so the job exits rather than "
+        "being killed mid-write.",
+    )
+    parser.add_argument(
+        "--month-budget",
+        type=float,
+        default=50.0,
+        metavar="MINUTES",
+        help="don't start a fresh month with less than this much budget left "
+        "(default: 50, a slow month). Clean exits then land on month "
+        "boundaries, where nothing is in flight.",
+    )
     args = parser.parse_args()
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
@@ -451,10 +520,22 @@ def main() -> None:
         log.info("segment table missing - fetching it first")
         fetch_segments(session)
 
+    deadline = time.monotonic() + args.max_runtime * 60 if args.max_runtime else None
     parts_by_month = _load_existing_parts(EZPASS_MANIFEST_PATH)
     failures: list[str] = []
-    for month in _iter_months(args.start, end):
+    remaining: list[str] = []
+    months = list(_iter_months(args.start, end))
+    for i, month in enumerate(months):
         tag = f"{month:%Y-%m}"
+        if deadline is not None and not _month_has_checkpoints(month):
+            left = (deadline - time.monotonic()) / 60
+            if left < args.month_budget:
+                log.info(
+                    "stopping before %s: %.0f min left, under the %.0f min a month needs",
+                    tag, max(left, 0), args.month_budget,
+                )
+                remaining = [f"{m:%Y-%m}" for m in months[i:]]
+                break
         try:
             rec = download_month(
                 session,
@@ -462,12 +543,20 @@ def main() -> None:
                 force=args.force,
                 prior=parts_by_month.get(tag),
                 do_count=args.count,
+                deadline=deadline,
             )
             parts_by_month[rec.month] = asdict(rec)
             _write(parts_by_month)
+        except TimeBudgetExceeded as exc:
+            log.info("%s", exc)
+            remaining = [f"{m:%Y-%m}" for m in months[i:]]
+            break
         except Exception:  # noqa: BLE001 - record and continue
             log.exception("failed month: %s", tag)
             failures.append(tag)
+
+    if remaining:
+        log.info("%d month(s) still to pull, next run starts at %s", len(remaining), remaining[0])
 
     if failures:
         raise SystemExit(f"download failed for months: {', '.join(failures)}")

@@ -44,6 +44,14 @@ TABLES_DIR = OUTPUTS_DIR / "tables"
 for _d in (RAW_DIR, INTERIM_DIR, PROCESSED_DIR, FIGURES_DIR, TABLES_DIR):
     _d.mkdir(parents=True, exist_ok=True)
 
+# Per-day download checkpoints. A month takes 30-40 minutes to pull, and the
+# process can die at any moment (a laptop closing, a CI job hitting its time
+# limit), so each day is written here as it lands and the month part is
+# assembled from them. Kept OUT of EZPASS_PARTS_DIR because build_staging globs
+# that directory - day checkpoints living alongside month parts would be
+# double-counted. Deleted once their month part is written.
+EZPASS_DAYS_DIR = RAW_DIR / "ezpass_days"
+
 # --- Intervention ------------------------------------------------------------
 # NYC Congestion Relief Zone tolling began on this date. This is the treatment
 # date for every difference-in-differences / event-study specification.
