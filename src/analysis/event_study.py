@@ -34,6 +34,7 @@ from __future__ import annotations
 
 import argparse
 import logging
+from datetime import UTC, datetime
 
 import matplotlib
 
@@ -43,7 +44,14 @@ import numpy as np  # noqa: E402
 import pandas as pd  # noqa: E402
 from scipy import stats  # noqa: E402
 
-from src.analysis.descriptive import GRID, INK, INK_MUTED, SERIES_COLOR, SURFACE, _save  # noqa: E402
+from src.analysis.descriptive import (  # noqa: E402
+    GRID,
+    INK,
+    INK_MUTED,
+    SERIES_COLOR,
+    SURFACE,
+    _save,
+)
 from src.analysis.did import OUTCOME, TIME_KEY, _absorb, attach_weather, load  # noqa: E402
 from src.config import CLUSTER_VAR, TABLES_DIR, TREATMENT_DATE  # noqa: E402
 
@@ -128,7 +136,10 @@ def coef_frame(result: dict, dummy_cols: list[str]) -> pd.DataFrame:
         sign, mag = col.split("_")[1][0], int(col.split("_")[1][1:])
         kk = -mag if sign == "m" else mag
         rows.append(
-            {"k": kk, "coef": b, "se": s, "p_value": p, "ci_low": b - crit * s, "ci_high": b + crit * s}
+            {
+                "k": kk, "coef": b, "se": s, "p_value": p,
+                "ci_low": b - crit * s, "ci_high": b + crit * s,
+            }
         )
     return pd.DataFrame(rows).sort_values("k").reset_index(drop=True)
 
@@ -148,6 +159,50 @@ def pretrend_test(coefs: pd.DataFrame, result: dict) -> tuple[float, float, int]
     dof = len(z)
     p = float(stats.chi2.sf(stat, dof))
     return stat, p, dof
+
+
+def record_pretrend(
+    sample: str,
+    pt: tuple[float, float, int] | None,
+    df: pd.DataFrame,
+    result: dict,
+) -> None:
+    """Append this run's pre-trend verdict to ``outputs/tables/pretrend_tests.csv``.
+
+    The pre-trend test is what gates the study: until it clears on a real
+    pre-period, nothing here is quotable. Logging it is not enough when the
+    pipeline runs unattended, so each run upserts a row keyed on the sample.
+    One file answers "can we quote a number yet, and on how much data".
+    """
+    if pt is None:
+        return
+    stat, p, dof = pt
+    dates = pd.to_datetime(df[TIME_KEY] if TIME_KEY in df else df["date"])
+    pre = df[df["event_week"] < REFERENCE_K]
+    row = {
+        "sample": sample,
+        "chi2": round(stat, 4),
+        "dof": dof,
+        "p_value": round(p, 6),
+        "verdict": "PASS" if p > 0.05 else "FAIL",
+        "pre_weeks": int(pre["event_week"].nunique()) if not pre.empty else 0,
+        "panel_start": str(dates.min().date()),
+        "panel_end": str(dates.max().date()),
+        "n_obs": int(result["n_obs"]),
+        "n_clusters": int(result["n_clusters"]),
+        "run_at": datetime.now(UTC).isoformat(timespec="seconds"),
+    }
+
+    TABLES_DIR.mkdir(parents=True, exist_ok=True)
+    path = TABLES_DIR / "pretrend_tests.csv"
+    if path.exists():
+        prior = pd.read_csv(path)
+        prior = prior[prior["sample"] != sample]
+        out = pd.concat([prior, pd.DataFrame([row])], ignore_index=True)
+    else:
+        out = pd.DataFrame([row])
+    out.sort_values("sample").to_csv(path, index=False)
+    log.info("recorded pre-trend verdict for %s in %s", sample, path)
 
 
 def plot(coefs: pd.DataFrame, sample: str) -> None:
@@ -186,10 +241,14 @@ def plot(coefs: pd.DataFrame, sample: str) -> None:
 
 
 def main() -> None:
-    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap = argparse.ArgumentParser(
+        description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter
+    )
     ap.add_argument("--sample", default="all", choices=["all", "peak", "offpeak", "weekend"])
     ap.add_argument("--horizon", type=int, default=12, help="max |weeks| from treatment")
-    ap.add_argument("--weather", action="store_true", help="add treated x weather controls (Phase 9)")
+    ap.add_argument(
+        "--weather", action="store_true", help="add treated x weather controls (Phase 9)"
+    )
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
@@ -213,7 +272,9 @@ def main() -> None:
     pt = pretrend_test(coefs, result)
     if pt:
         stat, p, dof = pt
-        verdict = "PASS (fail to reject flat pre-trend)" if p > 0.05 else "FAIL (pre-trend not flat)"
+        verdict = (
+            "PASS (fail to reject flat pre-trend)" if p > 0.05 else "FAIL (pre-trend not flat)"
+        )
         log.info(
             "pre-trend joint test (approx Wald, diag-only): chi2=%.2f, dof=%d, p=%.4f -> %s",
             stat, dof, p, verdict,
@@ -222,6 +283,7 @@ def main() -> None:
         log.warning("no pre-period weeks available for a pre-trend test")
 
     tag = f"{args.sample}{'_weather' if controls else ''}"
+    record_pretrend(tag, pt, df, result)
     out_csv = TABLES_DIR / f"event_study_{tag}.csv"
     coefs.round(6).to_csv(out_csv, index=False)
     plot(coefs, tag)
