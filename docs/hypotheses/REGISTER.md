@@ -11,7 +11,7 @@ cannot tell the difference from the finding alone.
 
 | ID | Title | Status | Registered | Verdict |
 |---|---|---|---|---|
-| [H001](H001-placebo-in-space.md) | Is the DiD estimate larger than chance reassignment of control links? | running | 2026-09-12 | — |
+| [H001](H001-placebo-in-space.md) | Is the DiD estimate larger than chance reassignment of control links? | answered | 2026-09-12 | Intermediate: magnitude beats chance in 3 of 4 samples, peak does not (p=0.09); analytic SEs too tight by <=1.5x |
 | [H002](H002-honest-did-sensitivity.md) | How large a parallel-trends violation would it take to overturn the estimate? | deferred — needs contiguous pre-period | 2026-09-12 | — |
 
 ## Queue — considered, not yet registered
