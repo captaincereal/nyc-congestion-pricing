@@ -1,0 +1,180 @@
+{
+  "checked_at": "2026-09-12T17:16:32.913146+00:00",
+  "repository": "captaincereal/nyc-congestion-pricing",
+  "pr_url": "https://github.com/captaincereal/nyc-congestion-pricing/pull/1",
+  "merge_sha": "af93a066ec8cd8593fc2458ed5ec97197a70a881",
+  "release_url": "https://github.com/captaincereal/nyc-congestion-pricing/releases/tag/data-raw",
+  "release_assets": [
+    {
+      "name": "ezpass_manifest.json",
+      "bytes": 4795,
+      "digest": "sha256:b6ca0f05724d35c0cf1a7b9ca679690cd32831bf53bf61271f75c6cbda56ba17"
+    },
+    {
+      "name": "ezpass_segments.parquet",
+      "bytes": 26275,
+      "digest": "sha256:2a07d361fae6a4f44e577edecfdcfc0a7cbafc00421619de3047289488285cbd"
+    },
+    {
+      "name": "ezpass_speeds_2024-06.parquet",
+      "bytes": 5362381,
+      "digest": "sha256:d3085973cfec9d1b191e414ac2c285dd1229914ec6eca7970a2f49835fd6a53b"
+    },
+    {
+      "name": "ezpass_speeds_2024-10.parquet",
+      "bytes": 5234952,
+      "digest": "sha256:0955f1a8e5c06a1dc70e774129552f9eb0ea6045a25339c2ee0bcdb1bf47c889"
+    },
+    {
+      "name": "ezpass_speeds_2024-11.parquet",
+      "bytes": 4643865,
+      "digest": "sha256:c8083222e06be312df4d58f85413f63be8ebf4b866a013b17d3f45584b99229c"
+    },
+    {
+      "name": "ezpass_speeds_2024-12.parquet",
+      "bytes": 4825838,
+      "digest": "sha256:f6b10d3757de02ddaea2d82bf09b6e4515e8633cafab43185f356ff345343851"
+    },
+    {
+      "name": "ezpass_speeds_2025-01.parquet",
+      "bytes": 4878732,
+      "digest": "sha256:44f6ab4d7072aca6f2a192beeaad03391240f681609e0b8a95829148605e0681"
+    },
+    {
+      "name": "ezpass_speeds_2025-02.parquet",
+      "bytes": 4694507,
+      "digest": "sha256:575b6c25db4297090e1e4337b31e7263feb76985a214b8babc1c4023e861a0ff"
+    },
+    {
+      "name": "ezpass_speeds_2025-03.parquet",
+      "bytes": 5065676,
+      "digest": "sha256:e70962b7326d6af1bacb13c99933b97055ee166976c494184b1bf38f7b5e9c25"
+    },
+    {
+      "name": "ezpass_speeds_2025-04.parquet",
+      "bytes": 4319945,
+      "digest": "sha256:abc0c12b02febdb8ed95f89c80996b1a69f7340620cc7d75413ab7f7b5d05ad6"
+    },
+    {
+      "name": "ezpass_verify_2024-06.json",
+      "bytes": 608,
+      "digest": "sha256:5d234c705f3e2e2018c0672392bb8095b87bbafdde8fd3a0f82af8836d89d86b"
+    },
+    {
+      "name": "hourly_panel.parquet",
+      "bytes": 36656800,
+      "digest": "sha256:d8cf8b4690cd7a96c371a880577d042ab51207f6791bb802dd7e11bd4a0a2347"
+    },
+    {
+      "name": "weather_hourly.parquet",
+      "bytes": 386828,
+      "digest": "sha256:23d232435c66a27f131189aa953462cab0b900a590c92358512c60a41af952d8"
+    }
+  ],
+  "runs": [
+    {
+      "id": 34707558019,
+      "name": "Backfill",
+      "status": "in_progress",
+      "conclusion": null,
+      "head_sha": "af93a066ec8cd8593fc2458ed5ec97197a70a881",
+      "html_url": "https://github.com/captaincereal/nyc-congestion-pricing/actions/runs/34707558019"
+    },
+    {
+      "id": 34707540983,
+      "name": "Analysis",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "af93a066ec8cd8593fc2458ed5ec97197a70a881",
+      "html_url": "https://github.com/captaincereal/nyc-congestion-pricing/actions/runs/34707540983"
+    },
+    {
+      "id": 34707540919,
+      "name": "Tests",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "af93a066ec8cd8593fc2458ed5ec97197a70a881",
+      "html_url": "https://github.com/captaincereal/nyc-congestion-pricing/actions/runs/34707540919"
+    },
+    {
+      "id": 34707343319,
+      "name": "Tests",
+      "status": "completed",
+      "conclusion": "success",
+      "head_sha": "4b519549a499af9beca9cd1fe8ded9a2f177a6b8",
+      "html_url": "https://github.com/captaincereal/nyc-congestion-pricing/actions/runs/34707343319"
+    }
+  ],
+  "backfill_steps": [
+    {
+      "name": "Set up job",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/checkout@v4",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run actions/setup-python@v5",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Run pip install -e .",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Fetch what previous passes already downloaded",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Restore in-flight day checkpoints",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Mark the start, so only new parts get published",
+      "status": "completed",
+      "conclusion": "success"
+    },
+    {
+      "name": "Download",
+      "status": "in_progress",
+      "conclusion": null
+    },
+    {
+      "name": "Verify existing parts within the remaining budget",
+      "status": "pending",
+      "conclusion": null
+    },
+    {
+      "name": "Publish what landed",
+      "status": "pending",
+      "conclusion": null
+    },
+    {
+      "name": "Save day checkpoints for the next pass",
+      "status": "pending",
+      "conclusion": null
+    },
+    {
+      "name": "Report coverage",
+      "status": "pending",
+      "conclusion": null
+    },
+    {
+      "name": "Post Run actions/setup-python@v5",
+      "status": "pending",
+      "conclusion": null
+    },
+    {
+      "name": "Post Run actions/checkout@v4",
+      "status": "pending",
+      "conclusion": null
+    }
+  ]
+}

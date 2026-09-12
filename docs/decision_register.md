@@ -105,6 +105,31 @@ all four event studies, weather sensitivities, 12 robustness fits and the
 secondary summary completed on the actual stored data. Passing these checks
 does not substitute for source verification or the robustness assumptions.
 
+### Hosted deployment verified — 2026-09-12
+
+[PR #1](https://github.com/captaincereal/nyc-congestion-pricing/pull/1) passed
+hosted tests and merged as `af93a066`. The original eight immutable primary
+parts, segment/weather files, manifest and three-day June verification receipt
+were seeded into the [data release](https://github.com/captaincereal/nyc-congestion-pricing/releases/tag/data-raw).
+Upload digests were checked; no existing raw part was overwritten.
+
+The first repaired [Analysis run](https://github.com/captaincereal/nyc-congestion-pricing/actions/runs/34707540983)
+completed successfully and committed its regenerated results as `0c6ca41`.
+[Tests on merged main](https://github.com/captaincereal/nyc-congestion-pricing/actions/runs/34707540919)
+also passed. Its corrected joint-test verdicts agree with the local run.
+The hosted panel was downloaded and matched the tracked provenance hash.
+
+[Backfill](https://github.com/captaincereal/nyc-congestion-pricing/actions/runs/34707558019)
+was explicitly started on main. At the recorded check its setup and archive
+restore had succeeded and its Download step was running; verification and
+publication were still pending. This is confirmation of an active hosted run,
+not a claim that the missing months or full verification have completed.
+The existing six-hour schedule will resume later passes without owner uptime.
+Exact statuses, asset digests and check time are in
+`outputs/tables/hosted_rollout.json`. The saved local project has the delivered
+code and corrected derived data. The next research action is owner review of
+the six open recommendations, while hosted data collection continues.
+
 Everything below this entry is historical unless explicitly reconfirmed above.
 
 > **Update 2026-09-10.** Since this register was first compiled the priority
