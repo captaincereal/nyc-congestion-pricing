@@ -1,0 +1,56 @@
+{
+  "schema_version": 1,
+  "registered_on": "2026-09-12",
+  "purpose": "Original eight immutable primary inputs; source verification gate and H003 fixed sample",
+  "segments_sha256": "2a07d361fae6a4f44e577edecfdcfc0a7cbafc00421619de3047289488285cbd",
+  "parts": [
+    {
+      "month": "2024-06",
+      "part": "ezpass_speeds_2024-06.parquet",
+      "sha256": "d3085973cfec9d1b191e414ac2c285dd1229914ec6eca7970a2f49835fd6a53b",
+      "rows": 814839
+    },
+    {
+      "month": "2024-10",
+      "part": "ezpass_speeds_2024-10.parquet",
+      "sha256": "0955f1a8e5c06a1dc70e774129552f9eb0ea6045a25339c2ee0bcdb1bf47c889",
+      "rows": 800394
+    },
+    {
+      "month": "2024-11",
+      "part": "ezpass_speeds_2024-11.parquet",
+      "sha256": "c8083222e06be312df4d58f85413f63be8ebf4b866a013b17d3f45584b99229c",
+      "rows": 718101
+    },
+    {
+      "month": "2024-12",
+      "part": "ezpass_speeds_2024-12.parquet",
+      "sha256": "f6b10d3757de02ddaea2d82bf09b6e4515e8633cafab43185f356ff345343851",
+      "rows": 740209
+    },
+    {
+      "month": "2025-01",
+      "part": "ezpass_speeds_2025-01.parquet",
+      "sha256": "44f6ab4d7072aca6f2a192beeaad03391240f681609e0b8a95829148605e0681",
+      "rows": 749479
+    },
+    {
+      "month": "2025-02",
+      "part": "ezpass_speeds_2025-02.parquet",
+      "sha256": "575b6c25db4297090e1e4337b31e7263feb76985a214b8babc1c4023e861a0ff",
+      "rows": 722991
+    },
+    {
+      "month": "2025-03",
+      "part": "ezpass_speeds_2025-03.parquet",
+      "sha256": "e70962b7326d6af1bacb13c99933b97055ee166976c494184b1bf38f7b5e9c25",
+      "rows": 774383
+    },
+    {
+      "month": "2025-04",
+      "part": "ezpass_speeds_2025-04.parquet",
+      "sha256": "abc0c12b02febdb8ed95f89c80996b1a69f7340620cc7d75413ab7f7b5d05ad6",
+      "rows": 657408
+    }
+  ]
+}

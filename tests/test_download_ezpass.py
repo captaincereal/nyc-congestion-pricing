@@ -147,7 +147,7 @@ def test_download_month_resumes_from_day_checkpoints(tmp_path, monkeypatch):
 
     fetched: list[date] = []
 
-    def _fake_fetch_day(session, day, datasets):
+    def _fake_fetch_day(session, day, datasets, **kwargs):
         fetched.append(day)
         return _fake_day_frame(day)
 
@@ -163,7 +163,7 @@ def test_completed_month_clears_its_day_checkpoints(tmp_path, monkeypatch):
     """Checkpoints are scaffolding; the month part makes them redundant."""
     monkeypatch.setattr(dl, "EZPASS_DAYS_DIR", tmp_path / "days")
     monkeypatch.setattr(dl, "EZPASS_PARTS_DIR", tmp_path / "parts")
-    monkeypatch.setattr(dl, "_fetch_day", lambda s, day, ds: _fake_day_frame(day))
+    monkeypatch.setattr(dl, "_fetch_day", lambda s, day, ds, **kwargs: _fake_day_frame(day))
 
     dl.download_month(session=None, month=date(2024, 1, 1), force=False)
 
@@ -179,7 +179,7 @@ def test_expired_budget_stops_before_writing_a_partial_month(tmp_path, monkeypat
     """
     monkeypatch.setattr(dl, "EZPASS_DAYS_DIR", tmp_path / "days")
     monkeypatch.setattr(dl, "EZPASS_PARTS_DIR", tmp_path / "parts")
-    monkeypatch.setattr(dl, "_fetch_day", lambda s, day, ds: _fake_day_frame(day))
+    monkeypatch.setattr(dl, "_fetch_day", lambda s, day, ds, **kwargs: _fake_day_frame(day))
 
     with pytest.raises(dl.TimeBudgetExceeded):
         dl.download_month(
@@ -202,7 +202,7 @@ def test_budget_checked_between_days_so_finished_work_survives(tmp_path, monkeyp
     clock = {"now": 0.0}
     monkeypatch.setattr(dl.time, "monotonic", lambda: clock["now"])
 
-    def _fetch_and_spend(session, day, datasets):
+    def _fetch_and_spend(session, day, datasets, **kwargs):
         clock["now"] += 30.0
         return _fake_day_frame(day)
 

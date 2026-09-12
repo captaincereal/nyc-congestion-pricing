@@ -36,8 +36,17 @@ def test_one_sided_observations_wait(tmp_path: Path, timestamps: list[datetime])
     assert not readiness(tmp_path)[0]
 
 
-def test_january_with_both_sides_can_run(tmp_path: Path) -> None:
+def test_january_with_both_sides_still_requires_source_verification(tmp_path: Path) -> None:
     write_inputs(tmp_path, [datetime(2025, 1, 4, 23), datetime(2025, 1, 5)])
+    assert not readiness(tmp_path)[0]
+
+
+def test_verified_january_with_both_sides_can_run(tmp_path: Path, monkeypatch) -> None:
+    write_inputs(tmp_path, [datetime(2025, 1, 4, 23), datetime(2025, 1, 5)])
+    monkeypatch.setattr(
+        "scripts.check_analysis_inputs.verification_summary",
+        lambda *args: {"gate_passed": True},
+    )
     assert readiness(tmp_path)[0]
 
 

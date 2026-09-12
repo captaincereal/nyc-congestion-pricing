@@ -8,6 +8,7 @@ from pathlib import Path
 import duckdb
 
 from src.config import EZPASS_TIME_COL, RAW_DIR, TREATMENT_DATE
+from src.data.verification_gate import StateIntegrityError, verification_summary
 
 
 def readiness(raw_dir: Path) -> tuple[bool, str]:
@@ -35,9 +36,19 @@ def readiness(raw_dir: Path) -> tuple[bool, str]:
             "Waiting for pre- and post-treatment data: "
             f"available observations span {first} to {last}."
         )
+    try:
+        gate = verification_summary(raw_dir, None)
+    except StateIntegrityError as exc:
+        return False, f"Waiting for valid source-verification metadata: {exc}"
+    if not gate["gate_passed"]:
+        return False, (
+            f"Waiting for source verification: {gate['verified_months']}/"
+            f"{gate['target_months']} inputs verified; "
+            f"{gate['days_checked']}/{gate['total_days']} daily receipts."
+        )
     return True, (
         f"Primary inputs available from {first} to {last}. "
-        "Readiness permits a rerun; verification and identifying assumptions still gate claims."
+        "Every input has complete source receipts; identifying assumptions still gate claims."
     )
 
 

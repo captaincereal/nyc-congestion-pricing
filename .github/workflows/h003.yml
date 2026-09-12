@@ -1,28 +1,22 @@
-name: Analysis
+name: H003 aggregation
 
 on:
   workflow_run:
     workflows: [Backfill]
     types: [completed]
-  push:
-    branches: [main]
-    paths:
-      - 'src/analysis/**'
-      - 'src/data/build_panel.py'
-      - 'src/data/build_staging.py'
-      - 'src/data/geo.py'
-      - 'sql/**'
+  schedule:
+    - cron: '47 * * * *'
   workflow_dispatch:
 
 concurrency:
-  group: analysis-${{ github.event.workflow_run.head_branch || github.ref_name }}
+  group: h003-aggregation
   cancel-in-progress: false
 
 permissions:
   contents: write
 
 jobs:
-  analyse:
+  aggregate:
     if: >-
       github.event.repository.private == false &&
       (github.event_name != 'workflow_run' ||
@@ -32,14 +26,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: ${{ github.event.workflow_run.head_branch || github.ref_name }}
+          ref: main
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
           cache: pip
       - run: python -m pip install -e .
-      - name: Require source receipts before rebuilding existing diagnostics
+      - name: Run the registered fixed-snapshot sensitivity only after the source gate
         env:
           GH_TOKEN: ${{ github.token }}
-          RESULTS_BRANCH: ${{ github.event.workflow_run.head_branch || github.ref_name }}
-        run: python -m scripts.run_hosted_analysis
+          RESULTS_BRANCH: main
+        run: python -m scripts.run_hosted_analysis --hypothesis H003
+      - name: Preserve results and failures even if publishing fails
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: H003-${{ github.run_id }}
+          path: outputs/tables/H003_*
+          if-no-files-found: ignore
