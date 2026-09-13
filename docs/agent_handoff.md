@@ -25,7 +25,44 @@ of asking. Prepare a concrete, reviewable result before seeking approval.
 3. `README.md` — the current public finding.
 4. `docs/owner_decisions.md` — what is waiting on the owner.
 
-## First: confirm the backfill recovered
+## First: Analysis is failing on the completed archive
+
+**This is the live blocker.** `backfill.yml` run 6 finished successfully at
+2026-09-13T20:16:48Z and completed the frozen archive — **44 of 44 months,
+2023-01 … 2026-08, all 44 verified**, 24 pre-treatment and 20 post. Both
+milestone issues opened (#3, #4).
+
+`analysis.yml` run 16 fired on that completion and **failed**. The step
+"Require source receipts before rebuilding existing diagnostics"
+(`scripts/run_hosted_analysis`) ran 83 seconds and died; run 15, on the
+27-month archive, took 180 seconds and passed. So it gets partway and stops.
+
+What is already ruled out. The release store is healthy: 178 assets, zero day
+receipts, the prune holding. All nine snapshots were checked against the live
+release and every one is fully restorable — zero missing assets, zero size
+mismatches — so `restore()` is not starved and the 2026-09-13 prune changes are
+not the cause.
+
+What was not determined: the actual error. The Actions log endpoint returns
+HTTP 403 unauthenticated and this project holds no GitHub token, so the log was
+never read. **Read it first** rather than re-deriving from the outside — either
+from the Actions tab in a browser, or with a token:
+
+```
+gh run view --repo captaincereal/nyc-congestion-pricing --log-failed
+```
+
+The untested hypothesis, offered as a starting point and nothing more: the
+archive grew about 63% (27 → 44 months, roughly 21M → 34M rows), and
+`build_staging` / `build_panel` run on a free runner. A memory or disk ceiling
+would fit an 83-second death partway through. Confirm it from the log before
+acting on it.
+
+Consequence: **every number in the README and in `outputs/tables/` predates the
+completed archive.** They were computed on 27 months ending 2025-04. Until
+analysis.yml passes, the study has complete data and stale results.
+
+## Then: confirm the backfill recovered
 
 The Backfill failed on 2026-09-13 (run 5) with `HTTP 422` on every release
 upload: the `data-raw` release had filled to GitHub's **1000-asset ceiling** —
