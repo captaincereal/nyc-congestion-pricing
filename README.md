@@ -27,7 +27,7 @@ entry and TLC data support the mechanism? (Phase 10.)
 ## Result
 
 **Speeds inside the Congestion Relief Zone rose relative to comparison streets
-after tolling began, by around 0.77 mph on the full sample, roughly 8% of the
+after tolling began, by around 1.17 mph on the full sample, roughly 12% of the
 pre-tolling treated mean. That association is real and survives every robustness
 check applied to it. It cannot be attributed to the toll.**
 
@@ -46,27 +46,36 @@ evidence that diversion did not occur.
 
 ## Evidence
 
-The source archive is complete for the window it covers: **12 contiguous months,
-2024-05 through 2025-04, all 12 verified** against live source counts with
-deterministic replay of the retained sample. Effect magnitudes appear below
-because that verification has now completed.
+The source archive is **27 contiguous months, 2023-02 through 2025-04, all 27
+verified** against live source counts with deterministic replay of the retained
+sample. That gives 96 pre-treatment weeks. Effect magnitudes appear below because
+the verification gate has passed.
 
-**The association.** Two-way fixed effects on link and time, standard errors
-clustered by link, 331 clusters, 2.36M link-hours
+Evidence below is labelled by the panel it was computed on. The association and
+the pre-trend test are current. H001 through H004 ran on an earlier 12-month
+panel; H005 and H006 rerun the two that depend most on pre-period length.
+
+**The association** (27-month panel). Two-way fixed effects on link and time,
+standard errors clustered by link, 333 clusters, 5.18M link-hours
 ([did_estimates.csv](outputs/tables/did_estimates.csv)):
 
 | Sample | ATT (mph) | SE | 95% CI | % of pre-treated mean |
 |---|---:|---:|---|---:|
-| all | +0.77 | 0.22 | [0.34, 1.20] | 7.9 |
-| weekday peak | +0.81 | 0.22 | [0.37, 1.24] | 10.1 |
-| weekday off-peak | +0.67 | 0.21 | [0.24, 1.09] | 6.7 |
-| weekend | +0.95 | 0.25 | [0.46, 1.45] | 9.2 |
+| all | +1.17 | 0.25 | [0.68, 1.67] | 12.0 |
+| weekday peak | +1.20 | 0.25 | [0.72, 1.68] | 15.0 |
+| weekday off-peak | +1.05 | 0.25 | [0.56, 1.54] | 10.4 |
+| weekend | +1.40 | 0.27 | [0.86, 1.93] | 13.4 |
 
 **Why it is not causal.** The joint test that pre-tolling leads are zero rejects
 in every sample ([pretrend_tests.csv](outputs/tables/pretrend_tests.csv)):
-chi-squared 84.8 overall, 63.9 peak, 87.1 off-peak, 43.6 weekend, all on 11
+chi-squared 96.7 overall, 70.4 peak, 100.2 off-peak, 45.6 weekend, all on 11
 degrees of freedom, all p below 1e-05. Treated and comparison streets were
 already moving apart before the toll existed.
+
+The test rejects **harder on 96 pre-treatment weeks than it did on 36** (the
+earlier values were 84.8, 63.9, 87.1 and 43.6). Every previous caveat leaned on
+the pre-period being short and holiday-dominated, and predicted the opposite.
+That explanation is now largely exhausted.
 
 An earlier version of that test summed squared individual t-statistics and
 ignored the covariance between leads, and an off-by-one event-week boundary put
@@ -75,7 +84,9 @@ ignored the covariance between leads, and an off-by-one event-week boundary put
 
 **How little violation it takes to overturn.** Rambachan & Roth (2023)
 sensitivity, bounding post-treatment violations as a multiple of those observed
-pre-treatment ([H002](docs/hypotheses/H002-honest-did-sensitivity.md)):
+pre-treatment ([H002](docs/hypotheses/H002-honest-did-sensitivity.md), 36-week
+panel; [H005](docs/hypotheses/H005-honest-did-long-preperiod.md) reruns it on 96
+weeks):
 
 | Sample | breakdown value | robust CI at M = 0.5 |
 |---|---:|---|
@@ -135,14 +146,15 @@ first is supported.
 
 ## Limitations
 
-- **Coverage.** Twelve of 44 target months are held. The pre-treatment side is
-  eight months where the frozen design asks for 24, so nothing here has been
-  tested on the window the design actually calls for.
-- **The held-out window is holiday-dominated.** H004 validates on October to
-  December 2024. That makes it a demanding test, but a failure there is
-  confounded with holiday dynamics and cannot on its own establish that trend
-  matching is hopeless. Repeat it on a clean window once the backfill reaches
-  2023-01.
+- **Coverage.** Twenty-seven of 44 target months are held, 2023-02 to 2025-04.
+  The pre-treatment side is 23 months against the 24 the frozen design asks for,
+  with 2023-01 still downloading. The post-period runs only to 2025-04.
+- **H004's held-out window was holiday-dominated.** It validated on October to
+  December 2024, so its failure was confounded with holiday dynamics.
+  [H006](docs/hypotheses/H006-control-construction-clean-holdout.md) repeats the
+  same construction against a clean July-September holdout and against H004's
+  window, which is what separates the two explanations. Until it is answered,
+  H004's verdict carries that caveat.
 - **Endpoint pooling.** Event-study bins beyond 12 weeks either side pool more
   distant weeks. The diagnostics record which bins are genuine weekly estimates.
 - **No units where diversion would show.** No control link lies within 500 m of
@@ -168,11 +180,12 @@ This is still a usable result. "Here is what the available data can and cannot
 support, and here is the evidence for both" is a more honest deliverable than a
 confident number resting on an assumption the data reject.
 
-To move past it: complete the frozen archive to 2023-01 on the hosted backfill,
-then repeat H004's held-out matching on a non-holiday window with the
-pre-treatment span the design specifies. If flat held-out leads emerge there,
-re-run the Rambachan-Roth sensitivity on the new control set before writing any
-causal sentence. If they do not, the conclusion above is the finding.
+To move past it: H006 is the live test, repeating H004's matching on a clean
+holdout with a 70-week matching window. If flat held-out leads emerge there, the
+Rambachan-Roth sensitivity must be rerun on that control set before any causal
+sentence is written. If they do not, the conclusion above is the finding, and
+the remaining work is the spillover and mechanism checks and the writeup rather
+than a further search for a control set that passes.
 
 [D1, D2, D3, D5, D6 and D7](docs/owner_decisions.md) await owner approval. No
 open decision has been silently adopted.

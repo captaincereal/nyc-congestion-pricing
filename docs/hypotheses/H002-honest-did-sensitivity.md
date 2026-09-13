@@ -6,7 +6,7 @@
 | **Registered** | 2026-09-12 |
 | **Registered by** | Claude Opus 5 session (methodology review) |
 | **Answered by** | Claude Opus 5 session, 2026-09-12, on the 12-month verified archive |
-| **Supersedes / superseded by** | none |
+| **Supersedes / superseded by** | superseded on the 27-month archive by [H005](H005-honest-did-long-preperiod.md); this verdict stands for the panel it was run on |
 
 ## Question
 

@@ -52,6 +52,7 @@ the reader is entitled to know which they are looking at.
 | `REGISTER.md` | The index. Every hypothesis, its status and verdict. Append-only. |
 | `TEMPLATE.md` | The form to copy. |
 | `H0NN-slug.md` | One hypothesis. |
+| `H0NN-execution-prompt.md` | A prompt written to hand a hypothesis to a fresh session. Not a record, and not listed in the register. |
 
 Outputs belong to their hypothesis: write tables and figures as
 `outputs/tables/H0NN_*.csv` and `outputs/figures/H0NN_*.png` so results cannot

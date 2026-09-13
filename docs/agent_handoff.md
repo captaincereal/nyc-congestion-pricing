@@ -1,221 +1,191 @@
 # Agent handoff prompt
 
-Paste everything below the horizontal rule into Codex as the opening task, with
-this repo connected. Standing conventions live in `AGENTS.md` and load
-automatically; this file is the mission.
+Give the next session this repository and one instruction:
+
+> Read `docs/agent_handoff.md` and carry out the mission it describes.
+
+`AGENTS.md` loads automatically and carries the standing conventions. Everything
+below the rule is the mission.
 
 ---
 
-> **Takeover audit, 2026-09-12.** Read the newest decision-register entry before
-> the historical status below. The old event-week boundary and joint pre-trend
-> test were incorrect. Corrected tests reject in all four samples, including
-> on the original contiguous window. Twelve exploratory robustness specs now
-> exist, but source verification and owner decisions remain open. The old
-> `--verify` compared sampled counts with raw counts; the replacement performs
-> resumable raw-count plus deterministic replay. Backfill had never run and
-> Analysis failed on an absent release; consult the register for actual rollout
-> status. The README records that the current design cannot support a causal
-> claim, while the full frozen study remains incomplete. No D1–D7 decision was
-> newly adopted. Review `docs/owner_decisions.md` with the owner before doing so.
+You are taking over a causal-inference study that has reached a defensible
+negative finding and is now testing whether that finding survives better data.
+Two analyses were running when this was written and may or may not have
+finished; resolving that is your first job.
 
-You are taking over a causal-inference study that is most of the way to an
-answer and stuck on one thing. Finish it.
+Infer intent from context and carry work to completion. When a question can be
+settled by reading the repo, measuring something, or running it, do that instead
+of asking. Prepare a concrete, reviewable result before seeking approval.
 
-Infer intent from context and carry work to completion. Treat "can you", "I want
-to" and "help me" as instructions to act. When a question can be settled by
-reading the repo, measuring something, or trying it, do that instead of asking.
-Prepare a concrete, reviewable result before seeking approval.
+## Start here, in this order
 
-## What done looks like
+1. `docs/hypotheses/REGISTER.md` — every hypothesis, its status and verdict.
+2. `docs/hypotheses/README.md` — the protocol you must follow. It is short and
+   it is not optional.
+3. `docs/decision_register.md` — the project's running record.
+4. `README.md` — the current public finding.
 
-The study reaches a defensible answer to its question: what the Congestion
-Relief Zone toll did to traffic speeds inside the zone, and whether congestion
-shifted just outside it. A defensible null counts. So does a documented finding
-that this design cannot support a causal claim. A number that looks good because
-an assumption went untested does not.
+## Immediate: two runs were in flight
 
-Concretely, that means the README's Result, Evidence, Robustness, Limitations
-and Recommendation sections say something true, and the "no quotable result yet"
-banner is gone because the evidence earned it.
+On 2026-09-13 around 10:30 EDT, two registered analyses were executing locally.
+Check `outputs/tables/` before doing anything else.
 
-## Instruction priority
+**H005** (`docs/hypotheses/H005-honest-did-long-preperiod.md`) — Rambachan–Roth
+sensitivity at three horizons. Horizons 12 and 26 completed; their artefacts are
+`H005_honest_did_h12*.csv` and `H005_honest_did_h26*.csv`. Horizon 52 was still
+running and may have failed on memory — it builds roughly a 9 GB dummy matrix on
+5.4M link-hours. **A horizon-52 memory failure is an expected, reportable
+outcome, not something to work around.** H005's criteria say so explicitly: the
+verdict is judged at horizon 12, and a failure confined to the wider horizons is
+a limit on what the panel supports.
 
-1. Anything the owner tells you directly in conversation.
-2. Research integrity: the frozen design in `docs/project_brief.md`, honest
-   reporting of nulls and failed assumption tests, no causal language without
-   defending the assumptions.
-3. The two hard constraints: zero dollars, and no dependency on the owner's
-   computer being on.
-4. This document.
-5. `AGENTS.md` and `.cursor/rules/`.
-6. Your own judgment about what would be nicer.
+Results so far, breakdown values under relative magnitudes:
 
-Point 2 outranks point 3. If the only honest analysis costs money, say so and
-stop rather than quietly weakening the analysis to fit the budget.
+| Sample | h12 | h26 |
+|---|---:|---:|
+| all | 0.093 | 0.063 |
+| peak | 0.044 | 0.015 |
+| offpeak | 0.054 | 0.034 |
+| weekend | 0.171 | 0.112 |
 
-## Decide on your own
+**H006** (`docs/hypotheses/H006-control-construction-clean-holdout.md`) —
+control construction judged on two holdouts. No output had appeared. Its command
+was:
 
-Implementation shape, file layout, library choices, what to measure, what to
-test, when to refactor, commit boundaries and messages, and how to structure any
-workflow changes.
+```
+python -m src.analysis.control_construction --match-weeks -96 -27 \
+  --holdout -26 -15 --holdout -12 -2 --out-prefix H006
+```
+
+**What to do with whatever you find.** If artefacts exist and the records still
+say Pending, close them: fill in Result and Verdict from the committed outputs,
+update `REGISTER.md`, commit. Do not touch Prediction or Acceptance criteria —
+both records were registered before the code ran and the commit order is the
+evidence. If a run did not complete, rerun it; the commands are above and in
+each record's Method section.
+
+H006 is the more important of the two. Read its Notes before interpreting it.
+
+## What the study found
+
+Speeds inside the Congestion Relief Zone rose about **1.17 mph** relative to
+comparison streets after tolling began on 2025-01-05, roughly 12% of the
+pre-tolling treated mean, on the current 27-month panel. That association is
+robust. **It cannot be attributed to the toll**, and the README says so.
+
+The estimate was 0.77 mph on the earlier 12-month panel. It moved by half again
+when the pre-period lengthened, which is itself a reason not to treat the point
+estimate as settled.
+
+Four answered hypotheses, each pre-registered, all pointing the same way:
+
+- **H001** placebo-in-space: clustered standard errors run up to 1.5× too tight;
+  weekday peak fails randomisation inference at p = 0.092.
+- **H002** Rambachan–Roth on 36 pre-weeks: breakdown values 0.044–0.151.
+- **H003** temporal aggregation: daily is stable, but collapsing to one pre and
+  one post observation per link inflates standard errors 3.8–6.2×, puts zero in
+  every interval, and flips the off-peak sign.
+- **H004** control construction: both matching rules rejected out of sample.
+  Nearest-neighbour made it *worse*; synthetic weights fit the matching window to
+  a squared loss of exactly zero and still rejected at p = 4.4e-07.
+
+The corrected joint pre-trend test rejects in all four samples, and **rejects
+harder on 96 pre-weeks than it did on 36** (χ² 45.6–100.2 against 43.6–87.1).
+That kills the explanation every earlier caveat leaned on: the failure is not a
+short-window or holiday artifact.
+
+None of this is evidence that congestion pricing did nothing. It is evidence
+that this comparison design cannot tell you either way. Keep that distinction in
+every sentence you write; it is the study's entire contribution.
+
+## The protocol, which is binding
+
+Many sessions and several models work on this. The dataset is fixed, so every
+specification tried against it is another draw, and enough draws produce a
+clean-looking result by chance. Roth (2022) sharpens it: conditioning on a
+diagnostic passing can leave the survivor *more* biased than not testing.
+
+So: **any analysis whose output could reach the README gets a hypothesis record
+committed before it runs**, with its prediction and acceptance criteria written
+while they are still guesses. Exploratory work does not. The `research-prompt`
+skill writes the record and a prompt together.
+
+Predictions and acceptance criteria are frozen once results exist. If criteria
+turn out badly chosen, supersede the record with a new one explaining why; do
+not edit them. Failed and abandoned attempts stay in the register — the count of
+attempts is part of what a reader needs.
+
+Namespace outputs by hypothesis (`H0NN_*`). Both analysis modules take an
+`--out-prefix` for exactly this reason.
+
+## Data and infrastructure
+
+The archive is **27 verified contiguous months, 2023-02 … 2025-04**, giving 96
+pre-treatment weeks and 101 pre-treatment weeks in the panel. Every month is
+verified against live source counts with deterministic replay. `2023-01` was
+still downloading; it completes the frozen window's start.
+
+Everything runs unattended on GitHub Actions, free, because the owner will not
+leave a machine on:
+
+- `backfill.yml` every six hours: verifies, then deepens the pre-period
+  backwards before extending the post-period forward. State lives in the
+  `data-raw` release, which is what the next pass resumes from.
+- `analysis.yml` rebuilds the panel and reruns Phases 6–9 when data lands.
+- `tests.yml` runs ruff, black and pytest. 205 tests currently pass.
+
+Two milestone notifications are wired into the backfill and will open a GitHub
+issue once each: when `2023-01` lands, and when the post-period is complete.
+Do not disable them.
+
+To work locally you need the archive on disk. Pull month parts, the manifest and
+the segment table from the release, then `build_staging` → `geo` → `build_panel`.
+
+## After H005 and H006
+
+If H006 refutes — both rules reject on the clean holdout — the study's
+conclusion is as well established as this data can make it. The work then is
+Phase 10 and 11: the spillover and mechanism checks that remain unrun, and a
+final writeup. Do not keep searching for a control set that passes; each further
+attempt is another draw and the register would have to carry it.
+
+If H006 supports — a rule gives flat leads on the clean holdout — D2 becomes
+live. Rerun H002's sensitivity on that control set before writing any causal
+sentence, and register it as a new hypothesis rather than reusing H005.
+
+Either way, `docs/owner_decisions.md` holds recommendations on **D1, D2, D3, D5,
+D6 and D7** that remain unadopted. They are reserved to the owner. You may
+analyse them and bring evidence; you may not adopt one.
+
+## Constraints
+
+Zero budget, Python only, must run unattended on free runners. Research
+integrity outranks the budget: if the only honest analysis costs money, say so
+rather than quietly weakening it.
+
+Cite with author, year and venue. Flag anything you cannot cite precisely rather
+than guessing — models fabricate confidently in this domain.
 
 ## Bring to the owner first
 
-- Force-pushing, rewriting published history, or changing repository
-  visibility. Branches and pull requests are normal and need no approval.
-- Any step that would cost money. Say it costs money and propose a free path.
-- Changing anything the brief marks frozen.
-- Resolving D1–D7. Bring a recommendation with the evidence behind it. These are
-  deliberately open because each changes what the study reports.
-
-## Delegating
-
-Parallel subagents help here more than usual, because much of the slow work is
-network- or IO-bound. Reasonable splits: the staging rebuild and the
-event-study rerun; separate agents on separate robustness specifications, which
-are independent by construction. Err toward delegating more than feels natural.
-
-## Where the project stands
-
-Tolling began **2025-01-05**. The design is difference-in-differences with
-two-way fixed effects (link and time), standard errors clustered by link, plus
-an event study. Unit of analysis is link × hour; the outcome is hourly median
-link speed in mph. `docs/decision_register.md` carries the detail.
-
-Phases 1–8 have run. There is no quotable result.
-
-| Phase | Status |
-|---|---|
-| 1 Setup | Complete |
-| 2 Ingestion | 8 of 44 months; automated, see below |
-| 3 Data quality | Checks written and run |
-| 4 Panel | Built, has a post-treatment period |
-| 5 Controls | Naive pool as a documented interim; D2 open |
-| 6 Descriptives | Run |
-| 7 DiD | Run, not quotable |
-| 8 Event study | Run; the pre-trend test fails on two of four samples |
-| 9–11 Robustness, mechanism, deliverables | Not started |
-
-The provisional DiD on the 7-month window (323 link clusters) gives ATT +0.85
-mph overall (SE 0.24, p=0.0004), +0.56 weekday peak, +0.72 weekday off-peak,
-+1.30 weekend. Positive and significant in every cut, and unquotable.
-
-## The one thing in the way
-
-Everything downstream — D2, robustness, the writeup, any causal sentence —
-waits on the pre-trend test. Current verdicts are in
-`outputs/tables/pretrend_tests.csv`:
-
-| Sample | chi2 | p | Verdict |
-|---|---:|---:|---|
-| all | 26.58 | 0.0053 | FAIL |
-| offpeak | 52.32 | ~0 | FAIL |
-| peak | 9.71 | 0.557 | pass |
-| weekend | 15.44 | 0.163 | pass |
-
-The likeliest explanation is that the only pre-period available runs 2024-10 to
-2025-01-04, which is Thanksgiving through New Year. That is plausible, not
-established, and it may instead be a real parallel-trends violation.
-
-`python -m src.data.coverage_report` prints how far the backfill is from
-answering that. The number that matters is the **longest unbroken pre-period**,
-currently 3 months against the 12 a credible test wants. Post-treatment months
-do not help this at all, however many land.
-
-## What already runs without anyone watching
-
-The backfill is ~21 hours against a feed that throttles, and the owner will not
-leave a machine on. That is solved and you should not rebuild it:
-
-- Each day is checkpointed to `data/raw/ezpass_days/` as it lands, so an
-  interruption costs a day rather than a month. Parquet writes are atomic.
-- `--max-runtime` and `--month-budget` let a run stop cleanly against a clock
-  instead of being killed mid-write.
-- `.github/workflows/backfill.yml` runs every six hours, downloads for about
-  five, publishes to the `data-raw` release and exits. `analysis.yml` rebuilds
-  the panel and reruns Phases 6–8 when data lands, committing `outputs/`.
-  `tests.yml` runs ruff, black and pytest.
-- `scripts/priority_backfill.sh` holds the range order, pre-period first. Its
-  union covers the whole frozen window, so a fresh environment converges on
-  complete coverage on its own.
-
-**Caveat: as of this writing those workflows had been validated locally but
-never actually run on GitHub Actions.** Check whether they have, and whether
-they are succeeding, before assuming data is flowing. If the first runs failed,
-fixing them is the highest-value thing you can do, because everything else waits
-on data. Treat a red run as the priority, not a distraction.
-
-One measurement never got made, and is worth 30 minutes because it could
-compress 21 hours into one: Socrata exposes a whole-dataset CSV export at
-`/api/views/{id}/rows.csv?accessType=DOWNLOAD` that streams rather than pages.
-`erdf-2akx` has ~108M rows and `6a2s-2t65` ~82M, so the files are large, but
-nothing requires landing them — stream through DuckDB, filter to
-`aggregation_period_sec = 900` and the study window, downsample, write parquet.
-If it holds a few MB/s it beats paging by an order of magnitude; it may equally
-be throttled or time out. Ordering by Socrata's internal `:id` rather than
-`$order=median_calculation_timestamp,sid` is a second cheap experiment. Measure,
-report numbers, move on either way.
-
-## The work
-
-Rerun Phase 8 as the pre-period deepens. This is the gate, and the answer goes
-in the decision register either way. If the test clears once the window is no
-longer holiday-dominated, the study is unblocked. If it still fails on a year of
-clean pre-period, the naive control pool is genuinely inadequate and that is a
-real finding, not a setback.
-
-Resolve D2, control selection, which the frozen design says must rest on
-pre-treatment trends rather than geography: match on pre-treatment trend,
-restrict to Manhattan above 60th, or build a synthetic control. Pre-tolling
-levels differ by nearly 2× between treated and control, which DiD tolerates
-since it identifies off changes, though it belongs in the limitations.
-
-Run `--verify` on the primary parts before quoting any number. All of them
-currently carry `verified: false`, meaning paging finished cleanly but row
-counts were never checked against a live `count(1)`.
-
-Then the remaining open decisions: D1 cleaning thresholds, where 10.2% of
-readings rest on three or fewer probe vehicles and 0.085% exceed 80 mph with a
-monthly maximum of 962; D3 whether the four 11th Avenue segments are really
-exempt, a one-line change in `EXEMPT_PATTERNS` in `src/data/geo.py`; D5 the two
-Williamsburg Bridge crossing segments; D6 roadway-name normalisation; D7 how far
-back to pull, given the feed reaches 2021-04-08 but 2021–22 carries COVID
-recovery dynamics.
-
-Phase 9 is robustness: alternative controls, placebo treatment dates,
-alternative pre/post windows, dropping the ±2-week transition, sensor-quality
-filters, alternative aggregation. Each is a separate specification rather than
-an edit to the primary model, and they land in a comparison table showing
-whether the conclusion moves.
-
-Phase 10 covers spillover and mechanism, using the boundary links and the
-secondary `i4gi-tjb9` feed — 42 months and 40.2M rows already held, covering
-exactly the toll-exempt roads and crossings where diverted traffic would go.
-
-Phase 11 is the writeup.
-
-## Verification
-
-Test what would otherwise break silently: transformations in `src/`, treatment
-assignment, the panel build, anything touching timestamps. Existing coverage is
-68 tests. Exhaustive suites around straightforward code cost more than they
-return, so keep verification proportionate.
-
-The check that matters more than any unit test is whether a result survives the
-robustness table. Treat that as the real verification step.
+- Force-pushing, rewriting published history, changing repository visibility.
+  Branches and pull requests need no approval.
+- Anything that costs money.
+- Changing anything `docs/project_brief.md` marks frozen.
+- Adopting any of D1–D7.
 
 ## Stopping
 
 Work through this without pausing for permission between steps. Stop when you
-hit something in "bring to the owner first", when a measurement contradicts this
-brief in a way that changes the plan, or when the study has an answer.
+hit something in the list above, when a measurement contradicts this brief in a
+way that changes the plan, or when the work is done.
 
-Waiting on data is not a stopping point. The backfill fills in over days, so
-when it is mid-flight, move to the open decisions, the robustness
-specifications, the spillover analysis, or the writeup scaffolding.
+Waiting on the backfill is not a stopping point; there is always a registered
+question or a writeup section available.
 
 ## First
 
-Read `docs/decision_register.md`, check whether the workflows have run and are
-green, then form your own view. Parts of this brief will be stale; correct it
-rather than trusting it, and say what you found that differs.
+Check `outputs/tables/` for H005 and H006 artefacts, then form your own view.
+Parts of this brief will be stale. Correct it rather than trusting it, and say
+what you found that differs.

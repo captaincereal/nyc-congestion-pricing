@@ -6,7 +6,7 @@
 | **Registered** | 2026-09-12 |
 | **Registered by** | Claude Opus 5 session, at owner direction to work on D2 |
 | **Answered by** | Claude Opus 5 session, 2026-09-12 |
-| **Supersedes / superseded by** | none |
+| **Supersedes / superseded by** | superseded on the 27-month archive by [H006](H006-control-construction-clean-holdout.md); this verdict stands for the panel it was run on |
 
 > This is the construction work behind **D2**. Registering and running it does
 > not adopt D2. The result comes back as a recommendation with its evidence, per
