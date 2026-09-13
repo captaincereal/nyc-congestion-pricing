@@ -25,32 +25,34 @@ of asking. Prepare a concrete, reviewable result before seeking approval.
 3. `README.md` — the current public finding.
 4. `docs/owner_decisions.md` — what is waiting on the owner.
 
-## First task: the backfill is failing
+## First: confirm the backfill recovered
 
-The most recent Backfill run **failed** on 2026-09-13 at 12:46 UTC after about
-93 minutes, in its main step:
+The Backfill failed repeatedly on 2026-09-13 with `HTTP 422` on every release
+upload. Diagnosed and fixed the same day: the `data-raw` release had filled to
+GitHub's **1000-asset ceiling** — 853 day checkpoints from months long since
+complete, plus 89 state snapshots. Raw assets were uploaded and never deleted,
+so every day ever checkpointed stayed forever after its month part superseded
+it.
 
-    https://github.com/captaincereal/nyc-congestion-pricing/actions/runs/34757999360
+`ReleaseStore.publish` now prunes before uploading: day checkpoints go once
+their month is complete in the manifest, and state snapshots keep the eight
+newest. Month parts, verification receipts and ancillary assets are never
+touched. It should self-heal on the first scheduled pass, freeing roughly 825
+slots.
 
-The run before it, at 06:17 UTC, succeeded. The failure uploaded a
-`source-status-34757999360` artifact that should say why; reading it, or the
-step logs, needs repository access this brief's author did not have. **Diagnose
-it before anything else** — a silently failing backfill is how this project lost
-days earlier.
+**Check that it actually did.** If the release is still at or near 1000 assets,
+or Backfill is still failing with 422, the fix did not take and that is the
+first thing to repair. The downloader itself was never the problem — it was
+finishing months normally right up to the upload failure.
 
-Consequence: the archive is stuck at **27 verified contiguous months, 2023-02 …
-2025-04**. `2023-01` has not landed, so the frozen window's first month is
-missing and the post-period beyond 2025-04 has not started.
+Consequence while it was stuck: the archive sits at **27 verified contiguous
+months, 2023-02 … 2025-04**. `2023-01` was 28 days downloaded when the failure
+hit, so it should complete quickly. The post-period beyond 2025-04 has not
+started.
 
-**A gotcha that will mislead you.** The `data-raw` release accumulates stale
-`ezpass_day_*.parquet` checkpoints. Months long since complete still show day
-files, so their presence does **not** mean work is in flight. Trust the manifest
-and the month parts, not the day checkpoints. Cleaning those up is a reasonable
-small task.
-
-Two milestone notifications are wired into the backfill and will open a GitHub
-issue once each: when `2023-01` lands, and when the post-period is complete.
-Neither has fired. Do not disable them.
+Two milestone notifications are wired into the backfill and open a GitHub issue
+once each: when `2023-01` lands, and when the post-period is complete. Neither
+has fired. Do not disable them.
 
 ## What the study found
 
