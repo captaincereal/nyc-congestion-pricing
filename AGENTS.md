@@ -98,9 +98,9 @@ and a dated entry, rather than defaulting one into the panel.
   downsample is client-side for this reason.
 - **On the secondary feed, `speed = 0` means OUTAGE, not standstill.** 9,129,474
   of 42.2M readings; 9,128,628 of those also carry `travel_time = 0`, all carry
-  `status = -101`, and the rate peaks overnight (47.8% at 03:00 on the exempt
-  in-zone links against 28.8% through the afternoon) — the inverse of a
-  congestion pattern. Filter on `speed > 0`; never average them in as 0 mph.
+  `status = -101`, and the rate peaks overnight (on the exempt in-zone links,
+  47.8% at 03:00 against 28.8% through the afternoon over 2023-01 … 2026-05)
+  — the inverse of a congestion pattern. Filter on `speed > 0`; never average them in as 0 mph.
   `status = -101` alone does not identify them, since it also accompanies 2.18M
   positive readings. `src/analysis/spillover_diagnostics.py` gets this wrong and
   its output is superseded by `data/processed/secondary_hourly_panel.parquet`.

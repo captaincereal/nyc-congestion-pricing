@@ -217,14 +217,15 @@ link_ids `4616339` and `4616340` held out by id.
 **The zero-speed diagnosis replicates**, measured independently on all 42.2M
 rows. 9,129,474 readings carry `speed = 0`; 9,128,628 of them also carry
 `travel_time = 0`; and all 9,129,474 carry `status = -101`. The hourly profile
-is the inverse of congestion, though the figures under Notes are higher than
-what reproduces here: on the nine treated links the zero rate peaks at
-47.8% at 03:00 against 28.8–29.4% through the afternoon, and feed-wide at 25.9%
-against about 20.4%, not the 56% and 38% quoted there. The yearly divergence
-reproduces exactly — treated 16.0%, 32.8%, 42.4%, 48.7% across 2023–2026
-against 21.3%, 19.2%, 20.5%, 23.4% elsewhere. One qualification on the third
-signature: `status = -101` also accompanies 2,180,196 readings with a positive
-speed, so the status flag alone does not identify an outage. `speed = 0` does.
+inverts the congestion pattern, as the Notes describe. Over the full 2023-01 …
+2026-05 window the zero rate on the nine treated links peaks at 47.8% at 03:00
+against 28.8–29.4% through the afternoon, and feed-wide at 25.9% against about
+20.4%; the 56% and 38% quoted under Notes are the same statistic on 2025 alone,
+which is what the exploratory query covered. The yearly divergence reproduces
+exactly — treated 16.0%, 32.8%, 42.4%, 48.7% across 2023–2026 against 21.3%,
+19.2%, 20.5%, 23.4% elsewhere. One qualification on the third signature:
+`status = -101` also accompanies 2,180,196 readings with a positive speed, so
+the status flag alone does not identify an outage. `speed = 0` does.
 
 ### 1. Availability — the gate, and it fails first
 
@@ -499,7 +500,10 @@ have moved them into the control group. The held-out list stands as written.
 reporting in autumn 2024 and never returned. The control group here falls from
 115 reporting links in 2023 to 102–103 from 2024 on. The panel is unbalanced and
 must be treated as such; the availability diagnostic exists partly to measure
-this.
+this. **Confirmed on running, and presence turned out to be only half of it.**
+Of the 116 control links present pre-treatment, 94 contribute a usable speed;
+of the 103 present post-treatment, 96 do. The treated side loses no links from
+the feed at all and still falls from 8 contributors to 6.
 
 **Independent verification, 2026-09-13, by the session that registered this
 record.** The deciding number was recomputed from `data/raw/dot_speeds/*.parquet`
@@ -519,10 +523,9 @@ but both are right and measure different windows: 56.2% at 03:00 against a 38.3%
 afternoon mean is 2025 alone, which is what the exploratory query covered, while
 47.5% against 28.6% is the full 2023-01 … 2026-05 window the analysis uses. The
 signature that matters — the zero rate peaking overnight, inverting the
-congestion pattern — holds on both. Nothing in the verdict turns on it. **Confirmed on running, and presence turned out to be only half of it.**
-Of the 116 control links present pre-treatment, 94 contribute a usable speed;
-of the 103 present post-treatment, 96 do. The treated side loses no links from
-the feed at all and still falls from 8 contributors to 6.
+congestion pattern — holds on both. Nothing in the verdict turns on it. The
+Result has been reworded to say so rather than to imply the Notes overstated
+anything.
 
 **No owner decision was adopted.** D3 concerns four northern 11th Avenue
 segments on the *primary* E-Z Pass roster (`108104`, `116080`, `80108`,

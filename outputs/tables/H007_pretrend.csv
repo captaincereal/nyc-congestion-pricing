@@ -1,5 +1,5 @@
 sample,event_time_unit,horizon_months,chi2,dof,p_value,verdict,reference_k,test_method,test_status,test_reason,covariance_rank,n_obs,n_clusters,n_periods,pooled_endpoint_bins,run_at
-all,month,12,86.021356,11,0.0,FAIL,-1,cluster_robust_wald_chi2,VALID,,11,2543110,109,28275,True,2026-09-13T15:14:48+00:00
-peak,month,12,67.944307,11,0.0,FAIL,-1,cluster_robust_wald_chi2,VALID,,11,456468,109,5059,True,2026-09-13T15:24:33+00:00
-offpeak,month,12,73.655299,11,0.0,FAIL,-1,cluster_robust_wald_chi2,VALID,,11,1358637,109,15134,True,2026-09-13T15:27:06+00:00
-weekend,month,12,45.987153,11,3e-06,FAIL,-1,cluster_robust_wald_chi2,VALID,,11,728005,109,8082,True,2026-09-13T15:32:27+00:00
+all,month,12,86.021356,11,0.0,FAIL,-1,cluster_robust_wald_chi2,VALID,,11,2543110,109,28275,True,2026-09-13T15:41:25+00:00
+peak,month,12,67.944307,11,0.0,FAIL,-1,cluster_robust_wald_chi2,VALID,,11,456468,109,5059,True,2026-09-13T15:52:04+00:00
+offpeak,month,12,73.655299,11,0.0,FAIL,-1,cluster_robust_wald_chi2,VALID,,11,1358637,109,15134,True,2026-09-13T15:54:38+00:00
+weekend,month,12,45.987153,11,3e-06,FAIL,-1,cluster_robust_wald_chi2,VALID,,11,728005,109,8082,True,2026-09-13T16:00:15+00:00
