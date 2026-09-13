@@ -89,3 +89,20 @@ Seven hypotheses are registered and answered. Two sit in the queue above,
 untouched. The restricted design suggested by H007's Verdict — treated limited
 to the six links that report throughout — is **not** registered and must not be
 run before it is.
+
+## 2026-09-13 — registration appended
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H008](H008-toll-timing-bunching.md) | Do drivers retime entries to avoid the peak toll rate? | proposed | 2026-09-13 | |
+
+The first hypothesis here that does not need a comparison group. It identifies
+off the toll's own time-of-day price discontinuity, so it does not rest on
+parallel trends — the assumption that H001 through H006 established this design
+cannot satisfy — and it runs against a different dataset, the MTA entry counts,
+so it is a fresh draw rather than another pass at the speed panel.
+
+Eight hypotheses are registered. The record discloses that the weekday raw
+discontinuities were seen during feasibility scoping before it was written, and
+freezes its criteria on quantities not yet measured — chiefly the weekend 09:00
+boundary, which is untouched and is the test that can tell a price from a clock.
