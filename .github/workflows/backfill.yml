@@ -51,27 +51,30 @@ jobs:
         with:
           path: data/raw/ezpass_days
           key: ezpass-days-${{ github.run_id }}
-      - name: Announce once when the archive reaches 2023-01
+      - name: Check for backfill milestones
         if: always()
-        id: window
-        run: python -m scripts.announce_window_complete
+        run: python -m scripts.announce_milestones
 
-      - name: Open a notification issue the first time it lands
-        # The backfill runs every six hours and this step runs on every pass,
-        # so it checks for an existing notice rather than reopening one.
-        if: always() && steps.window.outputs.ready == 'true'
+      - name: Open a notification issue for each milestone, once
+        # This runs on every six-hourly pass, so each milestone is checked
+        # against existing issues rather than reopened.
+        if: always()
         env:
           GH_TOKEN: ${{ github.token }}
-          TITLE: Backfill reached 2023-01 - frozen window complete
-          BODY: ${{ steps.window.outputs.body }}
         run: |
-          found=$(gh issue list --state all --search "$TITLE" --json title --jq "length")
-          if [ "$found" != "0" ]; then
-            echo "already announced"
-            exit 0
-          fi
-          echo "$BODY" > issue_body.md
-          gh issue create --title "$TITLE" --body-file issue_body.md
+          shopt -s nullglob
+          for body in outputs/milestones/*.md; do
+            key=$(basename "$body" .md)
+            title=$(cat "outputs/milestones/$key.title")
+            found=$(gh issue list --state all --search "$title" --json title --jq "length")
+            if [ "$found" != "0" ]; then
+              echo "already announced: $key"
+              continue
+            fi
+            gh issue create --title "$title" --body-file "$body"
+            echo "announced: $key"
+          done
+
 
 
       - name: Preserve source report, including failures
