@@ -466,7 +466,12 @@ class ReleaseStore:
         that was already full.
 
         Old state snapshots are history. ``restore`` reads the newest valid one
-        and falls back at most a few, so a handful is sufficient provenance.
+        and falls back at most a few, so a handful is sufficient provenance. The
+        ones that survive have to stay restorable, though: ``restore`` rejects a
+        snapshot whose raw assets have gone, so deleting a day file out from
+        under one shortens the fallback chain without saying so. Measured on the
+        live release, four of the eight newest still pointed at a completed
+        month's days. Whatever a kept snapshot references is therefore live too.
 
         Anything the state about to be published writes -- raw assets and
         compatibility metadata alike -- is excluded regardless, so a mistake in
@@ -484,16 +489,23 @@ class ReleaseStore:
             if part.get("complete") is True
         }
 
-        doomed = []
+        snapshots = sorted((n for n in assets if STATE_NAME.fullmatch(n)), reverse=True)
+        for name in snapshots[:KEEP_SNAPSHOTS]:
+            try:
+                referenced = self._state_json(assets[name]).get("assets")
+            except (ReleaseStoreError, StateIntegrityError):
+                # Already unrestorable, so it has nothing left to protect.
+                continue
+            if isinstance(referenced, dict):
+                live |= set(referenced)
+
+        doomed = list(snapshots[KEEP_SNAPSHOTS:])
         for name in assets:
             if name in live:
                 continue
             day = DAY_NAME.fullmatch(name) or DAY_RECEIPT_NAME.fullmatch(name)
             if day and day.group(1)[:7] in complete:
                 doomed.append(name)
-
-        snapshots = sorted((n for n in assets if STATE_NAME.fullmatch(n)), reverse=True)
-        doomed.extend(snapshots[KEEP_SNAPSHOTS:])
 
         deleted, failed = [], []
         for name in doomed:

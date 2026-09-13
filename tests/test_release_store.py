@@ -361,6 +361,45 @@ def test_live_checkpoints_of_a_completed_month_are_never_pruned(tmp_path):
     assert f"ezpass_day_{day}.receipt.json" in names
 
 
+def test_day_files_a_kept_snapshot_still_needs_are_never_pruned(tmp_path):
+    """The prune must not break the snapshots it chose to keep. restore() walks
+    them newest-first and rejects any whose raw assets have gone, so deleting a
+    day file out from under one shortens the fallback chain without saying so --
+    measured on the live release, four of the eight kept snapshots still pointed
+    at a completed month's days."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    manifest = json.loads((restored / "ezpass_manifest.json").read_text())
+    done = [p["month"] for p in manifest["parts"] if p.get("complete")][0]
+    day = f"ezpass_day_{done}-05.parquet"
+    _add_asset(fake, day)
+    _add_asset(
+        fake,
+        "state_20990101T000000000000Z_run_0001.json",
+        json.dumps({"assets": {day: {"sha256": "0" * 64, "size": 5}}}).encode(),
+    )
+
+    store.publish(restored)
+
+    names = {a["name"] for a, _ in fake.assets.values()}
+    assert day in names
+
+
+def test_an_unreadable_kept_snapshot_does_not_stop_the_prune(tmp_path):
+    """A snapshot that cannot be parsed is already unrestorable, so it protects
+    nothing -- but it must not take the whole prune down with it."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    manifest = json.loads((restored / "ezpass_manifest.json").read_text())
+    done = [p["month"] for p in manifest["parts"] if p.get("complete")][0]
+    _add_asset(fake, "state_20990101T000000000000Z_run_0002.json", b"not json at all")
+    _add_asset(fake, f"ezpass_day_{done}-05.parquet")
+
+    result = store.publish(restored)
+
+    assert result["pruned"]["deleted"] >= 1
+    names = {a["name"] for a, _ in fake.assets.values()}
+    assert f"ezpass_day_{done}-05.parquet" not in names
+
+
 def test_month_parts_and_receipts_are_never_pruned(tmp_path):
     """The archive itself is immutable. Only scaffolding is collectable."""
     _, _, fake, store, restored = _seeded_store(tmp_path)
