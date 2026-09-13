@@ -39,6 +39,7 @@ import argparse
 import io
 import json
 import logging
+import re
 import time
 from dataclasses import asdict, dataclass, fields
 from datetime import UTC, date, datetime, timedelta
@@ -56,10 +57,12 @@ from src.config import (
     EZPASS_MANIFEST_PATH,
     EZPASS_PARTS_DIR,
     EZPASS_READING_COLS,
+    EZPASS_SEGMENT_COL,
     EZPASS_SEGMENTS_PATH,
     EZPASS_SPLIT_DATE,
     EZPASS_TIME_COL,
     EZPASS_WINDOW_MINUTES,
+    RAW_DIR,
     SOCRATA_DOMAIN,
     STUDY_START,
 )
@@ -693,6 +696,84 @@ def fetch_segments(
     seg.to_parquet(EZPASS_SEGMENTS_PATH, engine="pyarrow", index=False)
     log.info("wrote %s (%d segments)", EZPASS_SEGMENTS_PATH.name, len(seg))
     return seg
+
+
+def missing_segment_sids(raw_dir: Path = RAW_DIR) -> list[str]:
+    """sids that appear in the month parts but have no row in the attribute table."""
+    import duckdb
+
+    parts = sorted((raw_dir / "ezpass_speeds").glob("ezpass_speeds_*.parquet"))
+    if not parts:
+        return []
+    known: set[str] = set()
+    if EZPASS_SEGMENTS_PATH.exists():
+        known = set(pd.read_parquet(EZPASS_SEGMENTS_PATH)["sid"].astype(str))
+    with duckdb.connect() as con:
+        rows = con.execute(
+            f'SELECT DISTINCT CAST("{EZPASS_SEGMENT_COL}" AS VARCHAR) '
+            "FROM read_parquet(?, union_by_name=true)",
+            [[str(p) for p in parts]],
+        ).fetchall()
+    return sorted({r[0] for r in rows if r[0]} - known)
+
+
+def top_up_segments(
+    session: requests.Session,
+    sids: list[str],
+    *,
+    deadline: float | None = None,
+) -> int:
+    """Fetch attribute rows for named sids and merge them into the segment table.
+
+    Sampling whole days cannot find a sparse sensor. sid 33024, the westbound
+    Belt Parkway east of JFK, carries 2,325 readings across the 44-month archive
+    and reported on none of the ten sampled days, so it reached staging with no
+    borough or geometry, the panel could not assign it a treatment group, and
+    ``hard_unmatched_segments`` stopped the analysis on 2026-09-13. Looking a sid
+    up directly is indexed and costs one request, which is why this exists
+    alongside ``fetch_segments`` rather than replacing it.
+    """
+    safe = [s for s in sids if re.fullmatch(r"[A-Za-z0-9_-]{1,32}", s)]
+    if len(safe) != len(sids):
+        log.warning("ignoring %d sid(s) with unexpected characters", len(sids) - len(safe))
+    if not safe:
+        return 0
+    cols = "sid,link_name,borough,polyline,link_length_ft"
+    frames: list[pd.DataFrame] = []
+    for sid in safe:
+        for dataset_id in EZPASS_DATASET_IDS:
+            resp = _get_page(
+                session,
+                dataset_id,
+                {"$select": cols, "$where": f"sid='{sid}'", "$limit": 1},
+                deadline=deadline,
+            )
+            # dtype=str, because fetch_segments stores every column as a string
+            # and a CSV-inferred int64 sid would make the merge below sort mixed
+            # types and drop_duplicates miss its match.
+            df = pd.read_csv(io.StringIO(resp.text), dtype=str)
+            if not df.empty:
+                frames.append(df)
+                log.info("  segment top-up: sid %s from %s", sid, dataset_id)
+                break
+        else:
+            log.warning("no attribute row anywhere for sid %s; it stays unassigned", sid)
+    if not frames:
+        return 0
+    existing = (
+        pd.read_parquet(EZPASS_SEGMENTS_PATH) if EZPASS_SEGMENTS_PATH.exists() else pd.DataFrame()
+    )
+    merged = (
+        pd.concat([existing, *frames], ignore_index=True)
+        .drop_duplicates(subset=["sid"])
+        .sort_values("sid")
+        .reset_index(drop=True)
+    )
+    EZPASS_SEGMENTS_PATH.parent.mkdir(parents=True, exist_ok=True)
+    merged.to_parquet(EZPASS_SEGMENTS_PATH, engine="pyarrow", index=False)
+    added = len(merged) - len(existing)
+    log.info("segment table topped up: %d added, %d total", added, len(merged))
+    return added
 
 
 def _write(parts_by_month: dict[str, dict]) -> None:

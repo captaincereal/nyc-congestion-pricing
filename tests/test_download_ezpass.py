@@ -213,3 +213,71 @@ def test_budget_checked_between_days_so_finished_work_survives(tmp_path, monkeyp
 
     survived = sorted((tmp_path / "days").glob("*.parquet"))
     assert len(survived) == 4, "completed days must outlive the run that fetched them"
+
+
+# --- Segment roster reconciliation -------------------------------------------
+# Day sampling cannot find a sparse sensor. sid 33024, the westbound Belt Pkwy
+# east of JFK, carries 2,325 readings across the 44-month archive and reported
+# on none of the ten sampled days, so it reached staging with no borough or
+# geometry and hard_unmatched_segments stopped the analysis on 2026-09-13.
+
+
+def _segment_frame(sid: str, name: str = "Belt Pkwy - Westbound") -> pd.DataFrame:
+    # Every column is a string on disk, as fetch_segments writes it.
+    return pd.DataFrame(
+        [
+            {
+                "sid": sid,
+                "link_name": name,
+                "borough": "Queens",
+                "polyline": "abc",
+                "link_length_ft": "1.0",
+            }
+        ]
+    )
+
+
+def test_missing_segment_sids_reports_only_what_the_table_lacks(tmp_path, monkeypatch):
+    parts = tmp_path / "ezpass_speeds"
+    parts.mkdir(parents=True)
+    pd.DataFrame({dl.EZPASS_SEGMENT_COL: ["100", "200", "33024"]}).to_parquet(
+        parts / "ezpass_speeds_2026-08.parquet", index=False
+    )
+    table = tmp_path / "segments.parquet"
+    pd.concat([_segment_frame("100"), _segment_frame("200")]).to_parquet(table, index=False)
+    monkeypatch.setattr(dl, "EZPASS_SEGMENTS_PATH", table)
+
+    assert dl.missing_segment_sids(tmp_path) == ["33024"]
+
+
+def test_top_up_segments_looks_the_gap_up_by_id_and_merges_it(tmp_path, monkeypatch):
+    table = tmp_path / "segments.parquet"
+    _segment_frame("100").to_parquet(table, index=False)
+    monkeypatch.setattr(dl, "EZPASS_SEGMENTS_PATH", table)
+    asked = []
+
+    class Response:
+        text = _segment_frame("33024").to_csv(index=False)
+
+    def _fake_page(session, dataset_id, params, **kwargs):
+        asked.append(params["$where"])
+        return Response()
+
+    monkeypatch.setattr(dl, "_get_page", _fake_page)
+
+    assert dl.top_up_segments(None, ["33024"]) == 1
+    assert asked == ["sid='33024'"]
+    merged = pd.read_parquet(table)
+    assert set(merged["sid"].astype(str)) == {"100", "33024"}
+
+
+def test_top_up_segments_refuses_a_sid_that_is_not_an_identifier(tmp_path, monkeypatch):
+    """The sids come from our own parquet, but they are interpolated into SoQL."""
+    table = tmp_path / "segments.parquet"
+    _segment_frame("100").to_parquet(table, index=False)
+    monkeypatch.setattr(dl, "EZPASS_SEGMENTS_PATH", table)
+    monkeypatch.setattr(
+        dl, "_get_page", lambda *a, **k: pytest.fail("must not query for a malformed sid")
+    )
+
+    assert dl.top_up_segments(None, ["33024' OR '1'='1"]) == 0

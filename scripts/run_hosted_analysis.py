@@ -11,6 +11,8 @@ import requests
 
 from scripts.check_analysis_inputs import readiness
 from src.config import PROJECT_ROOT, RAW_DIR
+from src.data.download import _session
+from src.data.download_ezpass import missing_segment_sids, top_up_segments
 from src.data.release_store import ReleaseStore
 from src.data.verification_gate import verification_summary
 
@@ -87,6 +89,15 @@ def main() -> None:
             "Report preregistered H003 aggregation sensitivity after source verification",
         )
         return
+    # Before staging, not after: a sid with no attribute row reaches the panel
+    # with no borough or geometry, cannot be assigned a treatment group, and
+    # fails hard_unmatched_segments. Day sampling misses sparse sensors -- sid
+    # 33024 reported on none of the ten sampled days -- so the roster is
+    # reconciled against the parts actually held and the gaps looked up by id.
+    if missing := missing_segment_sids(RAW_DIR):
+        print(f"segment table is missing {len(missing)} sid(s): {missing[:10]}", flush=True)
+        top_up_segments(_session(), missing)
+
     ready, message = readiness(RAW_DIR)
     print(message, flush=True)
     if not ready:
