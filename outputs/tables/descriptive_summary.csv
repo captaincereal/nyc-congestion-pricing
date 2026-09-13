@@ -1,11 +1,11 @@
 treatment_group,links,link_hours,median_speed_mph,mean_speed_mph,mean_obs_per_hour,period
-boundary,5,70390,10.522,12.286,3.917,pre
+boundary,5,73034,10.565,12.331,3.92,pre
 boundary,5,12985,10.824,12.753,3.911,post
-control,185,2413924,17.349,19.641,3.82,pre
+control,185,2523682,17.386,19.7,3.821,pre
 control,167,378175,15.873,17.903,3.77,post
-crossing,2,31734,36.32,28.811,3.962,pre
+crossing,2,33022,36.317,28.811,3.962,pre
 crossing,2,4622,37.732,33.551,3.972,post
-exempt_in_zone,6,84526,19.381,20.695,3.708,pre
+exempt_in_zone,6,88364,19.398,20.729,3.71,pre
 exempt_in_zone,6,12219,21.276,22.662,3.645,post
-treated,148,2050829,8.318,9.806,3.79,pre
+treated,148,2137600,8.356,9.836,3.792,pre
 treated,145,335913,9.044,10.414,3.772,post

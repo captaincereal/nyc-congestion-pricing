@@ -1,6 +1,6 @@
 # Data-quality report — E-Z Pass local-street staging
 
-Generated: 2026-09-13T11:05:09+00:00
+Generated: 2026-09-13T14:20:29+00:00
 Source DB: `nyc_cp.duckdb`  ·  raw manifest: `ezpass_manifest.json` (present; presence alone does not establish verification)
 
 > Observed problems only. Handling decisions are in the last section and are applied elsewhere, never by this script.
@@ -9,7 +9,7 @@ Source DB: `nyc_cp.duckdb`  ·  raw manifest: `ezpass_manifest.json` (present; p
 
 |   total_rows |   distinct_links | ts_min              | ts_max              |
 |-------------:|-----------------:|:--------------------|:--------------------|
-|     20516549 |              346 | 2023-03-01 00:01:58 | 2025-04-30 23:59:03 |
+|     21302664 |              346 | 2023-02-01 00:00:19 | 2025-04-30 23:59:03 |
 
 ## `null_rates`
 
@@ -29,19 +29,19 @@ _(no rows)_
 
 |   zero_speed |   negative_speed |   over_60 |   over_80 |   over_100 |   zero_speed_pct |   over_80_pct |   max_speed_mph |
 |-------------:|-----------------:|----------:|----------:|-----------:|-----------------:|--------------:|----------------:|
-|         1264 |                0 |    168664 |     38405 |       3440 |            0.006 |        0.1872 |          7043.9 |
+|         1392 |                0 |    179052 |     40616 |       3508 |            0.007 |        0.1907 |          7043.9 |
 
 ## `sample_depth`
 
 |   mean_samples |   min_samples |   p05 |   p50 |   p95 |   max_samples |   readings_with_le_1_sample |   le_3_samples_pct |
 |---------------:|--------------:|------:|------:|------:|--------------:|----------------------------:|-------------------:|
-|          40.09 |             2 |     2 |    21 |   140 |           782 |                           0 |               9.76 |
+|          40.15 |             2 |     2 |    21 |   140 |           782 |                           0 |               9.71 |
 
 ## `speed_vs_travel_time`
 
 |   comparable_rows |   p50_abs_diff_mph |   p95_abs_diff_mph |   pct_disagree_gt_5mph |
 |------------------:|-------------------:|-------------------:|-----------------------:|
-|       2.05153e+07 |              0.002 |              0.003 |                      0 |
+|       2.13013e+07 |              0.002 |              0.003 |                      0 |
 
 ## `dst_spring_forward`
 
@@ -55,25 +55,25 @@ _(no rows)_
 
 |   mean_readings_per_link_hour |   min_n |   p50_n |   p95_n |   max_n |   link_hours |   link_hours_over_4 |
 |------------------------------:|--------:|--------:|--------:|--------:|-------------:|--------------------:|
-|                           3.8 |       1 |       4 |       4 |       4 |  5.39589e+06 |                   0 |
+|                           3.8 |       1 |       4 |       4 |       4 |  5.60019e+06 |                   0 |
 
 ## `link_coverage_span`
 
 |   links |   links_gone_before_treatment |   links_new_after_treatment |   mean_active_days |
 |--------:|------------------------------:|----------------------------:|-------------------:|
-|     346 |                            21 |                           0 |              697.5 |
+|     346 |                            21 |                           0 |              723.1 |
 
 ## `daily_link_count`
 
-791 rows (series; not inlined — plot separately).
+819 rows (series; not inlined — plot separately).
 
 Head / tail:
 
 | day                 |   links |   readings |
 |:--------------------|--------:|-----------:|
-| 2023-03-01 00:00:00 |     317 |      28268 |
-| 2023-03-02 00:00:00 |     318 |      28255 |
-| 2023-03-03 00:00:00 |     316 |      28154 |
+| 2023-02-01 00:00:00 |     327 |      29054 |
+| 2023-02-02 00:00:00 |     327 |      28958 |
+| 2023-02-03 00:00:00 |     323 |      28453 |
 …
 | day                 |   links |   readings |
 |:--------------------|--------:|-----------:|
