@@ -1,6 +1,6 @@
 # Data-quality report — E-Z Pass local-street staging
 
-Generated: 2026-09-13T16:06:42+00:00
+Generated: 2026-09-13T22:31:33+00:00
 Source DB: `nyc_cp.duckdb`  ·  raw manifest: `ezpass_manifest.json` (present; presence alone does not establish verification)
 
 > Observed problems only. Handling decisions are in the last section and are applied elsewhere, never by this script.
@@ -9,7 +9,7 @@ Source DB: `nyc_cp.duckdb`  ·  raw manifest: `ezpass_manifest.json` (present; p
 
 |   total_rows |   distinct_links | ts_min              | ts_max              |
 |-------------:|-----------------:|:--------------------|:--------------------|
-|     21302664 |              346 | 2023-02-01 00:00:19 | 2025-04-30 23:59:03 |
+|     31271925 |              347 | 2023-01-01 00:00:19 | 2026-08-31 23:59:24 |
 
 ## `null_rates`
 
@@ -29,19 +29,19 @@ _(no rows)_
 
 |   zero_speed |   negative_speed |   over_60 |   over_80 |   over_100 |   zero_speed_pct |   over_80_pct |   max_speed_mph |
 |-------------:|-----------------:|----------:|----------:|-----------:|-----------------:|--------------:|----------------:|
-|         1392 |                0 |    179052 |     40616 |       3508 |            0.007 |        0.1907 |          7043.9 |
+|         8708 |                0 |    260539 |     61782 |       6212 |            0.028 |        0.1976 |         11674.7 |
 
 ## `sample_depth`
 
 |   mean_samples |   min_samples |   p05 |   p50 |   p95 |   max_samples |   readings_with_le_1_sample |   le_3_samples_pct |
 |---------------:|--------------:|------:|------:|------:|--------------:|----------------------------:|-------------------:|
-|          40.15 |             2 |     2 |    21 |   140 |           782 |                           0 |               9.71 |
+|          38.39 |             2 |     2 |    19 |   137 |           782 |                           0 |              10.88 |
 
 ## `speed_vs_travel_time`
 
 |   comparable_rows |   p50_abs_diff_mph |   p95_abs_diff_mph |   pct_disagree_gt_5mph |
 |------------------:|-------------------:|-------------------:|-----------------------:|
-|       2.13013e+07 |              0.002 |              0.003 |                      0 |
+|       3.12632e+07 |              0.002 |              0.003 |                      0 |
 
 ## `dst_spring_forward`
 
@@ -55,37 +55,37 @@ _(no rows)_
 
 |   mean_readings_per_link_hour |   min_n |   p50_n |   p95_n |   max_n |   link_hours |   link_hours_over_4 |
 |------------------------------:|--------:|--------:|--------:|--------:|-------------:|--------------------:|
-|                           3.8 |       1 |       4 |       4 |       4 |  5.60019e+06 |                   0 |
+|                          3.77 |       1 |       4 |       4 |       4 |  8.28455e+06 |                   0 |
 
 ## `link_coverage_span`
 
 |   links |   links_gone_before_treatment |   links_new_after_treatment |   mean_active_days |
 |--------:|------------------------------:|----------------------------:|-------------------:|
-|     346 |                            21 |                           0 |              723.1 |
+|     347 |                             3 |                           1 |             1085.7 |
 
 ## `daily_link_count`
 
-819 rows (series; not inlined — plot separately).
+1,288 rows (series; not inlined — plot separately).
 
 Head / tail:
 
 | day                 |   links |   readings |
 |:--------------------|--------:|-----------:|
-| 2023-02-01 00:00:00 |     327 |      29054 |
-| 2023-02-02 00:00:00 |     327 |      28958 |
-| 2023-02-03 00:00:00 |     323 |      28453 |
+| 2023-01-01 00:00:00 |     331 |      29295 |
+| 2023-01-02 00:00:00 |     335 |      29372 |
+| 2023-01-03 00:00:00 |     334 |      29519 |
 …
 | day                 |   links |   readings |
 |:--------------------|--------:|-----------:|
-| 2025-04-28 00:00:00 |     288 |      23295 |
-| 2025-04-29 00:00:00 |     301 |      24428 |
-| 2025-04-30 00:00:00 |     295 |      24481 |
+| 2026-08-29 00:00:00 |     291 |      23970 |
+| 2026-08-30 00:00:00 |     290 |      23637 |
+| 2026-08-31 00:00:00 |     294 |      23681 |
 
 ## `link_hour_gaps`
 
 |   links_in_window |   ge_90pct_hours |   lt_50pct_hours |   mean_coverage_pct |
 |------------------:|-----------------:|-----------------:|--------------------:|
-|               336 |              159 |               43 |                79.7 |
+|               336 |              179 |               43 |                  81 |
 
 ## `ts_bounds`
 
