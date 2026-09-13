@@ -184,6 +184,10 @@ D7 are still open and still reserved. D2's construction work is done and
 negative (H004, H006) and D3's sensitivity is measured and small — the
 `eleventh_as_treated` spec moves the coefficient by about 0.001 mph — so both
 are decisions waiting on a person, not on more evidence.
+[`owner_decision_prompt.md`](owner_decision_prompt.md) is written for handing
+those six to a model for a second opinion; it recommends and does not adopt, and
+its figures were checked against the committed tables. Keep that distinction if
+you use it.
 
 Before touching the secondary feed: read the zero-speed entry in `AGENTS.md`.
 Start from `data/processed/secondary_hourly_panel.parquet`

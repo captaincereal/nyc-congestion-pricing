@@ -88,3 +88,10 @@ recovery years. The 12-month diagnostic milestone does not replace the brief's
 Approval of these directions authorizes the next design step. It does not
 approve a causal result in advance; all failed tests, placebos, verification
 failures and null results must remain in the report.
+
+---
+
+A prompt for taking a second opinion on these six is in
+[`owner_decision_prompt.md`](owner_decision_prompt.md). It recommends rather
+than adopts: these decisions stay reserved to the owner, and the prompt is
+written so a model cannot quietly settle one.
