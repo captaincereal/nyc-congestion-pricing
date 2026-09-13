@@ -9,10 +9,10 @@ below the rule is the mission.
 
 ---
 
-You are taking over a causal-inference study that has reached a defensible
-negative finding and is now testing whether that finding survives better data.
-Two analyses were running when this was written and may or may not have
-finished; resolving that is your first job.
+You are taking over a causal-inference study that has reached its finding. Six
+pre-registered hypotheses are answered and they agree. The remaining work is not
+to keep testing the identification — that is settled — but to finish the parts
+of the study that were never run, and to fix a broken data pipeline.
 
 Infer intent from context and carry work to completion. When a question can be
 settled by reading the repo, measuring something, or running it, do that instead
@@ -21,83 +21,85 @@ of asking. Prepare a concrete, reviewable result before seeking approval.
 ## Start here, in this order
 
 1. `docs/hypotheses/REGISTER.md` — every hypothesis, its status and verdict.
-2. `docs/hypotheses/README.md` — the protocol you must follow. It is short and
-   it is not optional.
-3. `docs/decision_register.md` — the project's running record.
-4. `README.md` — the current public finding.
+2. `docs/hypotheses/README.md` — the protocol you must follow. Short, not optional.
+3. `README.md` — the current public finding.
+4. `docs/owner_decisions.md` — what is waiting on the owner.
 
-## Immediate: two runs were in flight
+## First task: the backfill is failing
 
-On 2026-09-13 around 10:30 EDT, two registered analyses were executing locally.
-Check `outputs/tables/` before doing anything else.
+The most recent Backfill run **failed** on 2026-09-13 at 12:46 UTC after about
+93 minutes, in its main step:
 
-**H005** (`docs/hypotheses/H005-honest-did-long-preperiod.md`) — Rambachan–Roth
-sensitivity at three horizons. Horizons 12 and 26 completed; their artefacts are
-`H005_honest_did_h12*.csv` and `H005_honest_did_h26*.csv`. Horizon 52 was still
-running and may have failed on memory — it builds roughly a 9 GB dummy matrix on
-5.4M link-hours. **A horizon-52 memory failure is an expected, reportable
-outcome, not something to work around.** H005's criteria say so explicitly: the
-verdict is judged at horizon 12, and a failure confined to the wider horizons is
-a limit on what the panel supports.
+    https://github.com/captaincereal/nyc-congestion-pricing/actions/runs/34757999360
 
-Results so far, breakdown values under relative magnitudes:
+The run before it, at 06:17 UTC, succeeded. The failure uploaded a
+`source-status-34757999360` artifact that should say why; reading it, or the
+step logs, needs repository access this brief's author did not have. **Diagnose
+it before anything else** — a silently failing backfill is how this project lost
+days earlier.
 
-| Sample | h12 | h26 |
-|---|---:|---:|
-| all | 0.093 | 0.063 |
-| peak | 0.044 | 0.015 |
-| offpeak | 0.054 | 0.034 |
-| weekend | 0.171 | 0.112 |
+Consequence: the archive is stuck at **27 verified contiguous months, 2023-02 …
+2025-04**. `2023-01` has not landed, so the frozen window's first month is
+missing and the post-period beyond 2025-04 has not started.
 
-**H006** (`docs/hypotheses/H006-control-construction-clean-holdout.md`) —
-control construction judged on two holdouts. No output had appeared. Its command
-was:
+**A gotcha that will mislead you.** The `data-raw` release accumulates stale
+`ezpass_day_*.parquet` checkpoints. Months long since complete still show day
+files, so their presence does **not** mean work is in flight. Trust the manifest
+and the month parts, not the day checkpoints. Cleaning those up is a reasonable
+small task.
 
-```
-python -m src.analysis.control_construction --match-weeks -96 -27 \
-  --holdout -26 -15 --holdout -12 -2 --out-prefix H006
-```
-
-**What to do with whatever you find.** If artefacts exist and the records still
-say Pending, close them: fill in Result and Verdict from the committed outputs,
-update `REGISTER.md`, commit. Do not touch Prediction or Acceptance criteria —
-both records were registered before the code ran and the commit order is the
-evidence. If a run did not complete, rerun it; the commands are above and in
-each record's Method section.
-
-H006 is the more important of the two. Read its Notes before interpreting it.
+Two milestone notifications are wired into the backfill and will open a GitHub
+issue once each: when `2023-01` lands, and when the post-period is complete.
+Neither has fired. Do not disable them.
 
 ## What the study found
 
 Speeds inside the Congestion Relief Zone rose about **1.17 mph** relative to
 comparison streets after tolling began on 2025-01-05, roughly 12% of the
-pre-tolling treated mean, on the current 27-month panel. That association is
-robust. **It cannot be attributed to the toll**, and the README says so.
+pre-tolling treated mean. That association is robust. **It cannot be attributed
+to the toll.**
 
-The estimate was 0.77 mph on the earlier 12-month panel. It moved by half again
-when the pre-period lengthened, which is itself a reason not to treat the point
-estimate as settled.
+Six answered hypotheses, each with its prediction committed before its code ran:
 
-Four answered hypotheses, each pre-registered, all pointing the same way:
+| | Finding |
+|---|---|
+| **H001** | Clustered SEs up to 1.5× too tight; weekday peak fails randomisation inference at p = 0.092 |
+| **H002** | Breakdown values 0.044–0.151 on 36 pre-weeks |
+| **H003** | Daily aggregation stable; collapsing to one pre/post per link inflates SEs 3.8–6.2×, zero enters every interval, off-peak flips sign |
+| **H004** | Both matching rules rejected out of sample; nearest-neighbour made it worse |
+| **H005** | Breakdown values 0.005–0.171 on 96 pre-weeks, falling monotonically as the horizon widens |
+| **H006** | Every control set rejects on a clean July–September holdout; holidays roughly double the statistic but do not cause the failure |
 
-- **H001** placebo-in-space: clustered standard errors run up to 1.5× too tight;
-  weekday peak fails randomisation inference at p = 0.092.
-- **H002** Rambachan–Roth on 36 pre-weeks: breakdown values 0.044–0.151.
-- **H003** temporal aggregation: daily is stable, but collapsing to one pre and
-  one post observation per link inflates standard errors 3.8–6.2×, puts zero in
-  every interval, and flips the off-peak sign.
-- **H004** control construction: both matching rules rejected out of sample.
-  Nearest-neighbour made it *worse*; synthetic weights fit the matching window to
-  a squared loss of exactly zero and still rejected at p = 4.4e-07.
+The joint pre-trend test rejects in all four samples and **rejects harder on 96
+pre-weeks than on 36**. Every explanation that would have rescued the finding —
+too little pre-period, an atypical holiday window, a poorly chosen comparison
+group — has been tested and none survives.
 
-The corrected joint pre-trend test rejects in all four samples, and **rejects
-harder on 96 pre-weeks than it did on 36** (χ² 45.6–100.2 against 43.6–87.1).
-That kills the explanation every earlier caveat leaned on: the failure is not a
-short-window or holiday artifact.
+**Do not reopen this.** Searching for a control set that passes is another draw
+against fixed data, and the register would have to carry the count. If you
+believe there is a specification nobody tried, register it with a prediction
+first, and expect it to fail.
 
 None of this is evidence that congestion pricing did nothing. It is evidence
-that this comparison design cannot tell you either way. Keep that distinction in
-every sentence you write; it is the study's entire contribution.
+that this comparison design cannot tell you either way. Hold that distinction in
+every sentence you write; it is the study's contribution.
+
+## The work that remains
+
+**Phase 10 — spillover and mechanism, never run.** The five `boundary` links
+straddle 60th Street rather than sitting outside it, and no control link lies
+within 500 m of the cordon (nearest ≈ 808 m), so the panel has no units where
+diversion would show most clearly. That is a coverage limitation to characterise
+honestly, not a null to report. The secondary `i4gi-tjb9` feed — 42 months,
+40.2M rows, already held — covers exactly the toll-exempt roads and crossings
+where diverted traffic would go. MTA entry and TLC checks have not been touched.
+
+**Phase 11 — the writeup.** The README is current and honest; treat it as the
+spine rather than starting over. What it lacks is the mechanism section and any
+treatment of the secondary feed.
+
+Anything whose output could reach the README needs a hypothesis record committed
+before it runs. Phase 10 work qualifies.
 
 ## The protocol, which is binding
 
@@ -106,66 +108,35 @@ specification tried against it is another draw, and enough draws produce a
 clean-looking result by chance. Roth (2022) sharpens it: conditioning on a
 diagnostic passing can leave the survivor *more* biased than not testing.
 
-So: **any analysis whose output could reach the README gets a hypothesis record
-committed before it runs**, with its prediction and acceptance criteria written
-while they are still guesses. Exploratory work does not. The `research-prompt`
-skill writes the record and a prompt together.
-
 Predictions and acceptance criteria are frozen once results exist. If criteria
 turn out badly chosen, supersede the record with a new one explaining why; do
-not edit them. Failed and abandoned attempts stay in the register — the count of
-attempts is part of what a reader needs.
+not edit them. Failed and abandoned attempts stay in the register — the count is
+part of what a reader needs. The `research-prompt` skill writes a record and a
+prompt together.
 
-Namespace outputs by hypothesis (`H0NN_*`). Both analysis modules take an
-`--out-prefix` for exactly this reason.
+Namespace outputs `H0NN_*`. Both analysis modules take `--out-prefix`, and
+`honest_did` also stamps the horizon, because reruns would otherwise overwrite
+the artefacts an earlier record cites.
 
-## Data and infrastructure
-
-The archive is **27 verified contiguous months, 2023-02 … 2025-04**, giving 96
-pre-treatment weeks and 101 pre-treatment weeks in the panel. Every month is
-verified against live source counts with deterministic replay. `2023-01` was
-still downloading; it completes the frozen window's start.
+## Infrastructure
 
 Everything runs unattended on GitHub Actions, free, because the owner will not
-leave a machine on:
+leave a machine on. `backfill.yml` every six hours (verify, then deepen the
+pre-period backwards, then extend forward); `analysis.yml` rebuilds the panel
+and reruns Phases 6–9 when data lands; `tests.yml` runs ruff, black and pytest.
+205 tests pass. State lives in the `data-raw` release.
 
-- `backfill.yml` every six hours: verifies, then deepens the pre-period
-  backwards before extending the post-period forward. State lives in the
-  `data-raw` release, which is what the next pass resumes from.
-- `analysis.yml` rebuilds the panel and reruns Phases 6–9 when data lands.
-- `tests.yml` runs ruff, black and pytest. 205 tests currently pass.
-
-Two milestone notifications are wired into the backfill and will open a GitHub
-issue once each: when `2023-01` lands, and when the post-period is complete.
-Do not disable them.
-
-To work locally you need the archive on disk. Pull month parts, the manifest and
-the segment table from the release, then `build_staging` → `geo` → `build_panel`.
-
-## After H005 and H006
-
-If H006 refutes — both rules reject on the clean holdout — the study's
-conclusion is as well established as this data can make it. The work then is
-Phase 10 and 11: the spillover and mechanism checks that remain unrun, and a
-final writeup. Do not keep searching for a control set that passes; each further
-attempt is another draw and the register would have to carry it.
-
-If H006 supports — a rule gives flat leads on the clean holdout — D2 becomes
-live. Rerun H002's sensitivity on that control set before writing any causal
-sentence, and register it as a new hypothesis rather than reusing H005.
-
-Either way, `docs/owner_decisions.md` holds recommendations on **D1, D2, D3, D5,
-D6 and D7** that remain unadopted. They are reserved to the owner. You may
-analyse them and bring evidence; you may not adopt one.
+To work locally: pull month parts, the manifest and the segment table from the
+release, then `build_staging` → `geo` → `build_panel`.
 
 ## Constraints
 
-Zero budget, Python only, must run unattended on free runners. Research
-integrity outranks the budget: if the only honest analysis costs money, say so
-rather than quietly weakening it.
+Zero budget, Python only, unattended on free runners. Research integrity
+outranks the budget: if the only honest analysis costs money, say so rather than
+quietly weakening it.
 
-Cite with author, year and venue. Flag anything you cannot cite precisely rather
-than guessing — models fabricate confidently in this domain.
+Cite with author, year and venue. Flag anything you cannot cite precisely —
+models fabricate confidently in this domain.
 
 ## Bring to the owner first
 
@@ -173,7 +144,10 @@ than guessing — models fabricate confidently in this domain.
   Branches and pull requests need no approval.
 - Anything that costs money.
 - Changing anything `docs/project_brief.md` marks frozen.
-- Adopting any of D1–D7.
+- Adopting any of **D1, D2, D3, D5, D6, D7** — all still open, all reserved.
+  You may analyse them and bring evidence; you may not adopt one. D2's
+  construction work is done and negative (H004, H006); the decision is still the
+  owner's to record.
 
 ## Stopping
 
@@ -181,11 +155,11 @@ Work through this without pausing for permission between steps. Stop when you
 hit something in the list above, when a measurement contradicts this brief in a
 way that changes the plan, or when the work is done.
 
-Waiting on the backfill is not a stopping point; there is always a registered
-question or a writeup section available.
+Waiting on the backfill is not a stopping point; Phase 10 runs on data already
+held.
 
 ## First
 
-Check `outputs/tables/` for H005 and H006 artefacts, then form your own view.
-Parts of this brief will be stale. Correct it rather than trusting it, and say
-what you found that differs.
+Diagnose the failed Backfill run, then form your own view of the repo. Parts of
+this brief will be stale. Correct it rather than trusting it, and say what you
+found that differs.
