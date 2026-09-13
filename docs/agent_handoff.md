@@ -9,10 +9,16 @@ below the rule is the mission.
 
 ---
 
-You are taking over a causal-inference study that has reached its finding. Seven
-pre-registered hypotheses are answered and they agree. The remaining work is not
-to keep testing the identification — that is settled — but to finish the parts
-of the study that were never run, and to fix a broken data pipeline.
+You are taking over a causal-inference study that is **essentially finished**.
+Seven pre-registered hypotheses are answered and they agree, the frozen 44-month
+archive is complete and verified, the pipeline is healthy, and the README
+reports the finding from current artefacts.
+
+This is a different job from the one earlier handoffs described. It is not to
+keep testing the identification — that is settled — and not to repair the
+pipeline, which is fixed. What is left is a small amount of optional work and a
+set of decisions that belong to the owner. **The most likely way to damage this
+study now is to find something to run.**
 
 Infer intent from context and carry work to completion. When a question can be
 settled by reading the repo, measuring something, or running it, do that instead
@@ -25,117 +31,90 @@ of asking. Prepare a concrete, reviewable result before seeking approval.
 3. `README.md` — the current public finding.
 4. `docs/owner_decisions.md` — what is waiting on the owner.
 
-## First: Analysis is failing on the completed archive
+## First: nothing is broken — read this before you go looking
 
-**This is the live blocker.** `backfill.yml` run 6 finished successfully at
-2026-09-13T20:16:48Z and completed the frozen archive — **44 of 44 months,
-2023-01 … 2026-08, all 44 verified**, 24 pre-treatment and 20 post. Both
-milestone issues opened (#3, #4).
+Everything that was failing on 2026-09-13 is fixed, verified, and pushed. Start
+by confirming it is still true rather than by re-diagnosing it:
 
-`analysis.yml` run 16 fired on that completion and **failed**. The step
-"Require source receipts before rebuilding existing diagnostics"
-(`scripts/run_hosted_analysis`) ran 83 seconds and died; run 15, on the
-27-month archive, took 180 seconds and passed. So it gets partway and stops.
+    gh run list --workflow analysis.yml --limit 3
+    gh run list --workflow backfill.yml --limit 3
 
-What is already ruled out. The release store is healthy: 178 assets, zero day
-receipts, the prune holding. All nine snapshots were checked against the live
-release and every one is fully restorable — zero missing assets, zero size
-mismatches — so `restore()` is not starved and the 2026-09-13 prune changes are
-not the cause.
+Expect the newest of each to be green. If they are, there is no pipeline work.
 
-What was not determined: the actual error. The Actions log endpoint returns
-HTTP 403 unauthenticated and this project holds no GitHub token, so the log was
-never read. **Read it first** rather than re-deriving from the outside — either
-from the Actions tab in a browser, or with a token:
+**The archive is complete.** 44 of 44 frozen months, 2023-01 … 2026-08, every
+one verified — 24 pre-treatment and 20 post. Both milestone issues opened (#3,
+#4). The backfill has nothing left to fetch; it now breaks out early with
+"Frozen 44-month archive complete", which is why run 6 finished in 3h18m rather
+than spending its 285-minute budget.
 
-```
-gh run view --repo captaincereal/nyc-congestion-pricing --log-failed
-```
+**The results are current.** `analysis.yml` rebuilt everything from the complete
+archive at 2026-09-13T22:34Z (commit `089f89b`), and the README's Evidence,
+Robustness and Limitations sections were rewritten from those tables in
+`7696130`. Every figure quoted there was checked back against the CSV it cites.
+The headline association is now **+1.05 mph** on all hours, down from 1.17 on 27
+months, and the joint pre-trend test still rejects in all four samples.
 
-The untested hypothesis, offered as a starting point and nothing more: the
-archive grew about 63% (27 → 44 months, roughly 21M → 34M rows), and
-`build_staging` / `build_panel` run on a free runner. A memory or disk ceiling
-would fit an 83-second death partway through. Confirm it from the log before
-acting on it.
+What was wrong, and why none of it needs revisiting:
 
-Consequence: **every number in the README and in `outputs/tables/` predates the
-completed archive.** They were computed on 27 months ending 2025-04. Until
-analysis.yml passes, the study has complete data and stale results.
+The release had filled to GitHub's 1000-asset ceiling and every upload 422'd.
+Pruning now runs before uploading; the release sits at 178 assets with zero
+stranded day receipts. Two defects in the first fix were found by checking it
+rather than trusting it — it matched `.parquet` only, leaving 408 receipts
+uncollectable, and it broke four of the eight snapshots it keeps.
 
-## Then: confirm the backfill recovered
+Then `analysis.yml` failed on the completed archive with
+`hard_unmatched_segments`. The cause was sid **33024**, the westbound Belt
+Parkway east of JFK: a sparse sensor with 2,325 readings across 44 months that
+reported on none of the ten sampled days, so it reached the panel with no
+geometry. It classifies as `control`, so no treated definition moved. Day
+sampling could never have found it, and a full re-fetch confirmed that — it
+returned a byte-identical table. The roster is now **reconciled** instead of
+sampled: `missing_segment_sids` diffs the sids in the parts on disk against the
+attribute table and `top_up_segments` looks each gap up by id, before staging.
 
-The Backfill failed on 2026-09-13 (run 5) with `HTTP 422` on every release
-upload: the `data-raw` release had filled to GitHub's **1000-asset ceiling** —
-853 day checkpoints from months long since complete, plus 89 state snapshots.
-Raw assets were uploaded and never deleted, so every day ever checkpointed
-stayed forever after its month part superseded it.
+Three things changed shape as a result, and they are the ones to know about:
 
-`ReleaseStore.publish` prunes before uploading. Three commits got it right, and
-the second and third exist because the first was checked rather than trusted:
+`publish` now **replaces** `ANCILLARY` assets (the segment table, the weather
+file) rather than refusing them. Month parts and day checkpoints are still
+immutable and a test pins that distinction. The cost is documented at the call
+site: snapshots written before a replacement stop being restorable, so the
+fallback chain shortens until fresh ones accumulate.
 
-The first rule matched `DAY_NAME`, which is `.parquet` only. But `publish`
-writes each checkpoint twice — the parquet from `state["assets"]` and its
-`.receipt.json` through the compatibility block — so 408 receipts of complete
-months were collectable by no rule at all. That rule freed 489 slots, not the
-825 originally claimed, and the remaining backfill is roughly 496 more days each
-stranding another receipt, so the release would have refilled part-way through
-the post-period.
+A failing HARD data-quality check now **prints its offending rows** to stderr.
+The previous exit said only "see the report", and `analysis.yml` uploads no
+artifact, so the report died with the runner.
 
-The second problem was that pruning broke the snapshots it keeps. `restore`
-walks them newest-first and rejects any whose raw assets have gone; four of the
-eight newest still pointed at 2023-02 days. The fallback chain would have become
-four deep instead of eight, silently. Whatever a kept snapshot references is now
-live too.
+`gh` is installed and authenticated on the owner's machine but is **not on the
+Git Bash PATH**; call it as `"C:/Program Files/GitHub CLI/gh.exe"` or from
+PowerShell. Without it the Actions log API returns 403 and failures are
+effectively undiagnosable from outside.
 
-Simulated against the live release before pushing: deletes 873, leaves 127.
-**Run 6 then confirmed it.** Started 2026-09-13T16:58Z on `0fa21bc`, it took the
-release from **1000 assets to 145** — day receipts 423 → **0**, day parquets
-430 → 54 in-flight, snapshots 89 → 9 — with every month part and verification
-receipt intact. The 422s are gone and the store is no longer near its ceiling.
+## Timing, if you ever wait on a workflow
 
-One caution on timing, which cost this session an hour of doubt. Scheduled runs
-on free runners are delayed hours past their cron slots (`25 1,7,13,19` UTC;
-observed starts 06:17, 12:46, 16:58). A release still at 1000 shortly after a
-push means the job has not run yet, not that the fix failed. Check the newest
-asset's `created_at` against your push before concluding anything.
+Scheduled runs on free runners are delayed hours past their cron slots
+(`25 1,7,13,19` UTC; observed starts 06:17, 12:46, 16:58). **A release or a
+table that has not changed shortly after a push means the job has not run yet,
+not that something failed.** Check the newest asset's `created_at`, or the run's
+`run_started_at`, against your push before concluding anything — an hour was
+lost to that on 2026-09-13.
 
-**The archive has moved a long way and the README has not caught up.** It was 27
-verified contiguous months, 2023-02 … 2025-04, when the failure hit. Run 6
-landed `2023-01` — it was 22 days downloaded, not the 28 previously recorded
-here — and then kept going: **39 month parts, 2023-01 … 2026-03, all 39 with
-verification receipts**. That is 24 pre-treatment months and 15 post, against
-the 23 and 4 the README still describes.
+`analysis.yml` fires on `workflow_run` when the backfill completes, and also
+takes `workflow_dispatch`, so you can trigger it directly instead of waiting:
 
-So **the README's Evidence section is stale and must be regenerated**, not
-hand-edited. Its figures were quoted from artefacts that `analysis.yml` has
-since rebuilt twice; as of 2026-09-13T16:08Z the committed tables already read
-χ² 96.96 / 70.69 / 100.43 / 45.55 against the 96.7 / 70.4 / 100.2 / 45.6 in the
-prose, and the ATT 1.194 against 1.17, on 5.375M link-hours against 5.18M. Those
-were not corrected in place because run 6 was still in flight and every number
-would have moved again within the hour. Wait for the backfill to settle, let
-`analysis.yml` rerun, then rewrite the section from the committed tables in one
-pass and say which commit's artefacts it quotes.
+    gh workflow run analysis.yml
+    gh run watch <id>
 
-None of this disturbs the finding. The pre-trend test still rejects in all four
-samples, and on a longer pre-period it has always rejected harder, not softer.
-But **do not quote the current README numbers** — read them off
-`outputs/tables/`.
-
-Two milestone notifications are wired into the backfill and open a GitHub issue
-once each: when `2023-01` lands, and when the post-period is complete. Neither
-has fired. Do not disable them. The 2023-01 body was rewritten on 2026-09-13 —
-it still told the owner to rerun H002 and H004, which H005 and H006 superseded
-the same day, so the issue would have opened asking for work already done. The
-logic that decides when each fires is untouched.
+It takes about five minutes end to end on the complete archive.
 
 ## What the study found
 
-Speeds inside the Congestion Relief Zone rose about **1.17 mph** relative to
-comparison streets after tolling began on 2025-01-05, roughly 12% of the
-pre-tolling treated mean. That association is robust. **It cannot be attributed
-to the toll.**
+Speeds inside the Congestion Relief Zone rose about **1.05 mph** relative to
+comparison streets after tolling began on 2025-01-05, roughly 11% of the
+pre-tolling treated mean, on the complete 44-month archive. That association is
+robust. **It cannot be attributed to the toll.**
 
-Six answered hypotheses, each with its prediction committed before its code ran:
+Seven answered hypotheses, each with its prediction committed before its code
+ran:
 
 | | Finding |
 |---|---|
@@ -145,11 +124,16 @@ Six answered hypotheses, each with its prediction committed before its code ran:
 | **H004** | Both matching rules rejected out of sample; nearest-neighbour made it worse |
 | **H005** | Breakdown values 0.005–0.171 on 96 pre-weeks, falling monotonically as the horizon widens |
 | **H006** | Every control set rejects on a clean July–September holdout; holidays roughly double the statistic but do not cause the failure |
+| **H007** | The secondary feed cannot measure diversion either: it stops reporting speeds on three of nine toll-exempt in-zone links, availability diverging 21.2 points against a 5-point bar. A measurement failure, not an identification one |
 
-The joint pre-trend test rejects in all four samples and **rejects harder on 96
-pre-weeks than on 36**. Every explanation that would have rescued the finding —
-too little pre-period, an atypical holiday window, a poorly chosen comparison
-group — has been tested and none survives.
+The joint pre-trend test rejects in all four samples on the full 104-week
+pre-period: χ² 97.9, 69.7, 102.2 and 46.7 on 11 dof. Lengthening the pre-period
+never rescued it — three of the four rise monotonically from 36 to 96 to 104
+weeks, weekday peak easing slightly at the last step while staying far beyond
+rejection. Every explanation that would have rescued the finding — too little
+pre-period, an atypical holiday window, a poorly chosen comparison group — has
+been tested and none survives, and **the pre-period explanation is now exhausted
+rather than merely unlikely: there is no more to add.**
 
 **Do not reopen this.** Searching for a control set that passes is another draw
 against fixed data, and the register would have to carry the count. If you
@@ -162,33 +146,44 @@ every sentence you write; it is the study's contribution.
 
 ## The work that remains
 
-**Phase 10 — spillover is done; mechanism is not.** The spillover half ran on
-2026-09-13 as [H007](hypotheses/H007-secondary-feed-diversion.md) and **refutes**.
-The five `boundary` links straddle 60th Street rather than sitting outside it,
-and no control link lies within 500 m of the cordon (nearest ≈ 808 m), so the
-primary panel has no units where diversion would show. The secondary
-`i4gi-tjb9` feed does carry those units — nine toll-exempt in-zone links — and
-stops reporting speeds on three of them across the toll date, so it cannot
-measure diversion either. Usable-hour availability diverges by 21.2 points
-against a 5-point bar. That is a **measurement** failure, not an identification
-one, and it is characterised in the record and the decision register rather than
-reported as a null.
+Very little, and none of it is analysis. Be honest with yourself about that
+before inventing something to run. **The study has reached its finding, the data
+are complete, and the pipeline is healthy.** Adding specifications now is the
+exact failure the protocol below exists to prevent.
 
-The MTA entry check is now closed too, and not by running it. The MTA's
-Congestion Relief Zone vehicle-entry series (`t6yz-b64h`, data.ny.gov) is titled
-*Beginning 2025* and runs 2025-01-05 to 2026-09-05, checked 2026-09-13. It
-starts on the tolling date, because the detection gear that produces the counts
-was installed to operate the toll, so it has **no pre-treatment period** and can
-support no before-and-after comparison at all. That is structural and waiting
-does not fix it. Do not register a hypothesis against it expecting to identify
-anything; it can describe post-tolling entry volumes and nothing more.
+**Phase 10 is closed except for TLC.** The spillover half ran as
+[H007](hypotheses/H007-secondary-feed-diversion.md) and refutes: the secondary
+`i4gi-tjb9` feed carries the nine toll-exempt in-zone links traffic would divert
+onto, and stops reporting speeds on three of them across the toll date, so
+usable-hour availability diverges by 21.2 points against a 5-point bar. That is
+a **measurement** failure, not an identification one. The MTA entry check is
+closed structurally: `t6yz-b64h` begins on the tolling date, so it has no
+pre-treatment period and no estimator recovers a counterfactual that was never
+instrumented. Waiting does not fix it.
 
-**TLC trip records are the one untried mechanism source** and the only one with
-a pre-period. They have not been ingested and would need their own record. The
-per-year archives on NYC Open Data reach back to at least 2014; the current
-trip records are distributed as monthly files outside the Socrata endpoints this
-project uses, and that exact source has not been verified — confirm it rather
-than assuming it.
+**TLC trip records are the only untried source with a pre-period.** They have
+not been ingested and would need their own registered record. Two cautions.
+Their current distribution is monthly files outside the Socrata endpoints this
+project uses, and that exact source has **not** been verified here — confirm it
+rather than assuming it. And weigh whether it is worth the ingest at all: the
+question it would answer is a mechanism check on a finding that is already
+"cannot identify", so a clean TLC result would not change the conclusion, only
+describe it better.
+
+**Phase 11 is done.** The README's Evidence, Robustness and Limitations sections
+were rewritten from the completed archive on 2026-09-13 and every figure was
+checked against the CSV it cites. Treat it as the spine. If you extend it, keep
+the labelling discipline it now has: the association, pre-trend test and
+robustness table are rebuilt by `analysis.yml` from the current panel, while the
+hypothesis records each stand on the panel they were answered on, and the
+section says so explicitly. **Do not restate H001–H006 against the 44-month
+panel.** Rerunning one is a fresh draw and needs its own registration.
+
+**What actually wants doing** is the owner's, not yours. D1, D2, D3, D5, D6 and
+D7 are still open and still reserved. D2's construction work is done and
+negative (H004, H006) and D3's sensitivity is measured and small — the
+`eleventh_as_treated` spec moves the coefficient by about 0.001 mph — so both
+are decisions waiting on a person, not on more evidence.
 
 Before touching the secondary feed: read the zero-speed entry in `AGENTS.md`.
 Start from `data/processed/secondary_hourly_panel.parquet`
@@ -196,11 +191,8 @@ Start from `data/processed/secondary_hourly_panel.parquet`
 `spillover_diagnostics.py`, whose committed table averages 8.8M outages in as
 0 mph and is superseded.
 
-**Phase 11 — the writeup.** The README is current and honest; treat it as the
-spine rather than starting over. What it lacks is the mechanism section.
-
 Anything whose output could reach the README needs a hypothesis record committed
-before it runs. Phase 10 work qualifies.
+before it runs.
 
 ## The protocol, which is binding
 
@@ -227,8 +219,9 @@ repointing that path, which is the pattern to copy.
 Everything runs unattended on GitHub Actions, free, because the owner will not
 leave a machine on. `backfill.yml` every six hours (verify, then deepen the
 pre-period backwards, then extend forward); `analysis.yml` rebuilds the panel
-and reruns Phases 6–9 when data lands; `tests.yml` runs ruff, black and pytest.
-253 tests pass. State lives in the `data-raw` release.
+and reruns Phases 6-9 when the backfill completes, and takes
+`workflow_dispatch`; `tests.yml` runs ruff, black and pytest.
+258 tests pass. State lives in the `data-raw` release.
 
 To work locally: pull month parts, the manifest and the segment table from the
 release, then `build_staging` → `geo` → `build_panel`.
@@ -250,8 +243,12 @@ models fabricate confidently in this domain.
 - Changing anything `docs/project_brief.md` marks frozen.
 - Adopting any of **D1, D2, D3, D5, D6, D7** — all still open, all reserved.
   You may analyse them and bring evidence; you may not adopt one. D2's
-  construction work is done and negative (H004, H006); the decision is still the
-  owner's to record.
+  construction work is done and negative (H004, H006) and D3's sensitivity is
+  measured and negligible; both are now waiting on a person rather than on more
+  evidence.
+- Pushing to a remote. `AGENTS.md` says to ask and this brief does not, which is
+  a real conflict. It was put to the owner on 2026-09-13 and they chose
+  push-to-main, so that is the standing answer — but say what you pushed.
 
 ## Stopping
 
@@ -259,11 +256,23 @@ Work through this without pausing for permission between steps. Stop when you
 hit something in the list above, when a measurement contradicts this brief in a
 way that changes the plan, or when the work is done.
 
-Waiting on the backfill is not a stopping point; Phase 10 runs on data already
-held.
+**The work may already be done.** If the two workflow checks are green, the
+register shows seven answered hypotheses, and the README quotes the current
+tables, then the honest report is that there is nothing to do and the remaining
+items belong to the owner. Saying so is a valid outcome and a better one than
+manufacturing a hypothesis to fill the session.
 
 ## First
 
-Diagnose the failed Backfill run, then form your own view of the repo. Parts of
-this brief will be stale. Correct it rather than trusting it, and say what you
-found that differs.
+Confirm the two workflows are green, then form your own view of the repo. Parts
+of this brief will be stale — it has been wrong before, in ways that mattered:
+it once said the prune freed 825 slots when the rule as written freed 489, and
+that `2023-01` was 28 days downloaded when the snapshot said 22. **Correct it
+rather than trusting it, and say what you found that differs.**
+
+Two habits that paid off on 2026-09-13 and are worth repeating. Check a fix
+against live state instead of assuming it took — the release was simulated
+asset-by-asset before the change was pushed, which is how two further defects
+surfaced. And when a failure is opaque, make it explain itself rather than
+guessing from outside; the unmatched segment was found in one line only after
+the check was made to print its rows.
