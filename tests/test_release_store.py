@@ -249,6 +249,41 @@ def test_unsafe_receipt_name_is_rejected_before_publication(tmp_path):
     assert fake.calls == []
 
 
+def test_a_changed_segment_table_replaces_the_release_asset(tmp_path):
+    """Reference data has to track the feed. The segment roster grew, the pinned
+    attribute table did not, and on 2026-09-13 a segment reached the readings
+    with no attribute row -- the panel could not classify it and
+    `hard_unmatched_segments` stopped the analysis. Refreshing it locally is
+    useless if publish() then refuses to carry it."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    segments = restored / "ezpass_segments.parquet"
+    segments.write_bytes(b"refreshed segment roster")
+    _add_asset(fake, "ezpass_segments.parquet", b"stale segment roster")
+
+    result = store.publish(restored)
+
+    assert result["replaced_ancillary"] == ["ezpass_segments.parquet"]
+    live = {a["name"]: data for a, data in fake.assets.values()}
+    assert live["ezpass_segments.parquet"] == b"refreshed segment roster"
+
+
+def test_a_changed_month_part_is_still_refused(tmp_path):
+    """The relaxation above is for reference data only. Observations stay
+    immutable: a month part whose bytes changed is a corruption, not an update."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    part = next((restored / "ezpass_speeds").glob("*.parquet"))
+    corrupt = b"different observation bytes"
+    for asset, _ in list(fake.assets.values()):
+        if asset["name"] == part.name:
+            asset = dict(
+                asset, size=len(corrupt), digest="sha256:" + hashlib.sha256(corrupt).hexdigest()
+            )
+            fake.assets[asset["id"]] = (asset, corrupt)
+
+    with pytest.raises(StateIntegrityError, match="conflicting raw release asset"):
+        store.publish(restored)
+
+
 # --- Release-asset pruning --------------------------------------------------
 # A GitHub release holds at most 1000 assets and rejects every upload once it is
 # full. On 2026-09-13 the backfill died exactly there: 853 day checkpoints from

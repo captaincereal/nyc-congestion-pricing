@@ -537,9 +537,32 @@ class ReleaseStore:
         # Before uploading, not after: a release at its asset ceiling rejects
         # every upload, so pruning last would never run.
         pruned = self._prune(state, release, assets)
-        uploaded_raw = []
+        uploaded_raw, replaced_ancillary = [], []
         for name, expected in state["assets"].items():
             asset = assets.get(name)
+            if (
+                asset is not None
+                and name in ANCILLARY
+                and not self._remote_matches(asset, expected)
+            ):
+                # Reference data, not observations. The segment attribute table
+                # has to track a roster the feed keeps adding to, and pinning it
+                # to first-fetch bytes is what stopped the analysis on
+                # 2026-09-13: a segment appeared in the readings with no
+                # attribute row, so the panel could not assign it to a treatment
+                # group and `hard_unmatched_segments` failed. Month parts and day
+                # checkpoints are observations and stay immutable.
+                #
+                # Cost: snapshots written before the replacement reference the
+                # old bytes and stop being restorable. `restore` reads the newest
+                # valid snapshot, which is written below against the new bytes,
+                # so the fallback chain shortens until fresh snapshots accumulate
+                # rather than breaking.
+                response = self._request("DELETE", f"{self.base}/releases/assets/{asset['id']}")
+                response.close()
+                assets.pop(name, None)
+                replaced_ancillary.append(name)
+                asset = None
             if asset is None:
                 asset = self._upload(release, name, _asset_path(raw_dir, name))
                 assets[name] = asset
@@ -548,6 +571,8 @@ class ReleaseStore:
                 raise StateIntegrityError(
                     f"refusing to overwrite conflicting raw release asset: {name}"
                 )
+        if replaced_ancillary:
+            log.info("replaced reference asset(s): %s", ", ".join(replaced_ancillary))
         stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%S%fZ")
         run_id = re.sub(r"[^A-Za-z0-9_-]", "_", os.environ.get("GITHUB_RUN_ID", "local"))
         name = f"state_{stamp}_{run_id}_{uuid.uuid4().hex[:8]}.json"
@@ -589,6 +614,7 @@ class ReleaseStore:
             "state_asset": name,
             "parts": len(state["manifest"]["parts"]),
             "uploaded_raw": uploaded_raw,
+            "replaced_ancillary": replaced_ancillary,
             "compatibility_errors": failures,
             "pruned": pruned,
         }

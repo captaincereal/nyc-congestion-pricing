@@ -646,6 +646,11 @@ SEGMENT_SAMPLE_DAYS = (
     date(2025, 7, 9),
     date(2026, 1, 7),
     date(2026, 6, 10),
+    # Added 2026-09-13. The archive now runs to 2026-08-31, and sampling only to
+    # 2026-06 left a segment in the readings with no attribute row: the panel
+    # build put 586 link-hours in an `unassigned` group and `hard_unmatched_segments`
+    # stopped the analysis. Extend this whenever the window extends.
+    date(2026, 8, 12),
 )
 
 
