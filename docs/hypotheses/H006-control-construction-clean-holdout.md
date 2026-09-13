@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | proposed |
+| **Status** | answered |
 | **Registered** | 2026-09-13 |
 | **Registered by** | Claude Opus 5 session |
-| **Answered by** | — |
+| **Answered by** | Claude Opus 5 session, 2026-09-13 |
 | **Supersedes / superseded by** | supersedes [H004](H004-control-construction.md) on the 27-month archive; H004's verdict stands for the 12-month one |
 
 > Construction work behind **D2**, like H004. Running it does not adopt D2.
@@ -109,11 +109,80 @@ matching window ends at k = −96, which this archive already covers.
 
 ## Result
 
-*Empty until run.*
+Matching window k = −96 … −27 (70 weeks), 148 treated links and 185 controls in
+the donor pool. The 500 m boundary rule again excluded **zero** controls. Rule A
+kept 60 donors; rule B put weight above 0.001 on **31** donors, with a
+matching-window fit loss of **2.67**. Both holdouts judged inside one
+horizon-26 event-study specification, so they are directly comparable.
+
+Joint pre-trend Wald test, held-out windows only:
+
+**Primary holdout — k = −26 … −15, roughly 2024-07-07 to 2024-09-28, no major
+holiday** (dof 12):
+
+| Control set | all | peak | offpeak | weekend |
+|---|---|---|---|---|
+| naive (185) | χ²=43.7, p=1.7e-05 | χ²=69.7, p=3.7e-10 | χ²=49.6, p=1.7e-06 | χ²=46.1, p=6.8e-06 |
+| A — nearest 60 | χ²=42.6, p=2.6e-05 | χ²=59.0, p=3.5e-08 | χ²=53.9, p=2.9e-07 | χ²=54.9, p=1.9e-07 |
+| **B — synthetic 31** | χ²=36.4, p=2.8e-04 | χ²=35.9, p=3.4e-04 | **χ²=31.9, p=1.4e-03** | χ²=39.3, p=9.4e-05 |
+
+**Secondary holdout — k = −12 … −2, H004's October–December window** (dof 11):
+
+| Control set | all | peak | offpeak | weekend |
+|---|---|---|---|---|
+| naive | χ²=94.6 | χ²=78.0 | χ²=96.3 | χ²=45.7 |
+| A — nearest 60 | χ²=133.1 | χ²=83.8 | χ²=112.9 | χ²=96.9 |
+| B — synthetic 31 | χ²=75.1 | χ²=62.8 | χ²=51.8 | χ²=58.8 |
+
+Every cell rejects. The best result anywhere is rule B on off-peak at the clean
+holdout, p = 1.4e-03, still more than an order of magnitude below the 0.05
+threshold.
 
 ## Verdict
 
-*Empty until run.*
+**Refutes.** Both rules reject on the primary holdout, in every sample. Matching
+on pre-treatment behaviour does not deliver parallel trends on this link roster,
+on a window with no holiday confound, fitted on seventy weeks.
+
+**The holiday explanation is answered, and the answer is "partly, but not
+enough".** This is what the two-holdout design was for. Holidays are real:
+every control set rejects roughly twice as hard on the October–December window
+as on the clean one — rule B goes from χ²=36.4 clean to χ²=75.1 holiday on the
+full sample. So H004's caveat was legitimate. But the clean window still rejects
+decisively, so holidays were aggravating a failure rather than causing one. That
+distinction could not be drawn before and can be now.
+
+**Rule B could not fit the long matching window, and that is the honest
+version.** In H004 the synthetic weights achieved a squared loss of exactly zero
+on 24 weeks, an in-sample fit so perfect it was evidence of nothing. Against 70
+weeks the same optimiser reaches 2.67 and concentrates onto 31 donors. It is
+still the best rule at both holdouts, and it still rejects. The earlier exact
+fit was degeneracy, not skill.
+
+**Rule A remains no better than not trying.** On the clean holdout it is
+indistinguishable from the naive pool (χ²=42.6 against 43.7); on the holiday
+holdout it is substantially worse (133.1 against 94.6). Nearest-neighbour
+selection on these features does not transport, in either window.
+
+**Donor count is at the edge.** Rule B retains 31 donors against the
+pre-registered minimum of 30, with the top five weights carrying 46% of the
+mass. That clears the bar as written, but it is close enough that the criteria
+would have been worth setting higher, and a reader should treat rule B's
+clustered inference as thin.
+
+The prediction held on both counts: failure on the primary holdout, and the
+holiday holdout rejecting at least as hard as the clean one.
+
+**What this licenses.** Under the registered criteria, the study reports that
+the available link panel cannot support the frozen design, and stops searching
+for a control set that passes. Further attempts are further draws against the
+same data, and the register would have to carry the count.
+
+**What it does not license.** Still no evidence that congestion pricing had no
+effect. This says the comparison cannot answer the question. A different
+outcome, a different geography, or a roster with links nearer the cordon could
+all still identify something — see the coverage limitation that no control link
+sits within 500 m of the boundary.
 
 ## Notes
 
