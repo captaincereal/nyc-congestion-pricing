@@ -1,6 +1,6 @@
 # Data-quality report — E-Z Pass local-street staging
 
-Generated: 2026-09-12T23:36:23+00:00
+Generated: 2026-09-13T01:01:57+00:00
 Source DB: `nyc_cp.duckdb`  ·  raw manifest: `ezpass_manifest.json` (present; presence alone does not establish verification)
 
 > Observed problems only. Handling decisions are in the last section and are applied elsewhere, never by this script.
@@ -9,7 +9,7 @@ Source DB: `nyc_cp.duckdb`  ·  raw manifest: `ezpass_manifest.json` (present; p
 
 |   total_rows |   distinct_links | ts_min              | ts_max              |
 |-------------:|-----------------:|:--------------------|:--------------------|
-|      9303380 |              344 | 2024-05-01 00:01:58 | 2025-04-30 23:59:03 |
+|     10942997 |              344 | 2024-03-01 00:00:57 | 2025-04-30 23:59:03 |
 
 ## `null_rates`
 
@@ -29,51 +29,51 @@ _(no rows)_
 
 |   zero_speed |   negative_speed |   over_60 |   over_80 |   over_100 |   zero_speed_pct |   over_80_pct |   max_speed_mph |
 |-------------:|-----------------:|----------:|----------:|-----------:|-----------------:|--------------:|----------------:|
-|          567 |                0 |     57975 |     11763 |       2065 |            0.006 |        0.1264 |          7043.9 |
+|          667 |                0 |     71939 |     15327 |       2421 |            0.006 |        0.1401 |          7043.9 |
 
 ## `sample_depth`
 
 |   mean_samples |   min_samples |   p05 |   p50 |   p95 |   max_samples |   readings_with_le_1_sample |   le_3_samples_pct |
 |---------------:|--------------:|------:|------:|------:|--------------:|----------------------------:|-------------------:|
-|          37.73 |             2 |     2 |    19 |   134 |           782 |                           0 |               10.7 |
+|           38.2 |             2 |     2 |    19 |   136 |           782 |                           0 |              10.68 |
 
 ## `speed_vs_travel_time`
 
 |   comparable_rows |   p50_abs_diff_mph |   p95_abs_diff_mph |   pct_disagree_gt_5mph |
 |------------------:|-------------------:|-------------------:|-----------------------:|
-|       9.30281e+06 |              0.002 |              0.003 |                      0 |
+|       1.09423e+07 |              0.002 |              0.003 |                      0 |
 
 ## `dst_spring_forward`
 
 | label                |   readings_in_missing_hour |   readings_hour_01 |   readings_hour_03 |
 |:---------------------|---------------------------:|-------------------:|-------------------:|
 | control week earlier |                       1063 |               1087 |               1010 |
-| spring forward 2024  |                          0 |                  0 |                  0 |
+| spring forward 2024  |                          0 |               1130 |               1071 |
 | spring forward 2025  |                          0 |               1026 |                990 |
 
 ## `readings_per_link_hour`
 
 |   mean_readings_per_link_hour |   min_n |   p50_n |   p95_n |   max_n |   link_hours |   link_hours_over_4 |
 |------------------------------:|--------:|--------:|--------:|--------:|-------------:|--------------------:|
-|                          3.77 |       1 |       4 |       4 |       4 |  2.46474e+06 |                   0 |
+|                          3.78 |       1 |       4 |       4 |       4 |  2.89851e+06 |                   0 |
 
 ## `link_coverage_span`
 
 |   links |   links_gone_before_treatment |   links_new_after_treatment |   mean_active_days |
 |--------:|------------------------------:|----------------------------:|-------------------:|
-|     344 |                            19 |                           0 |              323.3 |
+|     344 |                            19 |                           0 |              379.2 |
 
 ## `daily_link_count`
 
-365 rows (series; not inlined — plot separately).
+426 rows (series; not inlined — plot separately).
 
 Head / tail:
 
 | day                 |   links |   readings |
 |:--------------------|--------:|-----------:|
-| 2024-05-01 00:00:00 |     313 |      26994 |
-| 2024-05-02 00:00:00 |     313 |      27331 |
-| 2024-05-03 00:00:00 |     313 |      27174 |
+| 2024-03-01 00:00:00 |     328 |      28604 |
+| 2024-03-02 00:00:00 |     328 |      28773 |
+| 2024-03-03 00:00:00 |     322 |      27950 |
 …
 | day                 |   links |   readings |
 |:--------------------|--------:|-----------:|
