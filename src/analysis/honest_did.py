@@ -199,7 +199,7 @@ def sensitivity(m: dict) -> tuple[pd.DataFrame, dict]:
     return pd.DataFrame(rows), breakdown
 
 
-def plot(grid: pd.DataFrame, m: dict, breakdown: dict) -> None:
+def plot(grid: pd.DataFrame, m: dict, breakdown: dict, prefix: str = "H002") -> None:
     rm = grid[(grid["method"] == "relative_magnitude") & (grid["status"] == "ok")]
     if rm.empty:
         return
@@ -223,7 +223,7 @@ def plot(grid: pd.DataFrame, m: dict, breakdown: dict) -> None:
     )
     for s in ("top", "right"):
         ax.spines[s].set_visible(False)
-    _save(fig, f"H002_honest_did_{m['sample']}.png")
+    _save(fig, f"{prefix}_honest_did_h{m['horizon']}_{m['sample']}.png")
 
 
 def main() -> None:
@@ -231,6 +231,12 @@ def main() -> None:
     ap.add_argument("--sample", default="all", choices=[*SAMPLES])
     ap.add_argument("--all-samples", action="store_true")
     ap.add_argument("--horizon", type=int, default=12, help="max |weeks| from treatment")
+    ap.add_argument(
+        "--out-prefix",
+        default="H002",
+        help="namespace the output files, so reruns on a different panel or horizon "
+        "do not overwrite the record they belong to",
+    )
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
@@ -248,13 +254,14 @@ def main() -> None:
             m["min_eigenvalue"],
         )
         grid, breakdown = sensitivity(m)
-        plot(grid, m, breakdown)
+        plot(grid, m, breakdown, args.out_prefix)
         grids.append(grid)
 
         rm0 = grid[(grid["method"] == "relative_magnitude") & (grid["M"] == 0.0)]
         summary.append(
             {
                 "sample": s,
+                "horizon": args.horizon,
                 "breakdown_relative_magnitude": breakdown.get("relative_magnitude", np.nan),
                 "breakdown_smoothness": breakdown.get("smoothness", np.nan),
                 "n_pre_bins": sum(1 for k in m["k"] if k < REFERENCE_K),
@@ -275,11 +282,12 @@ def main() -> None:
         )
 
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
+    stem = f"{args.out_prefix}_honest_did_h{args.horizon}"
     pd.concat(grids, ignore_index=True).round(6).to_csv(
-        TABLES_DIR / "H002_honest_did_grid.csv", index=False
+        TABLES_DIR / f"{stem}_grid.csv", index=False
     )
-    pd.DataFrame(summary).round(6).to_csv(TABLES_DIR / "H002_honest_did.csv", index=False)
-    log.info("wrote H002_honest_did.csv and H002_honest_did_grid.csv")
+    pd.DataFrame(summary).round(6).to_csv(TABLES_DIR / f"{stem}.csv", index=False)
+    log.info("wrote %s.csv and %s_grid.csv", stem, stem)
     log.info(
         "A low breakdown value is a finding about this design, not a causal null. "
         "It does not establish that the effect is zero."

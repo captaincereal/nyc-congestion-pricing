@@ -162,7 +162,7 @@ def rule_synthetic(
     return pd.Series(w, index=weekly_donors.index), float(res.fun)
 
 
-def holdout_pretrend(sample: str, keep: set[str], horizon: int = 12) -> dict:
+def holdout_pretrend(sample: str, keep: set[str], window: tuple[int, int], horizon: int) -> dict:
     """Joint pre-trend Wald test on the held-out weeks for one donor set.
 
     Restricted to the held-out bins only, so the matching window contributes
@@ -177,7 +177,7 @@ def holdout_pretrend(sample: str, keep: set[str], horizon: int = 12) -> dict:
     df, dummy_cols = build_dummies(df, horizon)
     res = estimate(df, dummy_cols)
 
-    lo, hi = HOLDOUT_WEEKS
+    lo, hi = window
     idx = []
     for i, col in enumerate(res["dummy_cols"]):
         tok = col.split("_")[1]
@@ -208,10 +208,10 @@ def holdout_pretrend(sample: str, keep: set[str], horizon: int = 12) -> dict:
     }
 
 
-def build(boundary_m: float) -> dict:
+def build(boundary_m: float, match_weeks: tuple[int, int]) -> dict:
     """Fit both rules on the matching window. No held-out data is touched here."""
     df = load("all")
-    lo, hi = MATCH_WEEKS
+    lo, hi = match_weeks
     match_df = df[(df["event_week"] >= lo) & (df["event_week"] <= hi)]
     if match_df.empty:
         raise SystemExit("matching window is empty")
@@ -264,11 +264,38 @@ def build(boundary_m: float) -> dict:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--boundary-metres", type=float, default=BOUNDARY_METRES)
-    ap.add_argument("--horizon", type=int, default=12)
+    ap.add_argument(
+        "--match-weeks",
+        type=int,
+        nargs=2,
+        default=list(MATCH_WEEKS),
+        metavar=("LO", "HI"),
+        help="event weeks the features are built from, inclusive",
+    )
+    ap.add_argument(
+        "--holdout",
+        type=int,
+        nargs=2,
+        action="append",
+        metavar=("LO", "HI"),
+        help="event-week window to judge on, inclusive; repeatable. The first given "
+        "is primary. Defaults to the single window frozen for H004.",
+    )
+    ap.add_argument(
+        "--out-prefix",
+        default="H004",
+        help="namespace the outputs so a rerun does not overwrite the record it belongs to",
+    )
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
-    built = build(args.boundary_metres)
+    match_weeks = (args.match_weeks[0], args.match_weeks[1])
+    holdouts = [(h[0], h[1]) for h in (args.holdout or [list(HOLDOUT_WEEKS)])]
+    # One horizon wide enough for every holdout, so each window is judged inside
+    # the same event-study specification rather than a differently sized one.
+    horizon = max(max(abs(lo), abs(hi)) for lo, hi in holdouts)
+
+    built = build(args.boundary_metres, match_weeks)
     sets = {
         "naive": set(built["naive"]),
         "rule_a_nearest": set(built["rule_a"]),
@@ -276,28 +303,43 @@ def main() -> None:
     }
 
     rows = []
-    for name, keep in sets.items():
-        for sample in SAMPLES:
-            r = holdout_pretrend(sample, keep, args.horizon)
-            r.update(control_set=name, sample=sample, boundary_metres=args.boundary_metres)
-            rows.append(r)
-            if r["status"] == "ok":
-                log.info(
-                    "%-17s %-8s chi2=%7.2f dof=%2d p=%.4g -> %s",
-                    name,
-                    sample,
-                    r["chi2"],
-                    r["dof"],
-                    r["p_value"],
-                    "REJECTS" if r["rejects"] else "does not reject",
+    for i, window in enumerate(holdouts):
+        label = "primary" if i == 0 else f"secondary_{i}"
+        log.info("=== holdout %s: k=%d..%d, horizon %d ===", label, window[0], window[1], horizon)
+        for name, keep in sets.items():
+            for sample in SAMPLES:
+                r = holdout_pretrend(sample, keep, window, horizon)
+                r.update(
+                    control_set=name,
+                    sample=sample,
+                    holdout=label,
+                    holdout_lo=window[0],
+                    holdout_hi=window[1],
+                    match_lo=match_weeks[0],
+                    match_hi=match_weeks[1],
+                    horizon=horizon,
+                    boundary_metres=args.boundary_metres,
                 )
-            else:
-                log.warning("%-17s %-8s %s", name, sample, r["status"])
+                rows.append(r)
+                if r["status"] == "ok":
+                    log.info(
+                        "%-9s %-17s %-8s chi2=%7.2f dof=%2d p=%.4g -> %s",
+                        label,
+                        name,
+                        sample,
+                        r["chi2"],
+                        r["dof"],
+                        r["p_value"],
+                        "REJECTS" if r["rejects"] else "does not reject",
+                    )
+                else:
+                    log.warning("%-9s %-17s %-8s %s", label, name, sample, r["status"])
 
     TABLES_DIR.mkdir(parents=True, exist_ok=True)
     out = pd.DataFrame(rows)
     out["run_at"] = datetime.now(UTC).isoformat(timespec="seconds")
     cols = [
+        "holdout",
         "control_set",
         "sample",
         "status",
@@ -309,26 +351,29 @@ def main() -> None:
         "n_control",
         "n_clusters",
         "n_obs",
+        "holdout_lo",
+        "holdout_hi",
+        "match_lo",
+        "match_hi",
+        "horizon",
         "boundary_metres",
         "run_at",
     ]
-    out.reindex(columns=cols).round(6).to_csv(TABLES_DIR / "H004_holdout_pretrend.csv", index=False)
+    out.reindex(columns=cols).round(6).to_csv(
+        TABLES_DIR / f"{args.out_prefix}_holdout_pretrend.csv", index=False
+    )
 
     built["weights"].rename("weight").rename_axis(CLUSTER_VAR).reset_index().query(
         "weight >= @WEIGHT_FLOOR"
     ).sort_values("weight", ascending=False).round(6).to_csv(
-        TABLES_DIR / "H004_synthetic_weights.csv", index=False
+        TABLES_DIR / f"{args.out_prefix}_synthetic_weights.csv", index=False
     )
-    pd.DataFrame(
-        {
-            CLUSTER_VAR: sorted(set(built["rule_a"]) | set(built["rule_b"])),
-        }
-    ).assign(
+    pd.DataFrame({CLUSTER_VAR: sorted(set(built["rule_a"]) | set(built["rule_b"]))}).assign(
         in_rule_a=lambda t: t[CLUSTER_VAR].isin(built["rule_a"]),
         in_rule_b=lambda t: t[CLUSTER_VAR].isin(built["rule_b"]),
-    ).to_csv(TABLES_DIR / "H004_control_sets.csv", index=False)
+    ).to_csv(TABLES_DIR / f"{args.out_prefix}_control_sets.csv", index=False)
 
-    log.info("wrote H004_holdout_pretrend.csv, H004_synthetic_weights.csv, H004_control_sets.csv")
+    log.info("wrote %s_holdout_pretrend.csv and roster files", args.out_prefix)
     log.info(
         "Held-out pre-treatment diagnostics only. No post-treatment coefficient "
         "is computed here; see the hypothesis record before going further."
