@@ -60,6 +60,18 @@ did not occur.
 
 ## Evidence
 
+> **Stale as of 2026-09-13, and being regenerated.** The backfill was stuck at
+> GitHub's release-asset ceiling for part of 2026-09-13. Once unstuck it landed
+> `2023-01` and ran the post-period forward, so the archive is now **39 verified
+> contiguous months, 2023-01 through 2026-03** — 24 pre-treatment months and 15
+> post — against the 27 this section describes. The magnitudes below were quoted
+> from artefacts `analysis.yml` has since rebuilt: the committed tables already
+> read χ² 96.96 / 70.69 / 100.43 / 45.55 and an all-hours ATT of 1.194 mph on
+> 5.375M link-hours. **Read the numbers off `outputs/tables/`, not off this
+> prose**, until the section is rewritten in one pass from a settled archive.
+> The finding is unchanged: every sample still rejects, and a longer pre-period
+> has always made the pre-trend test reject harder rather than softer.
+
 The source archive is **27 contiguous months, 2023-02 through 2025-04, all 27
 verified** against live source counts with deterministic replay of the retained
 sample. That gives 96 pre-treatment weeks. Effect magnitudes appear below because

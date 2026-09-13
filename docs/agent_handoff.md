@@ -50,24 +50,39 @@ eight newest still pointed at 2023-02 days. The fallback chain would have become
 four deep instead of eight, silently. Whatever a kept snapshot references is now
 live too.
 
-Simulated against the live release before pushing: **deletes 873, leaves 127**,
-with all 27 month parts, all 27 verification receipts and all 8 snapshots intact
-and restorable. If you find the release near 1000 again, or Backfill still
-failing with 422, that simulation was wrong and this is the first thing to
-repair. The downloader was never the problem — it was finishing months normally
-right up to the upload failure.
+Simulated against the live release before pushing: deletes 873, leaves 127.
+**Run 6 then confirmed it.** Started 2026-09-13T16:58Z on `0fa21bc`, it took the
+release from **1000 assets to 145** — day receipts 423 → **0**, day parquets
+430 → 54 in-flight, snapshots 89 → 9 — with every month part and verification
+receipt intact. The 422s are gone and the store is no longer near its ceiling.
 
-One caution on timing. Scheduled runs on free runners are being delayed four to
-five hours past their cron slots (`25 1,7,13,19` UTC; observed starts 06:17 and
-12:46). A release still at 1000 shortly after a push means the job has not run
-yet, not that the fix failed. Check the newest asset's `created_at` against your
-push before concluding anything.
+One caution on timing, which cost this session an hour of doubt. Scheduled runs
+on free runners are delayed hours past their cron slots (`25 1,7,13,19` UTC;
+observed starts 06:17, 12:46, 16:58). A release still at 1000 shortly after a
+push means the job has not run yet, not that the fix failed. Check the newest
+asset's `created_at` against your push before concluding anything.
 
-Consequence while it was stuck: the archive sits at **27 verified contiguous
-months, 2023-02 … 2025-04**, 21.3M rows. `2023-01` was **22** days downloaded
-when the failure hit — the newest state snapshot references days 01 through 22,
-not the 28 previously recorded here — so it should complete quickly. The
-post-period beyond 2025-04 has not started.
+**The archive has moved a long way and the README has not caught up.** It was 27
+verified contiguous months, 2023-02 … 2025-04, when the failure hit. Run 6
+landed `2023-01` — it was 22 days downloaded, not the 28 previously recorded
+here — and then kept going: **39 month parts, 2023-01 … 2026-03, all 39 with
+verification receipts**. That is 24 pre-treatment months and 15 post, against
+the 23 and 4 the README still describes.
+
+So **the README's Evidence section is stale and must be regenerated**, not
+hand-edited. Its figures were quoted from artefacts that `analysis.yml` has
+since rebuilt twice; as of 2026-09-13T16:08Z the committed tables already read
+χ² 96.96 / 70.69 / 100.43 / 45.55 against the 96.7 / 70.4 / 100.2 / 45.6 in the
+prose, and the ATT 1.194 against 1.17, on 5.375M link-hours against 5.18M. Those
+were not corrected in place because run 6 was still in flight and every number
+would have moved again within the hour. Wait for the backfill to settle, let
+`analysis.yml` rerun, then rewrite the section from the committed tables in one
+pass and say which commit's artefacts it quotes.
+
+None of this disturbs the finding. The pre-trend test still rejects in all four
+samples, and on a longer pre-period it has always rejected harder, not softer.
+But **do not quote the current README numbers** — read them off
+`outputs/tables/`.
 
 Two milestone notifications are wired into the backfill and open a GitHub issue
 once each: when `2023-01` lands, and when the post-period is complete. Neither
