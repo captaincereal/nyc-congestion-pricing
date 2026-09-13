@@ -2,12 +2,108 @@
 
 **NYC Congestion Relief Zone · speed study**
 
-Compiled 2026-09-09, updated 2026-09-12 · treatment date 2025-01-05 ·
+Compiled 2026-09-09, updated 2026-09-13 · treatment date 2025-01-05 ·
 Validation details are recorded in the latest dated entry below.
 
 Six decisions are open. Earlier entries are historical and are superseded
 where the latest audit says so. Each open decision changes what the study reports, so it is
 deliberately left unmade rather than defaulted into the panel.
+
+## Update 2026-09-13 — the secondary feed cannot measure diversion either, and the reason is measurement
+
+[H007](hypotheses/H007-secondary-feed-diversion.md) is answered and **refutes**.
+The spillover question is now closed on both feeds, for two different reasons,
+and the difference between them is the useful part.
+
+The primary E-Z Pass roster cannot answer it because it contains no units where
+diversion would show — the five `boundary` links straddle 60th Street and the
+nearest control is 808 m out. That is a coverage limitation. The secondary DOT
+feed (`i4gi-tjb9`) does carry the nine toll-exempt in-zone links traffic would
+divert onto, and it cannot answer it either, because **it stops measuring three
+of them**. `4616325` (11th Ave S) has never emitted a positive speed in 41
+months. `4616323` and `4616338` (12th Ave S and N) report at full availability
+through March 2024, degrade in April, and go permanently dark from May 2024.
+The treated group is eight contributing links before the toll and six after,
+and the three that leave are the whole West Side Highway arm of the design.
+
+The pre-registered availability gate measures this as a **−21.16 pp**
+differential change in usable-hour availability against a 5 pp bar, identical to
+within 0.25 pp in all four hour-of-week cuts. The joint pre-trend test also
+rejects (χ² = 86.0 on 11 monthly leads, p = 1e-13) and the Rambachan–Roth
+breakdown value is 0.000–0.034, so all three refutation conditions fire. **Read
+the verdict off the availability gate.** The other two consume a cluster-robust
+covariance matrix resting on nine treated clusters, which is exactly the regime
+the same record calls untrustworthy; the availability gate is a count of hours
+and needs no asymptotics at all.
+
+**The break predates the toll by eight months**, so it is instrumentation, not
+the intervention. That is what makes this a measurement failure rather than a
+parallel-trends failure, and it says what better data would fix: working speed
+sensors on the 11th/12th Avenue corridor across the toll date. A better control
+pool, a different estimator and more draws would all change nothing.
+
+The estimate, which is not quotable: ATT +0.354 mph on all hours (clustered SE
+1.457, randomization p = 0.804 on 500 draws), positive where diversion predicts
+negative. The clustered standard errors run 10–26% tighter than the
+randomization null, consistent with H001. The design's 80%-power minimum
+detectable effect is 4.85 mph, 17% of the pre-treatment treated mean — even with
+clean diagnostics it could not have seen a diversion effect the size of the
+study's own headline association.
+
+**Two artefacts change status.** `data/processed/secondary_hourly_panel.parquet`
+is new, built by `python -m src.data.build_secondary_panel`, and is the panel
+any future secondary-feed work should start from; it treats zero-speed readings
+as the outages they are. `outputs/tables/spillover_secondary_monthly.csv` is
+**superseded**: `src/analysis/spillover_diagnostics.py` filters only
+`speed_mph IS NOT NULL` and so averages 8.8M zero-speed outages in as 0 mph.
+Speed levels taken from it are biased toward zero by roughly the local outage
+rate. The primary panel is unaffected — zero-speed readings are at most 0.014%
+of any `treatment_group × post` cell there.
+
+**Still open.** Whether diversion occurred. H007 establishes only that this feed
+on these nine links cannot measure it. The restricted design its Verdict names —
+treated limited to the six links reporting throughout — is a new hypothesis and
+must be registered before it runs.
+
+---
+
+## Update 2026-09-13 — the "geometric backstop" in geo.py was dead code, and could not have worked
+
+`src/data/geo.py` defined a Manhattan bounding box (`_in_manhattan_envelope`,
+`MANHATTAN_LON_MIN`/`MAX`, `MANHATTAN_LAT_MIN`/`MAX`) and a comment calling it
+the geometric backstop on the borough label. Nothing called it. It has been
+removed and the docstrings corrected. **No treatment assignment changed**: the
+primary roster still classifies 185 control, 148 treated, 6 exempt, 5 boundary,
+2 crossing, exactly as before.
+
+Wiring it in was the other option, and was measured first. It fails on both
+feeds. On the primary E-Z Pass roster it is a provable no-op — all 176
+Manhattan-labelled segments lie wholly inside the box. On the secondary feed
+(`i4gi-tjb9`) it does not catch the two links it was supposed to catch, because
+the box has to reach 40.680 N to cover the Battery and therefore also covers
+downtown Brooklyn. Links `4616339` and `4616340` — the BQE approaches to the
+Brooklyn and Manhattan Bridges, labelled `borough = Manhattan` with Brooklyn
+geometry — sit entirely inside it. So do ten Brooklyn-labelled E-Z Pass
+segments on Atlantic Ave and Flatbush Ave.
+
+Requiring every vertex inside the box instead moves six links, each for the
+wrong reason. Four have corrupt geometry, with vertices decoding to longitudes
+near zero (`4616324`, `4620343`, `4616332`, `4456511`). The two
+Brooklyn-Battery Tunnel links reach Brooklyn because the tunnel does, and both
+are in H007's treated group: `4456494` and `4456502` would have been moved into
+its control group. That is worse than the problem.
+
+**What remains open.** `classify_segment` still trusts the borough label alone,
+so the two BQE approaches still come back `treated`, which is wrong — an
+approach to a tolled crossing is toll-exposed, and plain `control` would be
+wrong too. H007 excludes both by `link_id`, which is the proportionate fix
+while two links are affected. If a later feed or a longer roster makes the
+disagreement general, the fix is a river-side or borough-polygon test, not a
+bounding box. `tests/test_geo.py` pins all three facts: the borough label is
+the only gate, the BQE misclassification is characterised so that changing it
+has to be deliberate, and a bounding box provably cannot backstop the label.
+
+---
 
 ## Update 2026-09-12 — inference corrected; the current design cannot identify the effect
 

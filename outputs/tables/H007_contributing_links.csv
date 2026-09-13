@@ -1,0 +1,5 @@
+group,post,links_present,links_contributing
+control,False,116,94
+control,True,103,96
+treated,False,9,8
+treated,True,9,6

@@ -96,12 +96,25 @@ and a dated entry, rather than defaulting one into the panel.
 - **Putting any function on the timestamp column in a SoQL `$where` clause
   collapses paging** — measured 255.8s versus 3.7s for the same page. The
   downsample is client-side for this reason.
+- **On the secondary feed, `speed = 0` means OUTAGE, not standstill.** 9,129,474
+  of 42.2M readings; 9,128,628 of those also carry `travel_time = 0`, all carry
+  `status = -101`, and the rate peaks overnight (47.8% at 03:00 on the exempt
+  in-zone links against 28.8% through the afternoon) — the inverse of a
+  congestion pattern. Filter on `speed > 0`; never average them in as 0 mph.
+  `status = -101` alone does not identify them, since it also accompanies 2.18M
+  positive readings. `src/analysis/spillover_diagnostics.py` gets this wrong and
+  its output is superseded by `data/processed/secondary_hourly_panel.parquet`.
+  The primary E-Z Pass panel is unaffected (≤0.014% of any cell).
 - **Treatment assignment is geometric.** 60th Street is not a line of constant
   latitude; the Manhattan grid is rotated by more than a block. Classify on
   decoded polylines, never on `link_name`.
-- **Link identity is not stable across the window.** 25 sensors stopped
-  reporting in autumn 2024 and never returned, so a balanced-panel claim needs
-  checking rather than assuming.
+- **Link identity is not stable across the window, and presence is not the same
+  as reporting.** 25 sensors stopped reporting in autumn 2024 and never
+  returned. On the secondary feed a link can also stay present indefinitely
+  while emitting nothing but outages: 15 control links and 1 exempt in-zone link
+  never produce a usable speed in 41 months, and two 12th Avenue links go
+  permanently dark in May 2024 while still publishing rows. Count contributing
+  links, not rows.
 
 ## Writing
 

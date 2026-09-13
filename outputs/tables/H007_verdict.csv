@@ -1,0 +1,5 @@
+sample,verdict,reason
+all,REFUTES,"availability (differential change -21.16 pp, bar 5 pp); joint pre-trend test rejects (p = 9.99e-14); Rambachan-Roth breakdown value 0.024 < 0.5"
+peak,REFUTES,"availability (differential change -21.34 pp, bar 5 pp); joint pre-trend test rejects (p = 3e-10); Rambachan-Roth breakdown value 0.000 < 0.5"
+offpeak,REFUTES,"availability (differential change -21.11 pp, bar 5 pp); joint pre-trend test rejects (p = 2.45e-11); Rambachan-Roth breakdown value 0.034 < 0.5"
+weekend,REFUTES,"availability (differential change -21.14 pp, bar 5 pp); joint pre-trend test rejects (p = 3.25e-06); Rambachan-Roth breakdown value 0.000 < 0.5"

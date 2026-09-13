@@ -15,6 +15,14 @@ from src.data.geo import (
 # Real geometry from data/raw/ezpass_segments.parquet.
 POLY_42ND_LEX_TO_3RD = "agvwFxmobMfCeI"  # sid 1004, in-zone surface street
 POLY_OCEAN_PKWY = "qtuvFjpmbMkLcB}LeB{LeB"  # sid 100098, Brooklyn
+# sid 117071, downtown Brooklyn: (40.6890, -73.9907) to (40.6839, -73.9773).
+POLY_ATLANTIC_AVE = "oajwFxhrbMtLkc@tQin@"
+
+# Real geometry from the secondary DOT feed (i4gi-tjb9), link_id 4616339,
+# "BQE N Atlantic Ave - BKN Bridge Manhattan Side": the leading vertices of its
+# encoded_poly_line, near (40.6916, -73.9992). Labelled borough=Manhattan; the
+# road is in Brooklyn, south of the Brooklyn Bridge.
+POLY_BQE_BKN_BRIDGE = "oqjwFt}sbMwCn@gABo"
 
 
 def test_decode_polyline_matches_known_location():
@@ -111,6 +119,59 @@ def test_crossing_in_zone_is_separated_from_treated():
         classify_segment("Williamsburg Bridge - Eastbound", "Manhattan", POLY_42ND_LEX_TO_3RD)
         == "crossing"
     )
+
+
+def test_borough_label_is_the_only_gate_on_brooklyn_geometry():
+    """Downtown Brooklyn is south of the 60th St line, so the label does the work.
+
+    Atlantic Ave at Boerum Pl runs from about (40.6890, -73.9907) south-east.
+    Nothing in the geometry distinguishes it from a tolled in-zone street: flip
+    the label and the same polyline classifies as treated.
+    """
+    name = "Atlantic Avenue - Eastbound - Boerum Pl to Flatbush Ave"
+    assert classify_segment(name, "Brooklyn", POLY_ATLANTIC_AVE) == "control"
+    assert classify_segment(name, "Manhattan", POLY_ATLANTIC_AVE) == "treated"
+
+
+def test_manhattan_label_on_brooklyn_geometry_is_a_known_limitation():
+    """Characterises a wrong answer so that changing it has to be deliberate.
+
+    Secondary-feed links 4616339 and 4616340 are labelled `borough = Manhattan`
+    but lie in Brooklyn; they are approaches to the Brooklyn and Manhattan
+    Bridges. `classify_segment` trusts the label, so they come back `treated`.
+    That is wrong — an approach to a tolled crossing is toll-exposed, not an
+    in-zone street — and plain `control` would be wrong too. H007 excludes both
+    by link_id. If this assertion ever fails, the fix has moved into
+    `classify_segment` and H007's held-out list needs revisiting with it.
+    """
+    assert (
+        classify_segment(
+            "BQE N Atlantic Ave - BKN Bridge Manhattan Side",
+            "Manhattan",
+            POLY_BQE_BKN_BRIDGE,
+        )
+        == "treated"
+    )
+
+
+def test_a_manhattan_bounding_box_cannot_backstop_the_borough_label():
+    """Why the dead `_in_manhattan_envelope` was deleted rather than wired in.
+
+    geo.py used to carry a Manhattan bounding box described as "the geometric
+    backstop", with no call sites. It could not have been one. The box has to
+    reach 40.680 N to cover the Battery, which also covers downtown Brooklyn:
+    every vertex of both Brooklyn polylines below sits inside it, so a backstop
+    built on it rejects neither. Measured against the secondary feed, wiring it
+    in left 4616339 and 4616340 treated and moved six other links the wrong
+    way, two of them out of H007's treated group and into its controls.
+    """
+    lat_min, lat_max = 40.680, 40.882
+    lon_min, lon_max = -74.030, -73.907
+    for poly in (POLY_ATLANTIC_AVE, POLY_BQE_BKN_BRIDGE):
+        vertices = decode_polyline(poly)
+        assert vertices
+        assert all(lat_min <= lat <= lat_max for lat, _ in vertices)
+        assert all(lon_min <= lon <= lon_max for _, lon in vertices)
 
 
 def test_missing_geometry_is_unknown():

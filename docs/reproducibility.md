@@ -67,7 +67,15 @@ python -m src.analysis.event_study --weather         # robustness: treated x wea
 python -m src.analysis.robustness
 python -m src.analysis.assignment_audit       # geometry evidence for owner decision D2
 
-# Phase 10 diagnostic only — requires the secondary raw archive
+# Phase 10 — spillover / diversion on the secondary feed (H007)
+python -m src.data.build_secondary_panel   # -> data/processed/secondary_hourly_panel.parquet
+python -m src.analysis.h007_diversion      # availability gate, event study, R&R, 500 RI draws
+# The RI step dominates the runtime; --draws 100 gives a quick smoke run, but the
+# registered inference is 500 draws and only that figure may be quoted.
+
+# Superseded by the two commands above. It filters only `speed_mph IS NOT NULL`
+# and therefore averages the feed's zero-speed OUTAGES in as 0 mph; its output
+# outputs/tables/spillover_secondary_monthly.csv should not be quoted.
 python -m src.analysis.spillover_diagnostics
 # Optional --secondary-parts '/path/to/dot_speeds/*.parquet' reads another archive.
 

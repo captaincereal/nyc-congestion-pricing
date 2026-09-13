@@ -148,6 +148,51 @@ groups come from `data/interim/segment_treatment.parquet`
 | `treated_post` | bool | `treated & post` — the DiD interaction |
 | `event_week` | int | Floor of elapsed local calendar days since 2025-01-05 divided by 7; Sunday–Saturday weeks, including negative weeks |
 
+## `data/processed/` — `secondary_hourly_panel`
+
+The spillover panel, built from the **secondary** feed by
+`python -m src.data.build_secondary_panel` for H007. Same shape as
+`hourly_panel` so the Phase 7–9 estimators run against it unchanged, with three
+differences of meaning that a reader has to hold on to.
+
+**`treated` means toll-EXEMPT, not tolled.** This feed carries no tolled CRZ
+surface street, so there is no treated group in the frozen sense. The nine
+`exempt_in_zone` links — FDR Drive, 12th/11th Ave, West St, the Brooklyn Battery
+Tunnel Manhattan approaches — are flagged `treated` here because the question is
+whether traffic diverted *onto* them.
+
+**Zero-speed readings are outages and never enter an average.** They carry
+`travel_time = 0` and `status = -101`, and their frequency peaks overnight. The
+hourly median is taken over readings with `speed > 0`; an hour with readings but
+no positive one keeps a **null** `median_speed_mph` and is retained, because the
+share of present link-hours that yield a speed is the quantity H007's
+availability criterion is written on. Every estimator drops null outcomes, so
+retaining them changes no estimate. This supersedes
+`outputs/tables/spillover_secondary_monthly.csv`, which averaged those zeros in
+as 0 mph.
+
+**Window 2023-01-01 .. 2026-05-31.** The feed holds 2023-01 … 2026-07 but
+2026-06 is missing, so the window stops short rather than spanning a hole.
+
+Columns are `hourly_panel`'s, minus the E-Z Pass-only `n_probe_samples` and
+`min_n_samples`, plus:
+
+| Column | Type | Description |
+|---|---|---|
+| `n_readings` | int | Deduplicated readings present in the hour, positive or not — the availability denominator |
+| `n_positive` | int | Readings with `speed > 0`; the hourly median is taken over exactly these |
+| `n_unparsed_speed` | int | Readings whose `speed` did not cast to a number |
+| `has_speed` | bool | `median_speed_mph` is not null |
+| `event_month` | int | Calendar months from 2025-01; `k = 0` is January 2025, `k = -1` December 2024. H007's event study bins on this, not on `event_week` |
+| `analysis_group` | string | `treated_exempt` · `control` · `boundary` · `crossing` · `held_out_geo` |
+| `hold_out_reason` | string | Why a link is in neither estimation group; empty for the two that are |
+| `treated` | bool | `analysis_group = 'treated_exempt'` — **not** `treatment_group = 'treated'` |
+
+`treatment_group` still carries the raw `classify_segment` output, so the two
+columns disagree on link_ids `4616339` and `4616340`: the classifier calls them
+`treated` because it trusts their `borough = Manhattan` label, their geometry is
+in Brooklyn, and `analysis_group` holds them out of both estimation groups.
+
 ## Secondary sources (Phase 10 only — not yet used)
 
 See `docs/future_data_sources.md`. MTA Congestion Relief Zone vehicle-entry

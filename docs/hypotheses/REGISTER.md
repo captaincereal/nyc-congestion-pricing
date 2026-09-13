@@ -63,3 +63,29 @@ Phase 10's first record. This is the spillover question the primary roster
 cannot answer — no control link lies within 808 m of the cordon — put to the
 one source that covers the exempt routes diverted traffic would use. It is
 registered against data already held and is not blocked on the backfill.
+
+## 2026-09-13 — H007 answered
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H007](H007-secondary-feed-diversion.md) | Can the secondary highway feed identify diversion onto toll-exempt in-zone routes? | answered | 2026-09-13 | Refutes: all three conditions fire in all four samples. Usable-hour availability diverges by 21.2 pp against a 5 pp bar; pre-trends reject (χ²=86.0, p=1e-13); breakdown M = 0.000–0.034 |
+
+Supersedes the row above, which recorded H007 as proposed. **The gate that
+failed first is availability, and it is the one the verdict rests on**: the
+other two conditions are computed from a cluster-robust covariance on nine
+treated clusters, the regime in which this record made randomization inference
+primary because such asymptotics cannot be trusted. Criterion 1 is a count of
+hours and needs no asymptotics.
+
+Three of the nine treated links yield no usable speed after the toll — the
+entire 11th/12th Avenue arm — and the break lands in May 2024, eight months
+before tolling. This is a **measurement** failure rather than a
+parallel-trends failure, which is the distinction the record was written to
+draw. The ATT is +0.354 mph on all hours with a randomization p of 0.804, and
+the design's 80%-power minimum detectable effect is 4.85 mph, so it could only
+ever have seen very large diversion.
+
+Seven hypotheses are registered and answered. Two sit in the queue above,
+untouched. The restricted design suggested by H007's Verdict — treated limited
+to the six links that report throughout — is **not** registered and must not be
+run before it is.

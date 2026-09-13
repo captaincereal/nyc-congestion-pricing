@@ -14,6 +14,13 @@ This is a finding about the design, not evidence that the toll did nothing.
 Every explanation that would have rescued it — too little pre-period, an
 atypical holiday window, a poorly chosen comparison group — has now been tested
 and none survives.
+
+**Updated 2026-09-13:** the diversion half of that sentence is now checked
+directly rather than inferred. The secondary highway feed does carry the
+toll-exempt roads traffic would divert onto, and it stops reporting speeds on
+three of the nine across the toll date, so it cannot measure diversion either.
+That failure is instrumentation rather than identification, which is a different
+problem with a different fix.
 Owner decisions are laid out in [the decision memo](docs/owner_decisions.md).
 
 ---
@@ -25,7 +32,8 @@ Congestion Relief Zone (CRZ), and is there evidence that congestion shifted to
 areas just outside the zone boundary?
 
 Secondary: do effects differ peak vs off-peak and weekday vs weekend? Do MTA
-entry and TLC data support the mechanism? (Phase 10.)
+entry and TLC data support the mechanism? The MTA half of that question is
+answered below and the answer is that the data cannot address it.
 
 ## Result
 
@@ -41,11 +49,14 @@ precision survives neither an honest null nor a collapse to one observation per
 link. And controls selected on pre-treatment behaviour, judged on a window the
 selection never saw, reject *more* decisively than the naive pool.
 
-Nearby diversion is likewise unidentified. The five links labelled `boundary`
+Nearby diversion is likewise unidentified, now on both available feeds and for
+two different reasons. In the primary panel the five links labelled `boundary`
 straddle 60th Street rather than sitting wholly outside it, and no control link
-lies within 500 m of the line, so the panel contains no units where diversion
-would show up most clearly. That is a coverage limitation of the feed, not
-evidence that diversion did not occur.
+lies within 500 m of the line, so it contains no units where diversion would
+show up most clearly. The secondary DOT highway feed does carry those units —
+the nine toll-exempt in-zone links traffic would divert onto — and it stops
+measuring three of them across the toll date. Neither is evidence that diversion
+did not occur.
 
 ## Evidence
 
@@ -150,6 +161,64 @@ Against seventy weeks the synthetic weights could no longer fit exactly, landing
 at a loss of 2.67 on 31 donors. They remain the best rule at both holdouts and
 still reject. H004's perfect in-sample fit was degeneracy, not skill.
 
+**The spillover feed cannot measure diversion, and the reason is measurement.**
+[H007](docs/hypotheses/H007-secondary-feed-diversion.md) put the question to the
+secondary DOT highway feed (`i4gi-tjb9`), which carries the nine toll-exempt
+in-zone links — FDR Drive, 12th/11th Ave, West St, the Brooklyn Battery Tunnel
+approaches — that displaced traffic would use. Three of the nine produce no
+usable speed after tolling began. One has never emitted a positive reading in
+41 months; the two 12th Avenue links report at full availability through March
+2024 and go permanently dark from May 2024, eight months before the toll
+existed. The treated group is eight contributing links before and six after,
+and the three lost are the entire West Side Highway arm.
+
+The pre-registered availability gate measures that as a **−21.2 percentage
+point** differential change in usable-hour availability against a 5-point bar,
+in every hour-of-week cut. Pre-trends also reject (χ² = 86.0 on 11 monthly
+leads, p = 1e-13) and the Rambachan–Roth breakdown value is 0.000 to 0.034, so
+all three refutation conditions fire — but the availability gate is the one the
+verdict rests on, because it is a count of hours rather than an asymptotic
+argument about nine treated clusters.
+
+The estimate, which is not quotable: **+0.354 mph** on all hours, positive where
+diversion predicts negative, randomization p = 0.804 on 500 draws reassigning
+nine control links. The design's 80%-power minimum detectable effect is 4.85
+mph. Even with clean diagnostics it could not have seen a diversion effect the
+size of the in-zone association above.
+
+This is a different kind of failure from the four above. Those are
+identification failures — the comparison cannot separate the effect from
+pre-existing drift. This one is instrumentation: sensors stopped reporting on
+the roads the question is about, for reasons that have nothing to do with the
+toll. What would fix it is a feed with working sensors on that corridor, not a
+better control group.
+
+**The mechanism checks cannot be run on the obvious source.** The study has
+always listed MTA entry counts as the way to corroborate the mechanism: if the
+toll worked, fewer vehicles entered the zone, and that should be visible
+directly rather than inferred from speed. The MTA publishes exactly that, as
+hourly vehicle entries by detection point and vehicle class
+([`t6yz-b64h`](https://data.ny.gov/d/t6yz-b64h), NYC Open Data on data.ny.gov).
+Its title is the problem: *Congestion Relief Zone Vehicle Entries: **Beginning
+2025***. The series starts on 2025-01-05 and runs to 2026-09-05, checked
+2026-09-13.
+
+That is the tolling date. There is no pre-treatment period, because the
+detection infrastructure that produces the counts was installed to operate the
+toll. The feed can describe how many vehicles entered after tolling and how that
+varies by hour, class and entry point, and it cannot support a before-and-after
+comparison of any kind, because the "before" was never measured. No estimator
+recovers a counterfactual that was never instrumented. This is a structural
+limit of the source rather than a gap that a longer wait fills.
+
+TLC trip records are the remaining candidate and the only one with the history
+the MTA feed lacks — the per-year archives on NYC Open Data reach back to at
+least 2014, so a pre-period exists. Ingesting them has not been attempted. They
+would need their own registered hypothesis, and the honest note is that the
+current trip records are distributed as monthly files outside the Socrata
+endpoints this project already uses; the exact current source has not been
+verified here and should be confirmed rather than assumed.
+
 Every hypothesis run against this study, including those that failed, is in the
 [hypothesis register](docs/hypotheses/REGISTER.md), each with its prediction
 fixed before the result existed.
@@ -186,13 +255,25 @@ first is supported.
 - **No units where diversion would show.** No control link lies within 500 m of
   the boundary; the nearest is about 808 m. The spillover question is
   unanswerable on this roster rather than answered in the negative.
+- **The secondary feed stops measuring the exempt roads.** H007: three of the
+  nine toll-exempt in-zone links yield no usable speed after tolling, the break
+  landing in May 2024. Usable-hour availability diverges by 21.2 points against
+  a 5-point bar. Its committed diagnostic table
+  `outputs/tables/spillover_secondary_monthly.csv` is superseded — it averages
+  8.8M zero-speed **outages** in as 0 mph, so its speed levels are biased toward
+  zero. Use `data/processed/secondary_hourly_panel.parquet` instead. The primary
+  panel is unaffected: zero-speed readings are at most 0.014% of any
+  `treatment_group × post` cell there.
 - **Treatment classification.** D3 remains open. The blanket 11th Avenue
   exemption probably misclassifies four local-street segments, though the
   sensitivity moves the coefficient only slightly.
 - **What the outcome is.** Hourly median speed on selected links, weighting a
   quiet link the same as a heavy corridor. Not network congestion, not volume,
-  not door-to-door travel time, not welfare. MTA entry and TLC mechanism checks
-  have not been run.
+  not door-to-door travel time, not welfare.
+- **The entry-count mechanism check is not available.** The MTA's vehicle-entry
+  series begins on the tolling date itself, so it has no pre-treatment period
+  and cannot corroborate or contradict anything about the toll's effect. TLC
+  trip records do have a pre-period and have not been ingested.
 
 ## Recommendation
 
@@ -212,12 +293,17 @@ seventy-week matching window. The conclusion above is the finding.
 
 **Stop searching for a control set that passes.** Every further attempt is
 another draw against the same fixed data, and the register would have to carry
-the count. The remaining work is the spillover and mechanism checks that have
-not been run, and the writeup.
+the count. The spillover check has now run, on the one feed that covers the
+exempt routes, and it is reported above. Of the mechanism checks, the MTA entry
+counts turn out to be unusable for the purpose — the series begins on the
+tolling date — which leaves TLC trip records as the only untried source, and
+they need their own registered hypothesis before anyone starts.
 
 What could still change the answer is different data, not a different
 specification: links nearer the cordon than the current 808 m nearest control,
-or an outcome other than link speed. Both are outside what this feed provides.
+an outcome other than link speed, or — for the spillover question specifically —
+working speed sensors on the 11th/12th Avenue corridor across the toll date.
+None of the three is available in what these feeds provide.
 
 [D1, D2, D3, D5, D6 and D7](docs/owner_decisions.md) await owner approval. No
 open decision has been silently adopted.
@@ -248,9 +334,24 @@ street segments, including the tolled Manhattan grid.
 primary source. It carries only ~123 links city-wide and **none** on tolled CRZ
 surface streets — every in-zone link is a toll-exempt highway (FDR Drive, West
 Side Highway) or a crossing — so it cannot support the primary specification. It
-is retained for the spillover/diversion analysis, since those exempt roads are
+was retained for the spillover/diversion analysis, since those exempt roads are
 exactly where displaced traffic would go. Full reasoning in the 2026-09-08
 decision record in `docs/methodology.md`.
+
+H007 has now used it, and it does not deliver. 42 months are held, 2023-01 to
+2026-07 with 2026-06 missing, and 42.2M readings — a longer post-period than the
+primary archive has. But 21.6% of those readings are outages coded `speed = 0`
+with `travel_time = 0` and `status = -101`, their rate peaking overnight rather
+than at rush hour, and on the exempt in-zone links that rate climbs from 16% in
+2023 to 49% in 2026 while the controls hold flat. Treat zeros as missing, never
+as 0 mph, and start from `data/processed/secondary_hourly_panel.parquet` rather
+than the superseded `spillover_diagnostics.py` table.
+
+**Mechanism — MTA Congestion Relief Zone Vehicle Entries** (`t6yz-b64h`,
+data.ny.gov). Hourly entries by detection point and vehicle class, 2025-01-05
+onward. Held for completeness only: it starts on the tolling date, so it carries
+no pre-treatment period and cannot support a before-and-after comparison. Not
+ingested.
 
 Schema and conventions in `docs/data_dictionary.md`; open questions in
 `docs/decision_register.md`; further sources in `docs/future_data_sources.md`.
@@ -262,8 +363,9 @@ data/         raw/ (immutable) · interim/ (typed staging) · processed/ (panels
 docs/         brief · data dictionary · methodology · reproducibility · data-quality report
 sql/          DuckDB: 01 staging · 02 quality checks · 03 hourly panel
 src/
-  data/       download · inspect_schema · build_staging · quality_report
-  analysis/   descriptive · did · event_study · robustness · spillover_diagnostics · provenance
+  data/       download · inspect_schema · build_staging · build_panel · build_secondary_panel
+  analysis/   descriptive · did · event_study · robustness · honest_did · placebo_space ·
+              h007_diversion (spillover) · provenance
   visualization/
 notebooks/    exploratory analysis (orchestrate + narrate only)
 tests/        unit tests for src/ transformations

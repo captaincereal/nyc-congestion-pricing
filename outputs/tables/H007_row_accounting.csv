@@ -1,0 +1,14 @@
+step,rows,reason
+raw rows in data/raw/dot_speeds/*.parquet,42216965,
+null link_id or unparseable timestamp,0,no key to aggregate on
+outside 2023-01-01 .. 2026-05-31,1031143,"2026-06 is missing from the feed, so the window stops at 2026-05 and 2026-07 goes"
+ambiguous DST fall-back hour,6128,that hour runs twice under naive local time; the cell would mix two real hours
+"duplicate (link_id, ts)",0,"one reading kept per link and timestamp, the highest id"
+readings kept,41179694,
+readings kept,41179694,
+zero-speed readings,8820124,"outages, not standstills: travel_time = 0, status = -101, frequency peaks overnight; treated as missing, never averaged in as 0 mph"
+unparseable speeds,0,try_cast returned null
+positive readings behind the hourly medians,32359570,
+link-hours present in the feed,3445716,
+link-hours with no positive reading,659095,"kept with a null outcome; every estimator drops them, the availability diagnostic needs them as its denominator"
+link-hours with a usable hourly median,2786621,

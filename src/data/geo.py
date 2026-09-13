@@ -5,6 +5,16 @@ It is deliberately not string matching on `link_name` — names are free text wi
 inconsistent casing and abbreviations, and getting treatment assignment wrong is
 the failure that invalidated the original data source.
 
+Geometry places a segment relative to the zone boundary; the `borough` label
+decides whether it is a Manhattan candidate at all, and it is trusted on its
+own. There is no geometric backstop on the label because no bounding box can
+be one. Lower Manhattan and downtown Brooklyn are a bridge span apart, so any
+box reaching far enough south to hold the Battery also holds Atlantic Avenue:
+ten Brooklyn-labelled E-Z Pass segments fall entirely inside the box this
+module used to define for that purpose, and so do both secondary-feed links
+whose label and geometry disagree. See `classify_segment` for what trusting the
+label costs on each feed.
+
 The one place a name-based rule is legitimate is the toll-exempt roadways: being
 exempt is a legal fact about specific named roads, not a geometric property. The
 FDR Drive and the West Side Highway / Route 9A run *through* the zone's bounding
@@ -68,12 +78,6 @@ def decode_polyline(encoded: str, precision: int = 5) -> list[tuple[float, float
 # boundary is the line through those two anchors.
 SIXTIETH_ST_WEST = (40.7726, -73.9887)
 SIXTIETH_ST_EAST = (40.7605, -73.9583)
-
-# Rough Manhattan envelope, used only to reject segments in other boroughs whose
-# geometry happens to fall south of the 60th St line (much of Brooklyn/Queens
-# does). Borough labels are also checked; this is the geometric backstop.
-MANHATTAN_LON_MIN, MANHATTAN_LON_MAX = -74.030, -73.907
-MANHATTAN_LAT_MIN, MANHATTAN_LAT_MAX = 40.680, 40.882
 
 # Roadways inside the zone's geometry that the toll does not apply to.
 EXEMPT_PATTERNS = (
@@ -144,13 +148,6 @@ def _south_of_60th(lat: float, lon: float) -> bool:
     return ((x2 - x1) * (lat - y1) - (y2 - y1) * (lon - x1)) < 0
 
 
-def _in_manhattan_envelope(lat: float, lon: float) -> bool:
-    return (
-        MANHATTAN_LAT_MIN <= lat <= MANHATTAN_LAT_MAX
-        and MANHATTAN_LON_MIN <= lon <= MANHATTAN_LON_MAX
-    )
-
-
 def classify_segment(link_name: str | None, borough: str | None, polyline: str | None) -> str:
     """Assign one segment to a treatment group.
 
@@ -167,6 +164,18 @@ def classify_segment(link_name: str | None, borough: str | None, polyline: str |
                              controls and modelled separately
       ``control``          — outside the zone
       ``unknown``          — geometry missing or undecodable
+
+    The ``borough`` label gates everything below it: a segment not labelled
+    Manhattan is a control whatever its geometry says. On the primary E-Z Pass
+    roster label and geometry agree on all 176 Manhattan segments. On the
+    secondary DOT feed (`i4gi-tjb9`) two links disagree — `4616339` and
+    `4616340`, the BQE approaches to the Brooklyn and Manhattan Bridges, which
+    carry `borough = Manhattan` but run through Brooklyn. Both come back
+    ``treated``, and both are wrong: an approach to a tolled crossing is
+    toll-exposed, so it is neither an in-zone street nor a clean control.
+    H007 excludes them by `link_id` rather than relying on this function, which
+    is the right place for the fix while only two links are affected — see
+    `docs/hypotheses/H007-secondary-feed-diversion.md`.
     """
     coords = decode_polyline(polyline or "")
     if not coords:

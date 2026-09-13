@@ -157,4 +157,9 @@ EZPASS_SEGMENTS_PATH = RAW_DIR / "ezpass_segments.parquet"
 STAGED_DOT_HIGHWAY_PATH = INTERIM_DIR / "stg_dot_highway_readings.parquet"
 STAGED_SPEEDS_PATH = INTERIM_DIR / "stg_speed_readings.parquet"
 HOURLY_PANEL_PATH = PROCESSED_DIR / "hourly_panel.parquet"
+# Spillover/diversion panel built from the SECONDARY feed (i4gi-tjb9). Same
+# schema as HOURLY_PANEL_PATH so the Phase 7-9 estimators run against it
+# unchanged; `treated` there flags the toll-EXEMPT in-zone links, because the
+# question that panel answers is diversion onto them. See H007.
+SECONDARY_HOURLY_PANEL_PATH = PROCESSED_DIR / "secondary_hourly_panel.parquet"
 DUCKDB_PATH = DATA_DIR / "nyc_cp.duckdb"

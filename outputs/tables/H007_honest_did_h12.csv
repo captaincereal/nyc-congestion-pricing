@@ -1,0 +1,5 @@
+sample,horizon_months,breakdown_relative_magnitude,breakdown_smoothness,min_eigenvalue,n_obs,n_clusters
+all,12,0.024414,0.0,0.00873,2543110,109
+peak,12,0.0,0.004883,0.011741,456468,109
+offpeak,12,0.03418,0.0,0.010586,1358637,109
+weekend,12,0.0,0.0,0.015236,728005,109
