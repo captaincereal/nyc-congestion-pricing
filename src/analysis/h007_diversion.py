@@ -443,7 +443,7 @@ def plot_availability(monthly: pd.DataFrame) -> None:
     # Room for the direct labels, which are the required relief for series that
     # would otherwise need a legend.
     last = monthly["month"].max()
-    ax.set_xlim(monthly["month"].min(), last + pd.Timedelta(days=330))
+    ax.set_xlim(monthly["month"].min(), last + pd.Timedelta(days=195))
     ax.set_facecolor(SURFACE)
     fig.set_facecolor(SURFACE)
     ax.grid(axis="y", color=GRID, linewidth=0.8, zorder=0)

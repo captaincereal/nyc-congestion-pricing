@@ -5,7 +5,6 @@ outside 2023-01-01 .. 2026-05-31,1031143,"2026-06 is missing from the feed, so t
 ambiguous DST fall-back hour,6128,that hour runs twice under naive local time; the cell would mix two real hours
 "duplicate (link_id, ts)",0,"one reading kept per link and timestamp, the highest id"
 readings kept,41179694,
-readings kept,41179694,
 zero-speed readings,8820124,"outages, not standstills: travel_time = 0, status = -101, frequency peaks overnight; treated as missing, never averaged in as 0 mph"
 unparseable speeds,0,try_cast returned null
 positive readings behind the hourly medians,32359570,
