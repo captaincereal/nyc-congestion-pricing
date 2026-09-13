@@ -57,7 +57,7 @@ def parse_blocks(sql: str) -> list[tuple[str, str]]:
     return blocks
 
 
-def render(con: duckdb.DuckDBPyConnection) -> tuple[str, bool]:
+def render(con: duckdb.DuckDBPyConnection) -> tuple[str, bool, list]:
     blocks = parse_blocks(SQL_PATH.read_text())
     now = datetime.now(UTC).isoformat(timespec="seconds")
 
@@ -73,6 +73,7 @@ def render(con: duckdb.DuckDBPyConnection) -> tuple[str, bool]:
     ]
 
     any_hard_fail = False
+    failures: list[tuple[str, object]] = []
     for name, body in blocks:
         df = con.execute(body).df()
         is_hard = name.startswith("hard_")
@@ -80,6 +81,8 @@ def render(con: duckdb.DuckDBPyConnection) -> tuple[str, bool]:
         if is_hard:
             failed = len(df) > 0
             any_hard_fail |= failed
+            if failed:
+                failures.append((name, df))
             status = "  ❌ **FAIL**" if failed else "  ✅ pass"
 
         parts.append(f"## `{name}`{status}\n")
@@ -97,7 +100,7 @@ def render(con: duckdb.DuckDBPyConnection) -> tuple[str, bool]:
         parts.append("")
 
     parts.append(PROPOSED_HANDLING)
-    return "\n".join(parts), any_hard_fail
+    return "\n".join(parts), any_hard_fail, failures
 
 
 def main() -> None:
@@ -107,7 +110,7 @@ def main() -> None:
 
     con = duckdb.connect(str(DUCKDB_PATH), read_only=True)
     try:
-        report, hard_fail = render(con)
+        report, hard_fail, failures = render(con)
     finally:
         con.close()
 
@@ -115,7 +118,14 @@ def main() -> None:
     log.info("wrote %s", REPORT_PATH)
 
     if hard_fail:
-        sys.exit("HARD data-quality check(s) failed - see the report")
+        # Print the offending rows, not just a pointer to a file the runner
+        # discards on failure. On 2026-09-13 this exit said only "see the
+        # report" and the report never left the runner, so which segment was
+        # unmatched had to be hunted from outside the build.
+        for name, df in failures:
+            print(f"\n{name}: {len(df)} row(s)", file=sys.stderr)
+            print(df.head(25).to_string(index=False), file=sys.stderr)
+        sys.exit("HARD data-quality check(s) failed - see the rows above and the report")
 
 
 if __name__ == "__main__":
