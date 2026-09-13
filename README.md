@@ -15,12 +15,20 @@ Every explanation that would have rescued it — too little pre-period, an
 atypical holiday window, a poorly chosen comparison group — has now been tested
 and none survives.
 
-**Updated 2026-09-13:** the diversion half of that sentence is now checked
-directly rather than inferred. The secondary highway feed does carry the
-toll-exempt roads traffic would divert onto, and it stops reporting speeds on
-three of the nine across the toll date, so it cannot measure diversion either.
-That failure is instrumentation rather than identification, which is a different
-problem with a different fix.
+**Updated 2026-09-13.** Two things changed, and neither rescued the design.
+
+The frozen archive is now **complete** — all 44 months, 2023-01 through 2026-08,
+every one verified. The "too little pre-period" explanation is therefore
+exhausted rather than merely unlikely: the design has the full two years it asked
+for, and the joint pre-trend test rejects in all four samples on it, harder than
+it did on half the data.
+
+And the diversion half of the finding is now checked directly rather than
+inferred. The secondary highway feed does carry the toll-exempt roads traffic
+would divert onto, and it stops reporting speeds on three of the nine across the
+toll date, so it cannot measure diversion either. That failure is
+instrumentation rather than identification, which is a different problem with a
+different fix.
 Owner decisions are laid out in [the decision memo](docs/owner_decisions.md).
 
 ---
@@ -38,7 +46,7 @@ answered below and the answer is that the data cannot address it.
 ## Result
 
 **Speeds inside the Congestion Relief Zone rose relative to comparison streets
-after tolling began, by around 1.17 mph on the full sample, roughly 12% of the
+after tolling began, by around 1.05 mph on the full sample, roughly 11% of the
 pre-tolling treated mean. That association is real and survives every robustness
 check applied to it. It cannot be attributed to the toll.**
 
@@ -60,49 +68,54 @@ did not occur.
 
 ## Evidence
 
-> **Stale as of 2026-09-13, and being regenerated.** The backfill was stuck at
-> GitHub's release-asset ceiling for part of 2026-09-13. Once unstuck it landed
-> `2023-01` and ran the post-period forward, so the archive is now **39 verified
-> contiguous months, 2023-01 through 2026-03** — 24 pre-treatment months and 15
-> post — against the 27 this section describes. The magnitudes below were quoted
-> from artefacts `analysis.yml` has since rebuilt: the committed tables already
-> read χ² 96.96 / 70.69 / 100.43 / 45.55 and an all-hours ATT of 1.194 mph on
-> 5.375M link-hours. **Read the numbers off `outputs/tables/`, not off this
-> prose**, until the section is rewritten in one pass from a settled archive.
-> The finding is unchanged: every sample still rejects, and a longer pre-period
-> has always made the pre-trend test reject harder rather than softer.
+The frozen archive is **complete**: 44 contiguous months, 2023-01 through
+2026-08, **all 44 verified** against live source counts with deterministic
+replay of the retained sample. That is 24 pre-treatment months and 20
+post-treatment, or 104 pre-treatment weeks. Effect magnitudes appear below
+because the verification gate has passed.
 
-The source archive is **27 contiguous months, 2023-02 through 2025-04, all 27
-verified** against live source counts with deterministic replay of the retained
-sample. That gives 96 pre-treatment weeks. Effect magnitudes appear below because
-the verification gate has passed.
+Evidence is labelled by the panel it was computed on, and the labels matter.
+The association, the pre-trend test and the robustness table are current, rebuilt
+from the complete archive on 2026-09-13. The hypothesis records are **not**
+rebuilt with it: each cites the artefacts it was answered on, and rerunning one
+against the longer panel would be a fresh draw needing its own registration. So
+H001 through H004 stand on an earlier 12-month panel, H005 and H006 on 96
+pre-treatment weeks, and H007 on the secondary feed.
 
-Evidence below is labelled by the panel it was computed on. The association and
-the pre-trend test are current. H001 through H004 ran on an earlier 12-month
-panel; H005 and H006 rerun the two that depend most on pre-period length, on 96
-pre-treatment weeks.
-
-**The association** (27-month panel). Two-way fixed effects on link and time,
-standard errors clustered by link, 333 clusters, 5.18M link-hours
+**The association** (44-month panel). Two-way fixed effects on link and time,
+standard errors clustered by link, 334 clusters, 7.95M link-hours
 ([did_estimates.csv](outputs/tables/did_estimates.csv)):
 
 | Sample | ATT (mph) | SE | 95% CI | % of pre-treated mean |
 |---|---:|---:|---|---:|
-| all | +1.17 | 0.25 | [0.68, 1.67] | 12.0 |
-| weekday peak | +1.20 | 0.25 | [0.72, 1.68] | 15.0 |
-| weekday off-peak | +1.05 | 0.25 | [0.56, 1.54] | 10.4 |
-| weekend | +1.40 | 0.27 | [0.86, 1.93] | 13.4 |
+| all | +1.05 | 0.27 | [0.53, 1.57] | 10.6 |
+| weekday peak | +0.98 | 0.25 | [0.50, 1.47] | 12.2 |
+| weekday off-peak | +0.95 | 0.26 | [0.43, 1.47] | 9.3 |
+| weekend | +1.28 | 0.30 | [0.69, 1.86] | 12.2 |
+
+The estimate has drifted down as the archive grew — 1.17 mph on 27 months, 1.19
+on 39, 1.05 on the full 44 — while staying positive and comfortably bounded away
+from zero in every cut. The pre-treatment treated mean is 9.88 mph.
 
 **Why it is not causal.** The joint test that pre-tolling leads are zero rejects
 in every sample ([pretrend_tests.csv](outputs/tables/pretrend_tests.csv)):
-chi-squared 96.7 overall, 70.4 peak, 100.2 off-peak, 45.6 weekend, all on 11
-degrees of freedom, all p below 1e-05. Treated and comparison streets were
-already moving apart before the toll existed.
+chi-squared 97.9 overall, 69.7 peak, 102.2 off-peak and 46.7 weekend, all on 11
+degrees of freedom, the weakest of them at p = 2.4e-06. Treated and comparison
+streets were already moving apart before the toll existed.
 
-The test rejects **harder on 96 pre-treatment weeks than it did on 36** (the
-earlier values were 84.8, 63.9, 87.1 and 43.6). Every previous caveat leaned on
-the pre-period being short and holiday-dominated, and predicted the opposite.
-That explanation is now largely exhausted.
+The pre-period is now the full two years the design asked for, and lengthening
+it never rescued the test. Against the same four samples: 84.8, 63.9, 87.1 and
+43.6 on 36 pre-treatment weeks; 97.0, 70.7, 100.4 and 45.6 on 96; and 97.9,
+69.7, 102.2 and 46.7 on 104. Three of the four rise monotonically and weekday
+peak is the exception, easing from 70.7 to 69.7 at the last step while remaining
+far beyond rejection. Every earlier caveat leaned on the pre-period being short
+and holiday-dominated, and predicted the opposite. **That explanation is now
+exhausted rather than merely unlikely**: there is no more pre-period to add.
+
+An earlier version of that test summed squared individual t-statistics and
+ignored the covariance between leads, and an off-by-one event-week boundary put
+1-4 January into event week zero. Both were corrected on 2026-09-12. The earlier
+"peak and weekend pass" claim came from the broken test and is superseded.
 
 An earlier version of that test summed squared individual t-statistics and
 ignored the covariance between leads, and an off-by-one event-week boundary put
@@ -240,14 +253,24 @@ fixed before the result existed.
 The [12-specification comparison](outputs/tables/robustness_comparison.csv)
 covers control geography, alternative windows, a common link roster, transition
 exclusion, probe-depth and extreme-speed filters, an hourly mean outcome, two
-placebo dates, and the four 11th Avenue links as a treatment sensitivity.
-Non-placebo coefficients stay positive; their magnitude is sensitive to the
-control pool and to quality filters.
+placebo dates, and the four 11th Avenue links as a treatment sensitivity. Ten of
+the twelve hold the October 2024 – April 2025 comparison window fixed so they
+vary one thing at a time; `all_available` is the full-archive fit reported above.
 
-The 2024-11-17 and 2024-12-01 placebos, using only pre-tolling observations, do
-not reject zero. Weather interactions move the all-hours coefficient by under
-5%. None of this repairs the rejected leads: a specification can be stable and
-still be measuring the wrong thing.
+Non-placebo coefficients stay positive, from +0.48 to +1.05 mph, and their
+magnitude is sensitive to the control pool above all. Restricting controls to
+Manhattan more than halves the estimate, to +0.48 mph and barely distinguishable
+from zero (p = 0.049), while outer-borough controls give +0.88. That spread is
+itself part of the identification problem: the answer depends on which streets
+are chosen for comparison.
+
+The two placebo dates, using only pre-tolling observations, do not reject zero —
+2024-11-17 gives +0.15 mph (p = 0.46) and 2024-12-01 gives −0.11 mph (p = 0.59).
+Weather interactions move the all-hours coefficient from 1.048 to 1.041, under
+1%. The D3 sensitivity that reassigns the four 11th Avenue links to treated
+gives +0.85 against the +0.85 baseline on the same window, so that open decision
+barely moves the number. None of this repairs the rejected leads: a
+specification can be stable and still be measuring the wrong thing.
 
 The pattern across all of it is consistent. **The point estimate is robust and
 its causal interpretation is not.** Those are different claims, and only the
@@ -255,9 +278,11 @@ first is supported.
 
 ## Limitations
 
-- **Coverage.** Twenty-seven of 44 target months are held, 2023-02 to 2025-04.
-  The pre-treatment side is 23 months against the 24 the frozen design asks for,
-  with 2023-01 still downloading. The post-period runs only to 2025-04.
+- **Coverage is no longer a limitation.** All 44 target months are held and
+  verified, 2023-01 to 2026-08: the full 24-month pre-period the frozen design
+  asks for, and 20 post-treatment months. This entry is kept because the
+  identification failure was once attributed to short coverage, and completing
+  the archive did not repair it.
 - **Rule B's donor count is thin.** H006's best control set retains 31 donors
   against a pre-registered minimum of 30, with the top five weights carrying 46%
   of the mass. It clears the bar as written, but its clustered inference should
