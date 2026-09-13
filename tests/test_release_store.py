@@ -298,6 +298,69 @@ def test_day_checkpoints_of_unfinished_months_survive(tmp_path):
     assert "ezpass_day_2099-12-01.parquet" in names
 
 
+def test_day_receipts_of_completed_months_are_deleted(tmp_path):
+    """publish() writes one receipt asset per day through the compatibility
+    block, so they pile up exactly as the day parts do. The first pruning rule
+    matched only ``.parquet`` and left 408 receipts of finished months on the
+    release -- enough to refill it before the post-period lands."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    manifest = json.loads((restored / "ezpass_manifest.json").read_text())
+    done = [p["month"] for p in manifest["parts"] if p.get("complete")][0]
+    _add_asset(fake, f"ezpass_day_{done}-05.receipt.json", b"{}")
+    _add_asset(fake, f"ezpass_day_{done}-06.receipt.json", b"{}")
+
+    store.publish(restored)
+
+    names = {a["name"] for a, _ in fake.assets.values()}
+    assert f"ezpass_day_{done}-05.receipt.json" not in names
+    assert f"ezpass_day_{done}-06.receipt.json" not in names
+
+
+def test_day_receipts_of_unfinished_months_survive(tmp_path):
+    """The interrupted month's receipts are its only per-day evidence."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    _add_asset(fake, "ezpass_day_2099-12-01.receipt.json", b"{}")
+
+    store.publish(restored)
+
+    names = {a["name"] for a, _ in fake.assets.values()}
+    assert "ezpass_day_2099-12-01.receipt.json" in names
+
+
+def test_live_checkpoints_of_a_completed_month_are_never_pruned(tmp_path):
+    """Belt and braces for the receipt rule: a snapshot may still carry a day
+    whose month part is already complete, and the prune runs just before the
+    upload that rewrites it. Both halves of the pair have to survive."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    manifest = json.loads((restored / "ezpass_manifest.json").read_text())
+    done = [p["month"] for p in manifest["parts"] if p.get("complete")][0]
+    day = f"{done}-07"
+    part = restored / "ezpass_days" / f"ezpass_day_{day}.parquet"
+    part.parent.mkdir(parents=True, exist_ok=True)
+    pd.DataFrame({EZPASS_TIME_COL: [f"{day}T08:00:00"]}).to_parquet(part, index=False)
+    write_json(
+        restored / "ezpass_days" / f"ezpass_day_{day}.receipt.json",
+        {
+            "day": day,
+            "sample_rows": 1,
+            "source_rows": 1,
+            "checkpoint_sha256": digest(part),
+            "verification_method": VERIFICATION_METHOD,
+            "checked_at": "2026-09-12T11:59:00+00:00",
+        },
+    )
+
+    state = store._local_state(restored)
+    assert f"ezpass_day_{day}.receipt.json" in state["day_receipts"]
+    _add_asset(fake, f"ezpass_day_{day}.receipt.json", b"{}")
+    release, assets = store._catalogue()
+
+    store._prune(state, release, assets)
+
+    names = {a["name"] for a, _ in fake.assets.values()}
+    assert f"ezpass_day_{day}.receipt.json" in names
+
+
 def test_month_parts_and_receipts_are_never_pruned(tmp_path):
     """The archive itself is immutable. Only scaffolding is collectable."""
     _, _, fake, store, restored = _seeded_store(tmp_path)

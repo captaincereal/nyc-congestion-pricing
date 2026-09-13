@@ -459,13 +459,25 @@ class ReleaseStore:
         the local copies for the same reason. Keeping them cost this project a
         full release: 853 day assets from months finished days earlier.
 
+        Both halves of a checkpoint go together. ``publish`` writes the parquet
+        from ``state["assets"]`` and its ``.receipt.json`` through the
+        compatibility block, so the receipts accrue at the same one-per-day
+        rate; matching only the parquet left 408 of them stranded on a release
+        that was already full.
+
         Old state snapshots are history. ``restore`` reads the newest valid one
         and falls back at most a few, so a handful is sufficient provenance.
 
-        Anything referenced by the state about to be published is excluded
-        regardless, so a mistake in the month rule cannot delete live data.
+        Anything the state about to be published writes -- raw assets and
+        compatibility metadata alike -- is excluded regardless, so a mistake in
+        the month rule cannot delete live data or race the upload that follows.
         """
-        live = set(state["assets"])
+        live = (
+            set(state["assets"])
+            | set(state["receipts"])
+            | set(state["day_receipts"])
+            | {"ezpass_manifest.json"}
+        )
         complete = {
             part["month"]
             for part in state["manifest"].get("parts", [])
@@ -476,7 +488,7 @@ class ReleaseStore:
         for name in assets:
             if name in live:
                 continue
-            day = DAY_NAME.fullmatch(name)
+            day = DAY_NAME.fullmatch(name) or DAY_RECEIPT_NAME.fullmatch(name)
             if day and day.group(1)[:7] in complete:
                 doomed.append(name)
 
