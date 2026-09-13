@@ -126,7 +126,7 @@ Everything runs unattended on GitHub Actions, free, because the owner will not
 leave a machine on. `backfill.yml` every six hours (verify, then deepen the
 pre-period backwards, then extend forward); `analysis.yml` rebuilds the panel
 and reruns Phases 6–9 when data lands; `tests.yml` runs ruff, black and pytest.
-205 tests pass. State lives in the `data-raw` release.
+211 tests pass. State lives in the `data-raw` release.
 
 To work locally: pull month parts, the manifest and the segment table from the
 release, then `build_staging` → `geo` → `build_panel`.
