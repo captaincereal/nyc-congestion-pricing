@@ -41,6 +41,12 @@ from src.data.verification_gate import (
 
 log = logging.getLogger(__name__)
 DAY_NAME = re.compile(r"ezpass_day_(\d{4}-\d{2}-\d{2})\.parquet\Z")
+STATE_NAME = re.compile(r"state_\d{8}T\d+Z_.+\.json\Z")
+# A GitHub release holds at most 1000 assets and every upload 422s once it is
+# full. Day checkpoints and state snapshots both accumulate one per slice, so
+# without pruning the store bricks itself after a few thousand slices -- which
+# is exactly what happened on 2026-09-13.
+KEEP_SNAPSHOTS = 8
 DAY_RECEIPT_NAME = re.compile(r"ezpass_day_(\d{4}-\d{2}-\d{2})\.receipt\.json\Z")
 ANCILLARY = ("ezpass_segments.parquet", "weather_hourly.parquet")
 MAX_STATE_BYTES = 8 * 1024 * 1024
@@ -442,11 +448,71 @@ class ReleaseStore:
             return advertised == f"sha256:{expected['sha256']}"
         return self._download(asset, limit=expected["size"]) == expected["sha256"]
 
+    def _prune(self, state: dict, release: dict, assets: dict[str, dict]) -> dict:
+        """Delete release assets that provably cannot be needed again.
+
+        Two kinds qualify, and nothing else is ever touched:
+
+        Day checkpoints exist only to resume an interrupted month. Once that
+        month's part is on the release and its hash matches the manifest, the
+        day files are redundant by construction -- ``download_month`` deletes
+        the local copies for the same reason. Keeping them cost this project a
+        full release: 853 day assets from months finished days earlier.
+
+        Old state snapshots are history. ``restore`` reads the newest valid one
+        and falls back at most a few, so a handful is sufficient provenance.
+
+        Anything referenced by the state about to be published is excluded
+        regardless, so a mistake in the month rule cannot delete live data.
+        """
+        live = set(state["assets"])
+        complete = {
+            part["month"]
+            for part in state["manifest"].get("parts", [])
+            if part.get("complete") is True
+        }
+
+        doomed = []
+        for name in assets:
+            if name in live:
+                continue
+            day = DAY_NAME.fullmatch(name)
+            if day and day.group(1)[:7] in complete:
+                doomed.append(name)
+
+        snapshots = sorted((n for n in assets if STATE_NAME.fullmatch(n)), reverse=True)
+        doomed.extend(snapshots[KEEP_SNAPSHOTS:])
+
+        deleted, failed = [], []
+        for name in doomed:
+            try:
+                response = self._request(
+                    "DELETE", f"{self.base}/releases/assets/{assets[name]['id']}"
+                )
+                response.close()
+                assets.pop(name, None)
+                deleted.append(name)
+            except ReleaseStoreError as exc:
+                # A failed delete is not fatal: the upload that follows may still
+                # fit, and the next pass tries again.
+                failed.append({"asset": name, "error": str(exc)})
+        if deleted or failed:
+            log.info(
+                "pruned %d redundant release asset(s); %d remain, %d delete(s) failed",
+                len(deleted),
+                len(assets),
+                len(failed),
+            )
+        return {"deleted": len(deleted), "failed": failed, "remaining": len(assets)}
+
     def publish(self, raw_dir: Path) -> dict:
         """Durably publish a checkpoint; raw assets and old snapshots remain immutable."""
         raw_dir = Path(raw_dir)
         state = self._local_state(raw_dir)
         release, assets = self._catalogue()
+        # Before uploading, not after: a release at its asset ceiling rejects
+        # every upload, so pruning last would never run.
+        pruned = self._prune(state, release, assets)
         uploaded_raw = []
         for name, expected in state["assets"].items():
             asset = assets.get(name)
@@ -500,6 +566,7 @@ class ReleaseStore:
             "parts": len(state["manifest"]["parts"]),
             "uploaded_raw": uploaded_raw,
             "compatibility_errors": failures,
+            "pruned": pruned,
         }
 
 

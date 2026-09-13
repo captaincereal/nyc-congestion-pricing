@@ -247,3 +247,111 @@ def test_unsafe_receipt_name_is_rejected_before_publication(tmp_path):
     with pytest.raises(StateIntegrityError, match="unbound receipt"):
         ReleaseStore("test/repo", "test-token", session=fake).publish(raw)
     assert fake.calls == []
+
+
+# --- Release-asset pruning --------------------------------------------------
+# A GitHub release holds at most 1000 assets and rejects every upload once it is
+# full. On 2026-09-13 the backfill died exactly there: 853 day checkpoints from
+# months finished days earlier, plus 89 state snapshots, filled the release and
+# publish() began raising HTTP 422. These cover the rule that stops it.
+
+
+def _seeded_store(tmp_path):
+    raw, targets, _, _ = make_archive(tmp_path / "source")
+    fake = GitHub()
+    seed_remote(fake, raw)
+    store = ReleaseStore("test/repo", "test-token", session=fake)
+    restored = tmp_path / "restored"
+    store.restore(restored)
+    return raw, targets, fake, store, restored
+
+
+def _add_asset(fake, name, payload=b"stale"):
+    fake.add(name, payload)
+
+
+def test_day_checkpoints_of_completed_months_are_deleted(tmp_path):
+    """The month part supersedes them; download_month deletes the local copies
+    for the same reason."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    manifest = json.loads((restored / "ezpass_manifest.json").read_text())
+    done = [p["month"] for p in manifest["parts"] if p.get("complete")][0]
+    _add_asset(fake, f"ezpass_day_{done}-05.parquet")
+    _add_asset(fake, f"ezpass_day_{done}-06.parquet")
+
+    result = store.publish(restored)
+
+    assert result["pruned"]["deleted"] >= 2
+    names = {a["name"] for a, _ in fake.assets.values()}
+    assert f"ezpass_day_{done}-05.parquet" not in names
+    assert f"ezpass_day_{done}-06.parquet" not in names
+
+
+def test_day_checkpoints_of_unfinished_months_survive(tmp_path):
+    """Deleting these would discard the only record of an interrupted month."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    _add_asset(fake, "ezpass_day_2099-12-01.parquet")
+
+    store.publish(restored)
+
+    names = {a["name"] for a, _ in fake.assets.values()}
+    assert "ezpass_day_2099-12-01.parquet" in names
+
+
+def test_month_parts_and_receipts_are_never_pruned(tmp_path):
+    """The archive itself is immutable. Only scaffolding is collectable."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    protected = {
+        a["name"]
+        for a, _ in fake.assets.values()
+        if a["name"].startswith(("ezpass_speeds_", "ezpass_verify_", "ezpass_segments"))
+    }
+    assert protected, "fixture should contain protected assets"
+
+    store.publish(restored)
+
+    names = {a["name"] for a, _ in fake.assets.values()}
+    assert protected <= names
+
+
+def test_only_the_newest_state_snapshots_are_kept(tmp_path):
+    """restore() reads the newest valid snapshot and falls back a little; a
+    handful is enough provenance, and unbounded growth is what filled the
+    release."""
+    from src.data.release_store import KEEP_SNAPSHOTS
+
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    for i in range(KEEP_SNAPSHOTS + 6):
+        _add_asset(fake, f"state_20260101T00000{i:04d}Z_run_{i:04d}.json", b"{}")
+
+    store.publish(restored)
+
+    remaining = sorted(a["name"] for a, _ in fake.assets.values() if a["name"].startswith("state_"))
+    assert len(remaining) <= KEEP_SNAPSHOTS + 1, remaining
+
+
+def test_assets_the_new_state_references_are_never_pruned(tmp_path):
+    """Belt and braces: whatever the snapshot about to be written points at is
+    excluded regardless of the month rule."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    state = store._local_state(restored)
+    release, assets = store._catalogue()
+
+    store._prune(state, release, assets)
+
+    names = {a["name"] for a, _ in fake.assets.values()}
+    assert set(state["assets"]) <= names
+
+
+def test_a_failed_delete_does_not_abort_the_publish(tmp_path):
+    """Pruning is housekeeping. A delete that fails must not cost the pass its
+    durable checkpoint."""
+    _, _, fake, store, restored = _seeded_store(tmp_path)
+    manifest = json.loads((restored / "ezpass_manifest.json").read_text())
+    done = [p["month"] for p in manifest["parts"] if p.get("complete")][0]
+    _add_asset(fake, f"ezpass_day_{done}-05.parquet")
+    fake.fail_prefix = "DELETE"
+
+    result = store.publish(restored)
+
+    assert result["state_asset"].startswith("state_")
