@@ -1,10 +1,50 @@
 {
-  "recorded_at": "2026-09-13T05:49:15.484148+00:00",
+  "recorded_at": "2026-09-13T11:06:32.879629+00:00",
   "interpretation": "Exploratory diagnostics; no causal attribution established.",
-  "panel_sha256": "6d600bf4d26d94a6ab04d660d4dc0411848c7f3cb234af1e490c28c6c9255192",
+  "panel_sha256": "7aaa0c32a2e05c48d6efe9fe72ddf8ab66d3727de5bfa98cae56c8bfec8428c3",
   "segments_sha256": "2a07d361fae6a4f44e577edecfdcfc0a7cbafc00421619de3047289488285cbd",
-  "manifest_sha256": "845f642c8a5dc37e143a043b6e85bf4bf119de436401aefbe91f623c35c9b18c",
+  "manifest_sha256": "bad418989288e093eda416094e9fc0a52d58db1d3ee0ff7b810cc96e257250cd",
   "primary_parts": [
+    {
+      "part": "ezpass_speeds_2023-03.parquet",
+      "sha256": "0c7b9aaf0f6ee7b2f52fb7e5acf3baeb75e7b4ad4969b3e08cc81c9e66f12960",
+      "rows": 850455,
+      "manifest_sha_matches": true,
+      "verified": true,
+      "verification_method": "raw-count-and-deterministic-replay-v1"
+    },
+    {
+      "part": "ezpass_speeds_2023-04.parquet",
+      "sha256": "f0dc8e26376cfea4c88140978e627fa87563cce845543e930d30cb9aef813c19",
+      "rows": 825682,
+      "manifest_sha_matches": true,
+      "verified": true,
+      "verification_method": "raw-count-and-deterministic-replay-v1"
+    },
+    {
+      "part": "ezpass_speeds_2023-05.parquet",
+      "sha256": "6907072912fb42a37fd3ddfadfe8574a209e3d81913b7294b93ee5fd3520a921",
+      "rows": 884875,
+      "manifest_sha_matches": true,
+      "verified": true,
+      "verification_method": "raw-count-and-deterministic-replay-v1"
+    },
+    {
+      "part": "ezpass_speeds_2023-06.parquet",
+      "sha256": "1ee67230cf63795cf9cdb22bee2f66498f0793085421c0f934452a02c2ebbc52",
+      "rows": 857283,
+      "manifest_sha_matches": true,
+      "verified": true,
+      "verification_method": "raw-count-and-deterministic-replay-v1"
+    },
+    {
+      "part": "ezpass_speeds_2023-07.parquet",
+      "sha256": "c3724b5012bf86a91d9735b9b432b33d36ad76f7473c9735c1579488a055e99e",
+      "rows": 764175,
+      "manifest_sha_matches": true,
+      "verified": true,
+      "verification_method": "raw-count-and-deterministic-replay-v1"
+    },
     {
       "part": "ezpass_speeds_2023-08.parquet",
       "sha256": "ac3629413ad897c9e432231894a5530b88fe71108bfe7bb3c12f1d868a1a171e",
@@ -221,22 +261,22 @@
     "H004_holdout_pretrend.csv": "304f7f7b48f747449c64fa8b5cf3e5f5ea211112293d91bfd2f0b30326eb60d6",
     "H004_synthetic_weights.csv": "e97f2178cac7f1061168fcb35186fab08d38361a72c30c731c32b6d07f1b6202",
     "boundary_distance_audit.csv": "b4d8e8e9fbc9028e4253118d6a26ecb0bb5818aa993cdc4c8bb9283899b4a7d4",
-    "descriptive_summary.csv": "1bd5401e32ae1d249e8fa5a0da728e6068ee42e70bce9603bb652934cd1f985b",
-    "did_estimates.csv": "06a4cb08a6f0de606460e31b4235f1037c53b688f7daaa46784c57dfa5ea920f",
-    "did_estimates_weather.csv": "c291b23af86693fd2b9c12cb822034e58d682ec4cd713d24bd9ee32b2eedb2bf",
-    "event_study_all.csv": "09d518f0afb5c9ae5235a4b58c79ce364f0fd7079b7caabf198e7cacc3f9046e",
-    "event_study_offpeak.csv": "9179ac34b6018924230a121d66e49b4b0cc9285ac56fbff75422c47ed189ccd0",
-    "event_study_peak.csv": "605a49e4f73af5769ed7ccef24744693269dca17a7786eb3136ea38645c07c85",
-    "event_study_weekend.csv": "1139db12c2c8bbc13f7a377937a2f4ee439f9c8dba98478386046e82d6636793",
-    "hourly_profile.csv": "4395adc91a6bac6398247ad2635cc01e52d1836432ce5b054912387611e1e12d",
+    "descriptive_summary.csv": "8f4d8b258e7f4ff5b51347caec0124fba524d0dc62fd55ca9c7ed2df92189eca",
+    "did_estimates.csv": "2698a41f6e7898582c65946232eb9ff29fbc0c9f70bd9e6a3a865269e3a36423",
+    "did_estimates_weather.csv": "e437c360a1d16430d9cc69980046609a5ebec793950d201b7b5b9bf5040ce07d",
+    "event_study_all.csv": "6ff60372d38e6340f20820067b4577585c4fb1234806b956e9eb95ead34860d5",
+    "event_study_offpeak.csv": "d6b7776072ad4dd01622215d0b038d9db322834f96cb9fc587d546fc8c6af4a2",
+    "event_study_peak.csv": "00b45ec14bf4b44d9da72392f221590b985fc2937029f0932cfb63a4434b6027",
+    "event_study_weekend.csv": "5f80accbb3e556d4f9e234862b091c5bea3c70a10eb68c783b448039b1dac358",
+    "hourly_profile.csv": "5ac417b5eeeb451da29b4de7b31eb11c1f4775af7a2b4735b466415c97b623e7",
     "placebo_space.csv": "9aca237b5733584b6a8d2b23e955ec19a00225d492d71392ff3069830d15e926",
-    "pretrend_tests.csv": "a82de885078d4791bfda4835e71d35529cd156bdde80ac97237387249c9eb92a",
-    "robustness_comparison.csv": "9d59ad07eb2c629313bd1ddb585b17849e19c0c5e0194ba8d137eece27bb3b52",
-    "robustness_event_study_contiguous.csv": "34c686c53d22ae7e2c312c0f6d517d1f78c726187c7b753896e694ab328ef52e",
-    "robustness_pretrend_contiguous.csv": "38aadc7559f2fef9f7389f6d7a15330f70bb5c61fa8b257a5215057f15203133",
+    "pretrend_tests.csv": "181a0dcccd32e8576bf0a35def68928b9d6ba07f674764a6a09bd774f9da3cd3",
+    "robustness_comparison.csv": "b72b8d73b3990fe805110f0a55318d8475872fd2921c80c525ccb4dc275362ba",
+    "robustness_event_study_contiguous.csv": "e82874096e3f8a52de9d721bdc0ee51932ad28fb77ce39e8494a7cb04343ad8a",
+    "robustness_pretrend_contiguous.csv": "62f60ed8a97e8d9791cab5dfed5664ad5cb8ded3867dbbf705dcc98c14a7ac4d",
     "spillover_primary_descriptive.csv": "e5ce8411635eba2b5f352d7a78009a912146d12d3a2941b2bbcd5affcc457910",
     "spillover_secondary_monthly.csv": "f85f61530792242317c833ec232ce026f4b4b7438cfa82975e6db19aaa6bbfa5",
-    "treated_control_gap.csv": "e9361e28cda520541331fae6068435f213d301357de870f38f31a3f5bbb65c71",
-    "weekly_median_speed.csv": "2ca8f135d1aa136c416569c95c6ab68eb28831174a9d0dde7aa9fcd99a47cf8a"
+    "treated_control_gap.csv": "385ff11b7df49dbba395754f192fd59c9fe220792103e914317a2194aed39f5d",
+    "weekly_median_speed.csv": "1aa35f8a1dbb700cc1b7dc274d122395784616538fd5b9f6e7a6b38cec9f5034"
   }
 }
