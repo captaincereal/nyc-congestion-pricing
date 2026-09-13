@@ -52,3 +52,14 @@ direction, peak replaces all-hours as the primary decision sample and daily
 peak becomes the lead metric. Estimators and stability thresholds are unchanged;
 all cuts remain reported. The registration retains the original text and
 the dated amendment. H002 remains deferred.
+
+## 2026-09-13 — registration appended
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H007](H007-secondary-feed-diversion.md) | Can the secondary highway feed identify diversion onto toll-exempt in-zone routes? | proposed | 2026-09-13 | |
+
+Phase 10's first record. This is the spillover question the primary roster
+cannot answer — no control link lies within 808 m of the cordon — put to the
+one source that covers the exempt routes diverted traffic would use. It is
+registered against data already held and is not blocked on the backfill.
