@@ -40,7 +40,7 @@ prediction and acceptance criteria to be written first.
 |---|---|---|---|---|
 | [H003](H003-temporal-aggregation.md) | Does temporal aggregation change the association or its precision? | answered | 2026-09-12 | Refutes: daily is stable (<=0.14 mph, SE ratio <=1.39) but collapsing to one pre/post per link inflates SEs 3.8-6.2x, every CI covers zero, offpeak flips sign |
 | [H004](H004-control-construction.md) | Can controls chosen on pre-treatment behaviour produce flat held-out leads? | answered | 2026-09-12 | Refutes: both rules reject out of sample everywhere. Nearest-neighbour made it worse; synthetic weights halved chi2, fit the matching window exactly, and still rejected at p=4.4e-07 |
-| [H005](H005-honest-did-long-preperiod.md) | Do the breakdown values survive a two-year pre-period? | proposed | 2026-09-13 | — |
+| [H005](H005-honest-did-long-preperiod.md) | Do the breakdown values survive a two-year pre-period? | answered | 2026-09-13 | Refutes: 0.005-0.171 across horizons and samples. At matched horizon the longer pre-period barely moved them; widening the horizon lowers them monotonically |
 | [H006](H006-control-construction-clean-holdout.md) | Does control matching fail on a holdout that is not holiday-dominated? | answered | 2026-09-13 | Refutes: every rule rejects on the clean July-September holdout. Holidays roughly double the statistic but do not cause the failure |
 
 The serial-correlation-collapse queue entry above is now represented by H003;

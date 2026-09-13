@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | proposed |
+| **Status** | answered |
 | **Registered** | 2026-09-13 |
 | **Registered by** | Claude Opus 5 session |
-| **Answered by** | — |
+| **Answered by** | Claude Opus 5 session, 2026-09-13 |
 | **Supersedes / superseded by** | supersedes [H002](H002-honest-did-sensitivity.md) on the 27-month archive; H002's verdict stands for the 12-month one |
 
 ## Question
@@ -90,11 +90,64 @@ still downloading and is not required: 96 pre-weeks already exceeds what the
 
 ## Result
 
-*Empty until run.*
+Run on the rebuilt 27-month panel, 5.38M link-hours, 333 clusters. All three
+horizons completed; none failed on memory. The covariance stayed positive
+definite throughout, including at horizon 52 where 68 event-time bins are
+estimated from the same 333 clusters (minimum eigenvalue 1.1e-03 to 2.5e-03), so
+every bound below is identified.
+
+Artefacts: `outputs/tables/H005_honest_did_h{12,26,52}.csv` and their `_grid`
+companions; figures `outputs/figures/H005_honest_did_h*_*.png`.
+
+**Breakdown values, relative magnitudes** (smoothness in brackets):
+
+| Sample | h12 — primary | h26 | h52 |
+|---|---:|---:|---:|
+| all | **0.093** (0.044) | 0.063 (0.000) | 0.044 (0.000) |
+| peak | **0.044** (0.024) | 0.015 (0.000) | **0.005** (0.000) |
+| offpeak | **0.054** (0.034) | 0.034 (0.034) | 0.034 (0.000) |
+| weekend | **0.171** (0.044) | 0.112 (0.015) | 0.093 (0.015) |
+
+Against H002 on 36 pre-weeks at the same horizon 12: all 0.083, peak 0.044,
+offpeak 0.054, weekend 0.151.
 
 ## Verdict
 
-*Empty until run.*
+**Refutes.** Breakdown values sit far below 1 at every horizon and in every
+sample, so the conclusion H002 reached on eight months of pre-period holds on
+ninety-six weeks of it.
+
+**At a matched horizon, tripling the pre-period barely moved anything.** Peak
+and off-peak are unchanged to three decimals; all and weekend rise by about
+0.02. The prediction declined to call the direction, on the grounds that a
+longer window exposes larger first differences (pushing the value down) while
+estimating coefficients more precisely (pushing it up). At horizon 12 those
+effects very nearly cancelled.
+
+**Widening the horizon lowers it, monotonically.** This is the substantive
+finding rather than the near-null at h12. Once the restriction is allowed to see
+more of the pre-period — 25 bins at h26, 51 at h52 — the largest observed
+first difference grows, and the breakdown value falls with it: peak drops from
+0.044 to 0.005. Under the smoothness family most samples reach 0.000 outright,
+meaning the robust set covers zero even with no violation permitted beyond
+curvature.
+
+Put plainly: the more of this pre-period the sensitivity analysis is allowed to
+look at, the less the estimate survives. That is the opposite of what a design
+with a short-window problem would show.
+
+**What this settles.** The low breakdown values were not an artifact of a short
+pre-period. Combined with the joint test rejecting harder on 96 weeks than on
+36, and with H006 failing on a clean holdout, the explanation that this study
+merely lacked data is exhausted.
+
+**What it does not settle.** A low breakdown value says this design cannot
+separate the effect from plausible differential drift. It says nothing about
+whether congestion pricing raised speeds.
+
+**Still an upper bound.** H001 found the clustered standard errors up to 1.5×
+too tight, and that covariance is this analysis's input, so these robust sets
+remain if anything too narrow and the true breakdown values lower still.
 
 ## Notes
 

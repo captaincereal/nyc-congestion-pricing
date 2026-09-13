@@ -11,6 +11,9 @@ is not: pre-period tests reject in every sample, the estimate tolerates only a
 fraction of the differential drift already visible in the data, and a
 pre-registered attempt to build a better comparison group failed out of sample.
 This is a finding about the design, not evidence that the toll did nothing.
+Every explanation that would have rescued it — too little pre-period, an
+atypical holiday window, a poorly chosen comparison group — has now been tested
+and none survives.
 Owner decisions are laid out in [the decision memo](docs/owner_decisions.md).
 
 ---
@@ -53,7 +56,8 @@ the verification gate has passed.
 
 Evidence below is labelled by the panel it was computed on. The association and
 the pre-trend test are current. H001 through H004 ran on an earlier 12-month
-panel; H005 and H006 rerun the two that depend most on pre-period length.
+panel; H005 and H006 rerun the two that depend most on pre-period length, on 96
+pre-treatment weeks.
 
 **The association** (27-month panel). Two-way fixed effects on link and time,
 standard errors clustered by link, 333 clusters, 5.18M link-hours
@@ -83,21 +87,32 @@ ignored the covariance between leads, and an off-by-one event-week boundary put
 "peak and weekend pass" claim came from the broken test and is superseded.
 
 **How little violation it takes to overturn.** Rambachan & Roth (2023)
-sensitivity, bounding post-treatment violations as a multiple of those observed
-pre-treatment ([H002](docs/hypotheses/H002-honest-did-sensitivity.md), 36-week
-panel; [H005](docs/hypotheses/H005-honest-did-long-preperiod.md) reruns it on 96
-weeks):
+sensitivity bounds post-treatment violations as a multiple of those observed
+pre-treatment, and reports the breakdown value: the smallest violation at which
+the robust confidence set stops excluding zero.
+[H005](docs/hypotheses/H005-honest-did-long-preperiod.md) on 96 pre-treatment
+weeks, at three event-study horizons:
 
-| Sample | breakdown value | robust CI at M = 0.5 |
-|---|---:|---|
-| all | 0.083 | [-2.42, 4.57] |
-| peak | 0.044 | [-2.10, 3.97] |
-| off-peak | 0.054 | [-2.93, 4.76] |
-| weekend | 0.151 | [-2.08, 5.07] |
+| Sample | ±12 weeks | ±26 weeks | ±52 weeks |
+|---|---:|---:|---:|
+| all | 0.093 | 0.063 | 0.044 |
+| peak | 0.044 | 0.015 | **0.005** |
+| off-peak | 0.054 | 0.034 | 0.034 |
+| weekend | 0.171 | 0.112 | 0.093 |
 
-The estimate holds only if post-tolling differential drift stays below roughly
-4 to 15 percent of the largest drift already visible beforehand. The pre-period
-violations are large, so that is a demand the data give no reason to grant.
+The estimate holds only if post-tolling differential drift stays below a few
+percent of the largest drift already visible beforehand. The pre-period
+violations are large, so that is a demand the data give no reason to grant. At
+M = 0.5 the robust intervals already run two to five mph either side of zero,
+an order of magnitude wider than the estimate they bound.
+
+Two things about this table matter beyond the headline. At a matched horizon,
+tripling the pre-period barely moved the values — H002 on 36 weeks gave 0.083,
+0.044, 0.054 and 0.151. And the values fall monotonically as the restriction is
+allowed to see more of the pre-period, because the largest observed first
+difference grows with the window. **The more of this pre-period the analysis
+looks at, the less the estimate survives** — the opposite of what a design
+limited by short data would show.
 
 **The precision is not defensible either.** Two independent checks:
 
@@ -113,14 +128,27 @@ violations are large, so that is a demand the data give no reason to grant.
   every interval, and flips the off-peak sign. Much of the apparent precision
   comes from treating serially correlated link-hours as independent evidence.
 
-**A direct attempt to fix the comparison group failed.**
+**Two attempts to fix the comparison group failed.**
 [H004](docs/hypotheses/H004-control-construction.md) built controls from
-pre-treatment trajectory shape on event weeks -36 to -13 and judged them on
--12 to -2, a window the matching never saw. Nearest-neighbour selection made
-held-out flatness *worse* in all four samples. Synthetic weights roughly halved
-the test statistic and still rejected at p = 4.4e-07, after fitting the matching
-window to a squared loss of exactly zero. Judged in-sample it would have looked
-like a complete success.
+pre-treatment trajectory shape and judged them on a window the matching never
+saw. Nearest-neighbour selection made held-out flatness *worse* in all four
+samples. Synthetic weights roughly halved the test statistic and still rejected
+at p = 4.4e-07, after fitting the matching window to a squared loss of exactly
+zero. Judged in-sample it would have looked like a complete success.
+
+[H006](docs/hypotheses/H006-control-construction-clean-holdout.md) repeated it
+on the long archive: seventy weeks of matching, judged on a clean July-September
+holdout **and** on H004's October-December one, under a single specification.
+Every control set rejects on the clean window — best result p = 0.0014.
+
+That two-holdout contrast settles the holiday question. Every set rejects about
+twice as hard on October-December as on the clean window, so holidays are real
+and H004's caveat was legitimate. But the clean window still rejects decisively.
+**Holidays were aggravating a failure, not causing one.**
+
+Against seventy weeks the synthetic weights could no longer fit exactly, landing
+at a loss of 2.67 on 31 donors. They remain the best rule at both holdouts and
+still reject. H004's perfect in-sample fit was degeneracy, not skill.
 
 Every hypothesis run against this study, including those that failed, is in the
 [hypothesis register](docs/hypotheses/REGISTER.md), each with its prediction
@@ -149,12 +177,10 @@ first is supported.
 - **Coverage.** Twenty-seven of 44 target months are held, 2023-02 to 2025-04.
   The pre-treatment side is 23 months against the 24 the frozen design asks for,
   with 2023-01 still downloading. The post-period runs only to 2025-04.
-- **H004's held-out window was holiday-dominated.** It validated on October to
-  December 2024, so its failure was confounded with holiday dynamics.
-  [H006](docs/hypotheses/H006-control-construction-clean-holdout.md) repeats the
-  same construction against a clean July-September holdout and against H004's
-  window, which is what separates the two explanations. Until it is answered,
-  H004's verdict carries that caveat.
+- **Rule B's donor count is thin.** H006's best control set retains 31 donors
+  against a pre-registered minimum of 30, with the top five weights carrying 46%
+  of the mass. It clears the bar as written, but its clustered inference should
+  be read as thin, and the threshold would have been worth setting higher.
 - **Endpoint pooling.** Event-study bins beyond 12 weeks either side pool more
   distant weeks. The diagnostics record which bins are genuine weekly estimates.
 - **No units where diversion would show.** No control link lies within 500 m of
@@ -180,12 +206,18 @@ This is still a usable result. "Here is what the available data can and cannot
 support, and here is the evidence for both" is a more honest deliverable than a
 confident number resting on an assumption the data reject.
 
-To move past it: H006 is the live test, repeating H004's matching on a clean
-holdout with a 70-week matching window. If flat held-out leads emerge there, the
-Rambachan-Roth sensitivity must be rerun on that control set before any causal
-sentence is written. If they do not, the conclusion above is the finding, and
-the remaining work is the spillover and mechanism checks and the writeup rather
-than a further search for a control set that passes.
+The live test has now run. H006 was the cleanest remaining shot at a usable
+comparison group and it failed, on a holdout with no holiday confound and a
+seventy-week matching window. The conclusion above is the finding.
+
+**Stop searching for a control set that passes.** Every further attempt is
+another draw against the same fixed data, and the register would have to carry
+the count. The remaining work is the spillover and mechanism checks that have
+not been run, and the writeup.
+
+What could still change the answer is different data, not a different
+specification: links nearer the cordon than the current 808 m nearest control,
+or an outcome other than link speed. Both are outside what this feed provides.
 
 [D1, D2, D3, D5, D6 and D7](docs/owner_decisions.md) await owner approval. No
 open decision has been silently adopted.
