@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | proposed |
+| **Status** | answered — **uninformative** |
 | **Registered** | 2026-09-13 |
 | **Registered by** | Claude Opus 5, session that completed the archive and answered H007 |
 | **Answered by** | |
@@ -184,11 +184,146 @@ hypothesis does not touch it, and no result here bears on the speed finding.
 
 ## Result
 
-*Filled in after running. Leave empty until then.*
+Answered 2026-09-13. `python -m src.analysis.h008_toll_timing`.
+
+**Panel.** 87,696 date × 10-minute-block rows over 609 dates, 2025-01-05 to
+2026-09-05, totalling 294,839,919 entries. Socrata aggregates, cached under
+`data/raw/mta_crz/`.
+
+**Boundary estimates**, frozen specification (±60 minutes, order 1, date fixed
+effects absorbed, clustered by date)
+([H008_boundaries.csv](../../outputs/tables/H008_boundaries.csv)):
+
+| Boundary | Sample | tau | SE | % change | Placebo max in sample |
+|---|---|---:|---:|---:|---:|
+| **05:00** peak begins | weekday | **−0.5138** | 0.0046 | −40.2% | 0.1387 |
+| **21:00** peak ends | weekday | **+0.1216** | 0.0023 | +12.9% | 0.1387 |
+| **09:00** peak begins | weekend | **−0.1950** | 0.0042 | −17.7% | 0.2386 |
+| **21:00** peak ends | weekend | **+0.0841** | 0.0038 | +8.8% | 0.2386 |
+
+### The three criteria, applied as written
+
+**Criterion 1 — day-of-week discrimination. PASSES.** At 09:00 the weekend
+estimate is −0.1950 and the weekday estimate at the same clock time is −0.0397,
+a ratio of **4.91×** against a bar of 3×, with the weekend sign negative as
+required. It holds across the whole sensitivity grid: 2.53×, 4.86×, 4.91×,
+5.00×, 6.15×, 8.52×. The same minute of the same clock, on days differing only
+in whether a price changes, moves five times as far.
+
+**Criterion 2 — separation from placebos. FAILS.** |tau(05:00)| = 0.5138 clears
+the weekday placebo maximum of 0.1387 by a factor of 3.7. |tau(21:00)| = 0.1216
+**does not clear it.** The criterion required both.
+
+**Criterion 3 — signs. PASSES.** Positive at 21:00, negative at weekday 05:00
+and weekend 09:00, as predicted.
+
+### The three refutation conditions, none of which fire
+
+**Not refute 1.** Weekday and weekend 09:00 are not comparable; they differ by
+4.91×.
+
+**Not refute 2.** Exactly **1 of 21** weekday placebo boundaries reaches
+|tau(21:00)|, against a bar of a majority. That one is hour 06:00, immediately
+downstream of the 05:00 response.
+
+**Not refute 3.** The discontinuity is not confined to one or two entry points.
+**All 12 detection groups carry the predicted sign at both weekday boundaries**
+([H008_by_detection_group.csv](../../outputs/tables/H008_by_detection_group.csv)),
+at 05:00 from Brooklyn Bridge at −56.8% to Queens Midtown Tunnel at −8.4%, and
+at 21:00 from Manhattan Bridge at +25.3% to Hugh L. Carey Tunnel at +1.0%.
+
+### The prediction on vehicle class was wrong
+
+The record predicted, at about 60% confidence, that trucks would bunch
+proportionally harder than cars. **They do not bunch at all**
+([H008_by_vehicle_class.csv](../../outputs/tables/H008_by_vehicle_class.csv)):
+
+| Class | tau at 05:00 | tau at 21:00 |
+|---|---:|---:|
+| Cars, pickups and vans | **−0.862** | **+0.254** |
+| Motorcycles | −0.616 | +0.039 |
+| Single-unit trucks | −0.037 | +0.024 |
+| Multi-unit trucks | +0.024 | −0.036 |
+| TLC taxi / FHV | −0.021 | +0.004 |
+| Buses | +0.332 | −0.082 |
+
+The entire response sits in cars and motorcycles. Trucks, taxis and buses are
+flat or wrong-signed. The economics are obvious in hindsight and the prediction
+was simply not thought through: taxis and for-hire vehicles pay a per-trip
+surcharge rather than the entry toll and drive to a passenger's schedule,
+freight runs to contracted delivery windows, and buses run to a timetable. The
+vehicles that retime are the ones with discretion over when to travel. That is a
+sharper result than the one predicted, and it was not predicted.
+
+### Sensitivity, as pre-registered
+
+Across the frozen grid
+([H008_sensitivity.csv](../../outputs/tables/H008_sensitivity.csv)),
+**tau(21:00) is stable at +0.10 to +0.13** while the placebo maximum it is
+compared against swings from 0.05 to 0.25:
+
+| Bandwidth | Order | tau(05) | tau(21) | Placebo max | 21:00 clears? |
+|---:|---:|---:|---:|---:|---|
+| 30 | 1 | −0.518 | +0.116 | 0.094 | yes |
+| 30 | 2 | −0.201 | +0.101 | 0.051 | yes |
+| **60** | **1** | **−0.514** | **+0.122** | **0.139** | **no (frozen spec)** |
+| 60 | 2 | −0.555 | +0.115 | 0.100 | yes |
+| 90 | 1 | −0.327 | +0.132 | 0.246 | no |
+| 90 | 2 | −0.629 | +0.120 | 0.194 | no |
+
+**Placebo spread and detectability**, which the uninformative criterion requires
+reporting. Weekday placebo |tau| has mean 0.0338 and standard deviation 0.0380.
+An 80%-power minimum detectable discontinuity against that spread is 0.1065 log
+points, or 11.2%. The observed 21:00 effect of 12.9% sits **above** that
+threshold but **below** the maximum-based bar the criteria actually used.
 
 ## Verdict
 
-*Filled in after running.*
+**Uninformative**, on the primary boundary and under the criteria as written.
+
+Criterion 2 required both weekday toll boundaries to clear the placebo maximum
+and 21:00 did not, so support cannot be claimed. No refutation condition fires
+either. That is the definition of the third outcome and it is the honest
+reading.
+
+**The criterion that failed is the one that was badly built, and that is
+diagnosable rather than a convenient excuse.** It compares a point estimate to a
+*maximum* over twenty-one placebos, and the sensitivity table shows what that
+maximum is made of: it moves between 0.05 and 0.25 across specifications while
+the quantity being tested barely moves. The placebo set includes the 05:00–08:00
+morning ramp, where entries rise fivefold within the hour and a local linear fit
+cannot track the curvature — hour 06:00 registers −0.139 for that reason, and it
+is the single placebo that beats 21:00. A maximum over a set contaminated by
+specification artefacts measures the artefact, not the effect. A percentile, or
+a placebo set restricted to hours without strong curvature, would have been the
+better construction.
+
+**None of that changes this verdict.** The criteria were frozen before the run
+and are applied as written. Reinterpreting them now is exactly the failure this
+protocol exists to prevent, and the study has spent seven hypotheses
+establishing what happens when that distinction is allowed to blur. The correct
+move is to supersede this record with one that states the better construction
+and freezes it in advance, not to relitigate this one.
+
+**What the surrounding evidence nonetheless shows.** Criterion 1 passed at 4.91×
+and held across all six specifications. Criterion 3 passed. All twelve entry
+points carry the predicted sign at both boundaries. The 05:00 estimate clears
+its placebo maximum by 3.7×. The response is confined to exactly the vehicle
+classes with discretion over departure time. Each is consistent with a real
+price response, and collectively they are hard to explain as a daily rhythm,
+since a rhythm cannot know that Saturday's peak begins four hours later than
+Tuesday's. But "consistent with" is not the pre-registered bar.
+
+**What this does not establish.** That the toll reduced congestion, reduced
+entries, or changed speeds. Retiming an entry is not avoiding one: a driver
+entering at 21:05 instead of 20:55 has responded to a price without necessarily
+changing whether they drove. Nothing here bears on the speed finding, which
+stands unchanged.
+
+**For the README.** Report as a strong suggestive result that did not clear its
+own pre-registered bar, with the vehicle-class pattern given prominence because
+it was predicted wrongly and is the most economically legible part of it. It
+must not be written up as a positive result.
 
 ## References
 

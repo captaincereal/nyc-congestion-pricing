@@ -106,3 +106,26 @@ Eight hypotheses are registered. The record discloses that the weekday raw
 discontinuities were seen during feasibility scoping before it was written, and
 freezes its criteria on quantities not yet measured — chiefly the weekend 09:00
 boundary, which is untouched and is the test that can tell a price from a clock.
+
+### H008 answered, 2026-09-13
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H008](H008-toll-timing-bunching.md) | Do drivers retime entries to avoid the peak toll rate? | answered | 2026-09-13 | Uninformative: the primary 21:00 boundary (+12.9%) did not clear the placebo maximum (13.9%), so support cannot be claimed. Every surrounding test points the other way — weekend/weekday 09:00 discrimination 4.91x, 12 of 12 entry points correctly signed, 05:00 clearing placebos by 3.7x, and the response confined to cars and motorcycles |
+
+Supersedes the row above, which recorded H008 as proposed. **The criterion that
+failed was badly constructed and the record says so without reinterpreting it:**
+it compares a point estimate to a *maximum* over twenty-one placebos, and that
+maximum ranges from 0.05 to 0.25 across specifications while the estimate being
+tested holds at +0.10 to +0.13. The placebo set includes the morning ramp, where
+a local linear fit cannot track fivefold within-hour growth. A superseding
+record should freeze a percentile instead, in advance.
+
+The registered prediction that trucks would bunch harder than cars was **wrong**.
+The response is entirely in cars and motorcycles; trucks, taxis and buses are
+flat or wrong-signed. Taxis pay a per-trip surcharge and drive to a passenger's
+schedule, freight runs to contracted windows, buses to a timetable.
+
+Eight hypotheses are registered and answered. H008 is the first to use a design
+that does not rest on parallel trends, and the first run against a dataset other
+than the speed panel.
