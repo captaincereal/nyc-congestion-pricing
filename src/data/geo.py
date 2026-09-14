@@ -86,7 +86,17 @@ EXEMPT_PATTERNS = (
     r"west\s*side\s*(hwy|highway)",
     r"\bwest\s+st\b",
     r"\b(9a|route\s*9a)\b",
-    r"\b1[12]th\s*ave",  # the Route 9A corridor is signed 11th/12th Ave
+    # The Route 9A corridor is signed 11th/12th Ave. D3 proposed narrowing this,
+    # on the reading that northern 11th Avenue is a local street the blanket
+    # pattern wrongly exempts. Rejected 2026-09-14 on the feed's own evidence:
+    # two crosstown segments are named "14th Street - westbound - 7th Ave to
+    # 11 Ave/Rt 9A" and its eastbound pair, so the source itself identifies 11th
+    # Avenue as Route 9A. The four segments D3 named (108104, 116080, 80108,
+    # 81116) are the only ones whose roadway subject is 11th Avenue, all
+    # southbound and continuous from 23rd to 57th, which is the Route 9A
+    # alignment through Manhattan. Narrowing this would have reclassified exempt
+    # highway as tolled local street. See docs/decision_register.md.
+    r"\b1[12]th\s*ave",
     r"battery\s+park\s+underpass",
     r"\b(bbt|hugh\s+l\.?\s+carey)\b",
 )

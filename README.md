@@ -128,11 +128,6 @@ ignored the covariance between leads, and an off-by-one event-week boundary put
 1-4 January into event week zero. Both were corrected on 2026-09-12. The earlier
 "peak and weekend pass" claim came from the broken test and is superseded.
 
-An earlier version of that test summed squared individual t-statistics and
-ignored the covariance between leads, and an off-by-one event-week boundary put
-1-4 January into event week zero. Both were corrected on 2026-09-12. The earlier
-"peak and weekend pass" claim came from the broken test and is superseded.
-
 **How little violation it takes to overturn.** Rambachan & Roth (2023)
 sensitivity bounds post-treatment violations as a multiple of those observed
 pre-treatment, and reports the breakdown value: the smallest violation at which
@@ -358,9 +353,13 @@ first is supported.
   zero. Use `data/processed/secondary_hourly_panel.parquet` instead. The primary
   panel is unaffected: zero-speed readings are at most 0.014% of any
   `treatment_group × post` cell there.
-- **Treatment classification.** D3 remains open. The blanket 11th Avenue
-  exemption probably misclassifies four local-street segments, though the
-  sensitivity moves the coefficient only slightly.
+- **Treatment classification.** D3 was **rejected** on 2026-09-14. It proposed
+  moving four northern 11th Avenue segments into treatment, but the feed names
+  two crosstown segments "11 Ave/Rt 9A", identifying 11th Avenue as Route 9A,
+  which is toll-exempt. The current classification stands. The identification
+  rests on that label plus a continuous 23rd-to-57th alignment rather than on an
+  MTA tolling document, and the sensitivity moves the coefficient by about
+  0.001 mph either way.
 - **What the outcome is.** Hourly median speed on selected links, weighting a
   quiet link the same as a heavy corridor. Not network congestion, not volume,
   not door-to-door travel time, not welfare.
@@ -412,8 +411,13 @@ an outcome other than link speed, or — for the spillover question specifically
 working speed sensors on the 11th/12th Avenue corridor across the toll date.
 None of the three is available in what these feeds provide.
 
-[D1, D2, D3, D5, D6 and D7](docs/owner_decisions.md) await owner approval. No
-open decision has been silently adopted.
+[All six open decisions](docs/owner_decisions.md) were resolved on 2026-09-14
+at the owner's direction, with reasoning in
+[the decision register](docs/decision_register.md). D1, D5, D6 and D7 adopted,
+D2 adopted as a method and recorded as executed and negative, D3 rejected. **No
+code changed as a result**, and none of the six was capable of changing the
+finding — which is worth saying plainly: the open decisions were never what
+stood between this study and a result.
 
 ---
 

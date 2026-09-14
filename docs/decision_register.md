@@ -5,9 +5,121 @@
 Compiled 2026-09-09, updated 2026-09-13 · treatment date 2025-01-05 ·
 Validation details are recorded in the latest dated entry below.
 
-Six decisions are open. Earlier entries are historical and are superseded
-where the latest audit says so. Each open decision changes what the study reports, so it is
+All six open decisions were resolved on 2026-09-14; see the entry immediately
+below. Earlier entries are historical and are superseded where the latest audit
+says so. Each open decision changes what the study reports, so it is
 deliberately left unmade rather than defaulted into the panel.
+
+## Update 2026-09-14 — the six open decisions are resolved
+
+The owner directed this session to decide D1, D2, D3, D5, D6 and D7 on their
+behalf. Each is settled below. **No code changed** beyond a comment recording
+D3's evidence: every verdict either confirms existing behaviour or closes a line
+of work, and nothing was invented to make the exercise look larger.
+
+One framing note, recorded because it shaped the verdicts. The instruction was
+to decide with an eye to what might produce results. Decisions were **not** made
+on that basis, because choosing a specification for the size of the number it
+returns is the failure this project spent nine hypotheses documenting. Where the
+productive choice and the correct one diverge — and on D1 they do — the correct
+one was taken and the divergence is stated.
+
+### D1 — Retain the unfiltered median as primary. **ADOPT.**
+
+The quality filter is the only one of the six that visibly moves the headline:
+`quality` gives +0.963 mph (SE 0.183) against the `contiguous_baseline` +0.849
+(SE 0.239), a larger estimate with a tighter interval. `no_extreme_readings`
+gives +0.932 (SE 0.234).
+
+That is precisely why it is not promoted. Adopting a filter as the primary
+outcome *because* it raises the coefficient and narrows the interval is
+selection on the outcome, and the primary outcome is frozen in
+`docs/project_brief.md`.
+
+The substantive case is also weaker than it looks. The extreme-value problem is
+real — 0.1976% of readings exceed 80 mph and the maximum is 11,674.7 mph — but
+the primary outcome is an hourly **median**, which is already robust to them;
+that is what a median is for. The probe-depth concern (10.88% of readings rest
+on three probes or fewer) is the more serious one, and it stays reported as a
+sensitivity where a reader can weigh it.
+
+Note the memo's figures are stale against the completed archive: it cited
+10.97%, 0.1125% and a 7,043.9 mph maximum, measured on eight months. The
+direction of the argument is unchanged.
+
+### D2 — Pre-treatment matching with held-out validation. **ADOPT as method; executed, and negative.**
+
+The discipline it prescribes was right and remains binding on any future control
+construction: freeze the features, the matching rule, the holdout dates and the
+acceptance criteria before touching post-treatment outcomes, and do not promote
+the naive pool or pick the pool with the most favourable coefficient.
+
+Its substantive hope is refuted. H004 and H006 both executed it. Nearest-
+neighbour made held-out flatness worse in all four samples; synthetic weights
+fitted the matching window to a squared loss of exactly zero and still rejected
+at p = 4.4e-07; H006 repeated it on seventy weeks with a clean July-September
+holdout and every control set still rejected.
+
+The memo said "wait for the contiguous pre-period to evaluate this
+recommendation". That wait is over — the archive is complete at 44 months — and
+the evaluation returned negative twice. The method is adopted; the line of work
+is closed.
+
+### D3 — Reclassify four northern 11th Avenue segments into treatment. **REJECT.**
+
+The recommendation rests on the claim that the blanket `1[12]th Ave` exemption
+"conflates these local streets with Route 9A". **The feed's own naming
+contradicts it.** Two crosstown segments in `ezpass_segments.parquet` are named
+*"14th Street – westbound – 7th Ave to 11 Ave/Rt 9A"* and its eastbound pair.
+The data source identifies 11th Avenue **as** Route 9A.
+
+The four segments D3 names — 108104, 116080, 80108, 81116 — are the only ones in
+the roster whose roadway subject is 11th Avenue. All four are southbound and
+their geometry is continuous from 23rd Street to 57th, which is the Route 9A
+alignment through Manhattan: West Street, then 11th Avenue, then 12th Avenue
+north of roughly 57th. Route 9A is toll-exempt, so the current classification is
+correct and adopting D3 would have reclassified exempt highway as tolled local
+street.
+
+**Residual uncertainty, stated rather than buried.** The feed's "11 Ave/Rt 9A"
+label appears at 14th Street, not at 23rd to 57th, so the identification along
+the D3 segments is an inference from that label plus the continuous alignment.
+It has not been checked against an MTA tolling document or a NYSDOT route log.
+What would settle it definitively is either of those. The `eleventh_as_treated`
+sensitivity stays in the robustness table, and it shows the choice moves the
+coefficient by about 0.001 mph — so the cost of being wrong in either direction
+is numerically negligible, and the reason to get it right is correctness of a
+frozen definition rather than the estimate.
+
+### D5 — Keep the two Williamsburg Bridge directions separate. **ADOPT.**
+
+`194196` is eastbound out of Manhattan and `197195` is westbound in. Pooling
+them would average entry and exit behaviour into one number that describes
+neither. Two links also carry very little independent information for clustered
+inference, so any crossing analysis stays exploratory and neither link belongs
+in the primary surface-street model. Costs nothing; prevents a real error.
+
+### D6 — Normalise only derived corridor labels, when corridor analysis begins. **ADOPT.**
+
+A conditional rule with no current cost: no corridor analysis exists, and the
+secondary diagnostic is at link × month, so spelling variants cannot split an
+estimate today. Adopting it now means the auditable lookup is required before
+the first corridor aggregate rather than retrofitted after one. Original names
+and IDs stay intact.
+
+### D7 — Complete the frozen window beginning January 2023. **ADOPTED — and executed.**
+
+Done on 2026-09-13. The archive holds all 44 frozen months, 2023-01 through
+2026-08, every one verified: 24 pre-treatment months and 20 post. The memo
+argued against extending back into 2021-22 COVID-recovery years instead, and
+that remains the position — no extension is planned or needed.
+
+### What this changes about the finding
+
+Nothing. The speed result stands: +1.05 mph, pre-trend test rejecting in all
+four samples on the full 104-week pre-period, causally uninterpretable. None of
+the six decisions was capable of changing that, which is itself worth recording
+— the open decisions were never what stood between this study and a result.
 
 ## Update 2026-09-13 (later) — a behavioural response the study can actually identify
 

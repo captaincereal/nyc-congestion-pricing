@@ -6,8 +6,26 @@ estimate of zero effect. The corrected joint pre-period tests reject in every
 sample. The full frozen pre-period is still absent and the primary archive is
 unverified. `decision_register.md` records the numerical evidence and code fixes.
 
-The following recommendations are **not adopted**. The handoff explicitly
-reserves D1–D7 to the owner. D4 was already resolved before this work.
+**RESOLVED 2026-09-14.** All six were decided by the owner, who directed the
+session to make the calls on their behalf. Reasoning is in the dated entry in
+`docs/decision_register.md`; the original text of each recommendation is
+preserved unchanged below.
+
+| | Recommendation | Verdict |
+|---|---|---|
+| **D1** | Retain the unfiltered median as primary; quality filters as sensitivities | **ADOPT** |
+| **D2** | Build controls by pre-treatment matching with held-out validation | **ADOPT as method — executed, and negative** |
+| **D3** | Reclassify four northern 11th Avenue segments into treatment | **REJECT** |
+| **D5** | Keep the two Williamsburg Bridge directions separate | **ADOPT** |
+| **D6** | Normalise only derived corridor labels, when corridor analysis begins | **ADOPT** |
+| **D7** | Complete the frozen window beginning January 2023 | **ADOPTED — and executed** |
+
+**No code changed as a result**, beyond a comment in `geo.py` recording D3's
+evidence. Every verdict either confirms what the pipeline already does or closes
+a line of work. That is the honest outcome and it was not padded into something
+larger.
+
+D4 was already resolved before this work.
 
 ## D1 — Retain the unfiltered median as primary; report quality sensitivities
 

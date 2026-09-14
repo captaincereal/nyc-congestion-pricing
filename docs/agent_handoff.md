@@ -16,9 +16,10 @@ finding from current artefacts.
 
 This is a different job from the one earlier handoffs described. It is not to
 keep testing the identification — that is settled — and not to repair the
-pipeline, which is fixed. What is left is a small amount of optional work and a
-set of decisions that belong to the owner. **The most likely way to damage this
-study now is to find something to run.**
+pipeline, which is fixed. The six owner decisions were resolved on
+2026-09-14 and changed no code. What is left is one optional dataset and a
+judgement call on the timing result. **The most likely way to damage this study
+now is to find something to run.**
 
 Infer intent from context and carry work to completion. When a question can be
 settled by reading the repo, measuring something, or running it, do that instead
@@ -29,7 +30,7 @@ of asking. Prepare a concrete, reviewable result before seeking approval.
 1. `docs/hypotheses/REGISTER.md` — every hypothesis, its status and verdict.
 2. `docs/hypotheses/README.md` — the protocol you must follow. Short, not optional.
 3. `README.md` — the current public finding.
-4. `docs/owner_decisions.md` — what is waiting on the owner.
+4. `docs/decision_register.md` — the audit trail, newest entry first.
 
 ## First: nothing is broken — read this before you go looking
 
@@ -201,11 +202,19 @@ robustness table are rebuilt by `analysis.yml` from the current panel, while
 each hypothesis record stands on the panel it was answered on. **Do not restate
 H001–H006 against the 44-month panel.**
 
-**What actually wants doing** is the owner's. D1, D2, D3, D5, D6 and D7 are open
-and reserved. D2's construction work is done and negative (H004, H006) and D3's
-sensitivity is measured and negligible, so both wait on a person rather than
-more evidence. [`owner_decision_prompt.md`](owner_decision_prompt.md) is written
-for taking a second opinion on them; it recommends and does not adopt.
+**The owner decisions are closed.** All six were resolved on 2026-09-14 at the
+owner's direction — D1, D5, D6 and D7 adopted, D2 adopted as a method and
+recorded as executed and negative, D3 **rejected**. Reasoning is in
+`docs/decision_register.md`. No code changed as a result, and none of the six
+was capable of moving the finding.
+
+D3 is the one worth knowing about. It proposed reclassifying four northern 11th
+Avenue segments as tolled, and was rejected because the feed's own segment names
+call 11th Avenue "11 Ave/Rt 9A" — Route 9A, which is exempt. Adopting it would
+have turned exempt highway into tolled local street. The identification rests on
+that label plus a continuous 23rd-to-57th alignment rather than an MTA tolling
+document; if you ever want it settled beyond doubt, that document or a NYSDOT
+route log is what does it.
 
 Before touching the secondary speed feed: read the zero-speed entry in
 `AGENTS.md`. Start from `data/processed/secondary_hourly_panel.parquet`, not
@@ -261,11 +270,11 @@ models fabricate confidently in this domain.
   Branches and pull requests need no approval.
 - Anything that costs money.
 - Changing anything `docs/project_brief.md` marks frozen.
-- Adopting any of **D1, D2, D3, D5, D6, D7** — all still open, all reserved.
-  You may analyse them and bring evidence; you may not adopt one. D2's
-  construction work is done and negative (H004, H006) and D3's sensitivity is
-  measured and negligible; both are now waiting on a person rather than on more
-  evidence.
+- **Reopening a resolved decision.** D1-D7 were all settled on 2026-09-14 and
+  the reasoning is in `docs/decision_register.md`. If evidence appears that
+  contradicts one, bring it rather than quietly re-deciding — especially D3,
+  whose rejection rests on an inference from the feed's naming rather than on an
+  MTA tolling document.
 - Pushing to a remote. `AGENTS.md` says to ask and this brief does not, which is
   a real conflict. It was put to the owner on 2026-09-13 and they chose
   push-to-main, so that is the standing answer — but say what you pushed.
