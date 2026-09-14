@@ -9,21 +9,21 @@ below the rule is the mission.
 
 ---
 
-You are taking over a causal-inference study that is **essentially finished**.
-Nine pre-registered hypotheses are answered, the frozen 44-month archive is
-complete and verified, the pipeline is healthy, and the README reports the
-finding from current artefacts.
+You are taking over a causal-inference study that is **finished**, in the sense
+that matters: the data are complete, the pipeline is healthy, nine
+pre-registered hypotheses are answered, the six open design decisions are
+resolved, and the README reports the finding from current artefacts.
 
-This is a different job from the one earlier handoffs described. It is not to
-keep testing the identification — that is settled — and not to repair the
-pipeline, which is fixed. The six owner decisions were resolved on
-2026-09-14 and changed no code. What is left is one optional dataset and a
-judgement call on the timing result. **The most likely way to damage this study
-now is to find something to run.**
+**The job left is judgement, not production.** One result needs a verdict that
+its own author should not give. One by-product deserves a record. One dataset is
+untried and may not be worth trying. Everything else is done.
+
+Read "Where results can and cannot come from" before planning anything. **The
+most likely way to damage this study now is to find something to run.**
 
 Infer intent from context and carry work to completion. When a question can be
 settled by reading the repo, measuring something, or running it, do that instead
-of asking. Prepare a concrete, reviewable result before seeking approval.
+of asking.
 
 ## Start here, in this order
 
@@ -32,90 +32,52 @@ of asking. Prepare a concrete, reviewable result before seeking approval.
 3. `README.md` — the current public finding.
 4. `docs/decision_register.md` — the audit trail, newest entry first.
 
-## First: nothing is broken — read this before you go looking
+## The state, in one pass
 
-Everything that was failing on 2026-09-13 is fixed, verified, and pushed. Start
-by confirming it is still true rather than by re-diagnosing it:
+Confirm rather than re-derive:
 
-    gh run list --workflow analysis.yml --limit 3
-    gh run list --workflow backfill.yml --limit 3
+    "C:/Program Files/GitHub CLI/gh.exe" run list --workflow analysis.yml --limit 3
+    "C:/Program Files/GitHub CLI/gh.exe" run list --workflow backfill.yml --limit 3
 
-Expect the newest of each to be green. If they are, there is no pipeline work.
+Both newest runs should be green. If they are, there is no pipeline work.
 
-**The archive is complete.** 44 of 44 frozen months, 2023-01 … 2026-08, every
-one verified — 24 pre-treatment and 20 post. Both milestone issues opened (#3,
-#4). The backfill has nothing left to fetch; it now breaks out early with
-"Frozen 44-month archive complete", which is why run 6 finished in 3h18m rather
-than spending its 285-minute budget.
+- **Archive complete.** 44 of 44 frozen months, 2023-01 … 2026-08, all verified.
+  24 pre-treatment months, 20 post. The backfill has nothing left to fetch and
+  now exits early.
+- **Results current.** `analysis.yml` rebuilds the panel and Phases 6-9 when the
+  backfill completes, and takes `workflow_dispatch`. About five minutes.
+- **Decisions closed.** D1-D7 resolved 2026-09-14; no code changed as a result.
+- **264 tests pass.** State lives in the `data-raw` release, which sits in
+  the low hundreds of assets and no longer drifts toward the 1000 ceiling.
+  The exact count moves as months complete and their day checkpoints are
+  pruned; what matters is that it is nowhere near the cap.
 
-**The results are current.** `analysis.yml` rebuilt everything from the complete
-archive at 2026-09-13T22:34Z (commit `089f89b`), and the README's Evidence,
-Robustness and Limitations sections were rewritten from those tables in
-`7696130`. Every figure quoted there was checked back against the CSV it cites.
-The headline association is now **+1.05 mph** on all hours, down from 1.17 on 27
-months, and the joint pre-trend test still rejects in all four samples.
+Everything that broke on 2026-09-13 is fixed and verified: a release that had
+filled to GitHub's 1000-asset ceiling, and an analysis failing on an unmatched
+segment. Details are in `docs/decision_register.md` if you need them; you should
+not. Three consequences do matter:
 
-What was wrong, and why none of it needs revisiting:
+`publish` **replaces** `ANCILLARY` assets (segment table, weather) rather than
+refusing them; month parts and day checkpoints remain immutable and a test pins
+that. A failing HARD data-quality check **prints its offending rows** to stderr.
+And the segment roster is **reconciled** against the parts on disk rather than
+sampled — `missing_segment_sids` plus `top_up_segments`, before staging.
 
-The release had filled to GitHub's 1000-asset ceiling and every upload 422'd.
-Pruning now runs before uploading; the release sits at 178 assets with zero
-stranded day receipts. Two defects in the first fix were found by checking it
-rather than trusting it — it matched `.parquet` only, leaving 408 receipts
-uncollectable, and it broke four of the eight snapshots it keeps.
+`gh` is installed and authenticated but **not on the Git Bash PATH**. Call it by
+full path or from PowerShell. Without it the Actions log API returns 403 and
+failures are undiagnosable from outside.
 
-Then `analysis.yml` failed on the completed archive with
-`hard_unmatched_segments`. The cause was sid **33024**, the westbound Belt
-Parkway east of JFK: a sparse sensor with 2,325 readings across 44 months that
-reported on none of the ten sampled days, so it reached the panel with no
-geometry. It classifies as `control`, so no treated definition moved. Day
-sampling could never have found it, and a full re-fetch confirmed that — it
-returned a byte-identical table. The roster is now **reconciled** instead of
-sampled: `missing_segment_sids` diffs the sids in the parts on disk against the
-attribute table and `top_up_segments` looks each gap up by id, before staging.
-
-Three things changed shape as a result, and they are the ones to know about:
-
-`publish` now **replaces** `ANCILLARY` assets (the segment table, the weather
-file) rather than refusing them. Month parts and day checkpoints are still
-immutable and a test pins that distinction. The cost is documented at the call
-site: snapshots written before a replacement stop being restorable, so the
-fallback chain shortens until fresh ones accumulate.
-
-A failing HARD data-quality check now **prints its offending rows** to stderr.
-The previous exit said only "see the report", and `analysis.yml` uploads no
-artifact, so the report died with the runner.
-
-`gh` is installed and authenticated on the owner's machine but is **not on the
-Git Bash PATH**; call it as `"C:/Program Files/GitHub CLI/gh.exe"` or from
-PowerShell. Without it the Actions log API returns 403 and failures are
-effectively undiagnosable from outside.
-
-## Timing, if you ever wait on a workflow
-
-Scheduled runs on free runners are delayed hours past their cron slots
-(`25 1,7,13,19` UTC; observed starts 06:17, 12:46, 16:58). **A release or a
-table that has not changed shortly after a push means the job has not run yet,
-not that something failed.** Check the newest asset's `created_at`, or the run's
-`run_started_at`, against your push before concluding anything — an hour was
-lost to that on 2026-09-13.
-
-`analysis.yml` fires on `workflow_run` when the backfill completes, and also
-takes `workflow_dispatch`, so you can trigger it directly instead of waiting:
-
-    gh workflow run analysis.yml
-    gh run watch <id>
-
-It takes about five minutes end to end on the complete archive.
+Scheduled runs are delayed hours past their cron slots. **State that has not
+changed shortly after a push means the job has not run, not that it failed.**
+Check `run_started_at` or an asset's `created_at` against your push before
+concluding anything — an hour was lost to that on 2026-09-13.
 
 ## What the study found
 
 Speeds inside the Congestion Relief Zone rose about **1.05 mph** relative to
 comparison streets after tolling began on 2025-01-05, roughly 11% of the
-pre-tolling treated mean, on the complete 44-month archive. That association is
-robust. **It cannot be attributed to the toll.**
-
-Nine answered hypotheses, each with its prediction committed before its code
-ran:
+pre-tolling treated mean. That association is robust. **It cannot be attributed
+to the toll.**
 
 | | Finding |
 |---|---|
@@ -123,105 +85,106 @@ ran:
 | **H002** | Breakdown values 0.044–0.151 on 36 pre-weeks |
 | **H003** | Daily aggregation stable; collapsing to one pre/post per link inflates SEs 3.8–6.2×, zero enters every interval, off-peak flips sign |
 | **H004** | Both matching rules rejected out of sample; nearest-neighbour made it worse |
-| **H005** | Breakdown values 0.005–0.171 on 96 pre-weeks, falling monotonically as the horizon widens |
-| **H006** | Every control set rejects on a clean July–September holdout; holidays roughly double the statistic but do not cause the failure |
-| **H007** | The secondary feed cannot measure diversion either: it stops reporting speeds on three of nine toll-exempt in-zone links, availability diverging 21.2 points against a 5-point bar. A measurement failure, not an identification one |
-| **H008** | Entries jump at both moments the toll price changes. Uninformative: the primary 21:00 boundary (+12.9%) missed a placebo maximum of 13.9%. Response confined to cars and motorcycles, which the record predicted backwards |
-| **H009** | Superseding H008 with a control that pays no toll. At 05:00 tolled entries fall 69 log points while exempt entries on the same sensors rise 7; difference -0.759 [-0.795, -0.723]. Does not support **as specified** -- a criterion required a significant zero |
+| **H005** | Breakdown values 0.005–0.171 on 96 pre-weeks, falling as the horizon widens |
+| **H006** | Every control set rejects on a clean July–September holdout; holidays aggravate the failure but do not cause it |
+| **H007** | The secondary feed cannot measure diversion either — it stops reporting on three of nine exempt in-zone links, availability diverging 21.2 points against a 5-point bar. A measurement failure, not an identification one |
+| **H008** | Entries jump at both moments the toll price changes. Uninformative: the 21:00 boundary (+12.9%) missed a placebo maximum of 13.9%. Response confined to cars and motorcycles, predicted backwards |
+| **H009** | Superseding H008 with a control that pays no toll. At 05:00 tolled entries fall 69 log points while exempt entries on the same sensors rise 7; difference −0.759 [−0.795, −0.723]. Does not support **as specified** |
 
 The joint pre-trend test rejects in all four samples on the full 104-week
-pre-period: χ² 97.9, 69.7, 102.2 and 46.7 on 11 dof. Lengthening the pre-period
-never rescued it — three of the four rise monotonically from 36 to 96 to 104
-weeks, weekday peak easing slightly at the last step while staying far beyond
-rejection. Every explanation that would have rescued the finding — too little
-pre-period, an atypical holiday window, a poorly chosen comparison group — has
-been tested and none survives, and **the pre-period explanation is now exhausted
-rather than merely unlikely: there is no more to add.**
+pre-period: χ² 97.9, 69.7, 102.2, 46.7 on 11 dof. Lengthening the pre-period
+never rescued it. Every explanation that would have saved the finding — too
+little pre-period, an atypical holiday window, a poor comparison group — has
+been tested, and **the pre-period explanation is now exhausted rather than
+merely unlikely: there is no more to add.**
 
 **Do not reopen this.** Searching for a control set that passes is another draw
-against fixed data, and the register would have to carry the count. If you
-believe there is a specification nobody tried, register it with a prediction
-first, and expect it to fail.
+against fixed data and the register carries the count. None of this is evidence
+that congestion pricing did nothing; it is evidence that this comparison design
+cannot tell you either way. Hold that distinction in every sentence you write —
+it is the study's contribution.
 
-None of this is evidence that congestion pricing did nothing. It is evidence
-that this comparison design cannot tell you either way. Hold that distinction in
-every sentence you write; it is the study's contribution.
+## The three things actually left
 
-## The work that remains
+**1. The timing result needs a verdict, and its author should not give it.**
 
-Very little, and none of it is a new specification against the speed panel. Be
-honest with yourself about that before inventing something to run.
-
-**The speed question is closed.** Seven hypotheses established that this design
-cannot identify the toll's effect, and the completed archive did not rescue it.
-Do not reopen the control-set search.
-
-**Phase 10 is closed except for TLC.** H007 answered spillover: the secondary
-feed carries the exempt roads but stops measuring three of the nine links across
-the toll date, a measurement failure rather than an identification one. The MTA
-entry check is closed structurally for before/after — `t6yz-b64h` begins on the
-tolling date — though see the timing thread below, which uses the same data for
-a different question.
-
-**TLC trip records are the only untried source with a pre-period**, have not
-been ingested, and would need their own record. Weigh whether it is worth it: a
-clean TLC result would describe a "cannot identify" finding better rather than
-change it. Its current distribution is monthly files outside the Socrata
-endpoints this project uses, and that source has **not** been verified — confirm
-it rather than assuming.
-
-**The timing thread is the live one, and it needs a reader more than a runner.**
 H008 and H009 found a large, precisely estimated behavioural response to the
 toll's peak/overnight price schedule, identified off a discontinuity rather than
-parallel trends. The 05:00 result is the strongest identification in this
-project: tolled entries fall 69 log points while exempt entries on the same
-sensors rise 7, at all four dual-recording points.
+parallel trends. The strongest piece: at 05:00 tolled entries fall 69 log points
+while toll-exempt vehicles on the same sensors, in the same ten-minute blocks,
+*rise* 7 — a difference of −0.759, consistent at all four dual-recording points.
+No clock, sensor artefact or curvature does that, because each would move both
+series together.
 
-**Neither record cleared its own bar, and both criteria were flawed in the same
-way** — H008 compared to a maximum over a contaminated placebo set, H009
-required a control to show a significant zero. Two consecutive drafting failures
-by the same author, an hour apart, both gates built on the wrong scale.
+Neither record cleared its own pre-registered bar, and both criteria were flawed
+in the same way. **A third record rewriting the criterion is the wrong move**:
+the estimate would not shift, only the label, and the label would then have been
+chosen by someone who already knew it. Whether this counts as supported is a
+judgement for a reader of the three records. If you disagree and register H010,
+say in it explicitly why you are not simply relabelling, and expect scepticism.
 
-So the correct next move is **not** a third record rewriting the criterion. The
-estimate would not move; only the label would, and it would move for someone who
-already knew it. Whether this counts as supported is a judgement for a reader of
-the three records. If you disagree with that and want to register H010, say
-explicitly in it why you are not simply relabelling, and expect a reader to be
-sceptical.
+**2. Route substitution is unregistered and unclaimed.**
 
-One genuine loose end, flagged in H009 and claimed nowhere: exempt entries
-**rising** as tolled ones collapse at 05:00 is the first direct evidence of route
-substitution in this project. H007 could not see it because the sensors on those
-roads had failed. It is a by-product of a design aimed at something else, so it
-would need its own record before it could be reported.
+Exempt-roadway entries *rising* as tolled entries collapse at 05:00 is the first
+direct evidence of diversion this project has obtained from any source. H007
+could not see it on the speed feed because the sensors on those roads had
+failed. It is a by-product of a design aimed at something else, so it is flagged
+in H009 and claimed nowhere. It would need its own record — and that record
+would be a genuinely new question, not a re-score.
 
-**Phase 11 is done.** The README carries the speed finding, the spillover
-finding and the timing thread, each from current artefacts, each with its
-caveats. Keep its labelling discipline: the association, pre-trend test and
-robustness table are rebuilt by `analysis.yml` from the current panel, while
-each hypothesis record stands on the panel it was answered on. **Do not restate
-H001–H006 against the 44-month panel.**
+**3. TLC trip records are the only untried source with a pre-period.**
 
-**The owner decisions are closed.** All six were resolved on 2026-09-14 at the
-owner's direction — D1, D5, D6 and D7 adopted, D2 adopted as a method and
-recorded as executed and negative, D3 **rejected**. Reasoning is in
-`docs/decision_register.md`. No code changed as a result, and none of the six
-was capable of moving the finding.
+Not ingested. Would need its own record. Weigh whether it is worth it: a clean
+TLC result would describe a "cannot identify" finding better rather than change
+it. Its current distribution is monthly files outside the Socrata endpoints this
+project uses, and that source has **not** been verified — confirm it rather than
+assuming.
 
-D3 is the one worth knowing about. It proposed reclassifying four northern 11th
-Avenue segments as tolled, and was rejected because the feed's own segment names
-call 11th Avenue "11 Ave/Rt 9A" — Route 9A, which is exempt. Adopting it would
-have turned exempt highway into tolled local street. The identification rests on
-that label plus a continuous 23rd-to-57th alignment rather than an MTA tolling
-document; if you ever want it settled beyond doubt, that document or a NYSDOT
-route log is what does it.
+## Where results can and cannot come from
 
-Before touching the secondary speed feed: read the zero-speed entry in
-`AGENTS.md`. Start from `data/processed/secondary_hourly_panel.parquet`, not
-`spillover_diagnostics.py`, whose committed table is superseded.
+Be honest with yourself about this before planning. The instinct to produce a
+positive finding is exactly what the protocol exists to resist.
 
-Anything whose output could reach the README needs a hypothesis record committed
-before it runs.
+**Closed, and not by accident.** The speed question. Seven hypotheses, a
+completed archive, a full 24-month pre-period, three attempts at control
+construction. The design cannot identify the effect and more specifications will
+not change that — they will only eventually produce a clean-looking one by
+chance.
+
+**Open, and where anything real will come from.** Designs that do not need
+parallel trends. The toll's own price structure is the existing example and it
+worked: a discontinuity in time-of-day, with a control group that pays nothing.
+That is why H008 and H009 produced something the speed panel never could.
+
+**A note on what "results" means here.** The documented failure to identify *is*
+a result, and it is the study's most defensible one. A study that says "here is
+what these data can and cannot support, and here is the evidence for both" is
+finished work, not a draft awaiting a better number. If you end a session having
+confirmed that and added nothing, say so — that is a valid and correct outcome.
+
+## How this project has recently gone wrong
+
+Two habits, both learned the hard way on 2026-09-13.
+
+**Acceptance criteria failed twice in a row, the same way.** H008 compared an
+estimate to a *maximum* over 21 placebo boundaries, a set contaminated by a
+morning ramp where a local linear fit cannot track fivefold growth. H009
+required a control series to show no *significant* movement, which 609 days and
+125M observations can never deliver — it demanded a precisely estimated zero. A
+refutation condition in the same record encoded the identical idea correctly,
+with a magnitude threshold, and behaved fine.
+
+So: **state criteria as magnitudes you would find convincing, never as
+significance or tail statistics**, and before freezing, ask whether a true
+effect of the size you expect could actually satisfy them. Two consecutive
+failures by one author should also tell you to have criteria read by something
+other than whatever wrote them.
+
+**Check a fix against live state instead of assuming it took.** The release
+prune was simulated asset-by-asset before being pushed, and that is how two
+further defects surfaced. And when a failure is opaque, make it explain itself
+rather than guessing from outside — the unmatched segment was found in one line
+only after the check was made to print its rows.
 
 ## The protocol, which is binding
 
@@ -236,21 +199,30 @@ not edit them. Failed and abandoned attempts stay in the register — the count 
 part of what a reader needs. The `research-prompt` skill writes a record and a
 prompt together.
 
-Namespace outputs `H0NN_*`. `control_construction` and `honest_did` take
-`--out-prefix`, and `honest_did` also stamps the horizon, because reruns would
-otherwise overwrite the artefacts an earlier record cites. `did`, `event_study`
-and `placebo_space` do not take one and load `HOURLY_PANEL_PATH` in their own
-`load()`; H007 imported their functions from a module of its own rather than
-repointing that path, which is the pattern to copy.
+Anything whose output could reach the README needs a record committed **before**
+it runs. Namespace outputs `H0NN_*`. `control_construction` and `honest_did`
+take `--out-prefix`, and `honest_did` stamps the horizon, because reruns would
+otherwise overwrite artefacts an earlier record cites. `did`, `event_study` and
+`placebo_space` do not take one and load `HOURLY_PANEL_PATH` in their own
+`load()`; H007 and H009 imported their functions from modules of their own
+rather than repointing that path, which is the pattern to copy.
+
+**Do not restate H001–H006 against the 44-month panel.** Each cites the
+artefacts it was answered on; rerunning one is a fresh draw. The README's
+labelling reflects this and should be preserved: the association, pre-trend test
+and robustness table are rebuilt by `analysis.yml` from the current panel, while
+each record stands on its own.
+
+Before touching the secondary speed feed: read the zero-speed entry in
+`AGENTS.md`. `speed = 0` means **outage**, not standstill. Start from
+`data/processed/secondary_hourly_panel.parquet`, not `spillover_diagnostics.py`,
+whose committed table averages 8.8M outages in as 0 mph and is superseded.
 
 ## Infrastructure
 
 Everything runs unattended on GitHub Actions, free, because the owner will not
-leave a machine on. `backfill.yml` every six hours (verify, then deepen the
-pre-period backwards, then extend forward); `analysis.yml` rebuilds the panel
-and reruns Phases 6-9 when the backfill completes, and takes
-`workflow_dispatch`; `tests.yml` runs ruff, black and pytest.
-264 tests pass. State lives in the `data-raw` release.
+leave a machine on. `backfill.yml` every six hours; `analysis.yml` on backfill
+completion or `workflow_dispatch`; `tests.yml` runs ruff, black and pytest.
 
 To work locally: pull month parts, the manifest and the segment table from the
 release, then `build_staging` → `geo` → `build_panel`.
@@ -262,7 +234,8 @@ outranks the budget: if the only honest analysis costs money, say so rather than
 quietly weakening it.
 
 Cite with author, year and venue. Flag anything you cannot cite precisely —
-models fabricate confidently in this domain.
+models fabricate confidently in this domain, and two records in this repo carry
+citations with page ranges deliberately left unverified rather than guessed.
 
 ## Bring to the owner first
 
@@ -270,14 +243,15 @@ models fabricate confidently in this domain.
   Branches and pull requests need no approval.
 - Anything that costs money.
 - Changing anything `docs/project_brief.md` marks frozen.
-- **Reopening a resolved decision.** D1-D7 were all settled on 2026-09-14 and
-  the reasoning is in `docs/decision_register.md`. If evidence appears that
-  contradicts one, bring it rather than quietly re-deciding — especially D3,
-  whose rejection rests on an inference from the feed's naming rather than on an
-  MTA tolling document.
-- Pushing to a remote. `AGENTS.md` says to ask and this brief does not, which is
-  a real conflict. It was put to the owner on 2026-09-13 and they chose
-  push-to-main, so that is the standing answer — but say what you pushed.
+- **Reopening a resolved decision.** D1-D7 were settled on 2026-09-14 with
+  reasoning in `docs/decision_register.md`. If evidence contradicts one, bring
+  it rather than quietly re-deciding — especially **D3**, whose rejection rests
+  on the feed naming 11th Avenue "11 Ave/Rt 9A" plus a continuous 23rd-to-57th
+  alignment, and not on an MTA tolling document. A tolling document or NYSDOT
+  route log would settle it beyond doubt.
+- Pushing to a remote. `AGENTS.md` says ask and this brief does not, which is a
+  real conflict. Put to the owner on 2026-09-13; they chose push-to-main, so
+  that is the standing answer — but say what you pushed.
 
 ## Stopping
 
@@ -285,32 +259,15 @@ Work through this without pausing for permission between steps. Stop when you
 hit something in the list above, when a measurement contradicts this brief in a
 way that changes the plan, or when the work is done.
 
-**The work may already be done.** If the two workflow checks are green, the
-register shows nine answered hypotheses, and the README quotes the current
-tables, then the honest report is that there is nothing to do and the remaining
-items belong to the owner. Saying so is a valid outcome and a better one than
+**The work may already be done.** If both workflows are green, the register
+shows nine answered hypotheses, and the README quotes the current tables, then
+the honest report is that there is nothing to do. Saying so is better than
 manufacturing a hypothesis to fill the session.
-
-**And one warning specific to this project's recent history.** Two records in a
-row, H008 and H009, had criteria that failed for the same reason: a gate built
-on the wrong scale — a maximum over a contaminated placebo set, then a demand
-that a control show a statistically insignificant zero on 125M observations. If
-you register anything, state your acceptance criteria in terms of *magnitudes*
-you would find convincing, not in terms of significance or tail statistics, and
-sanity-check that a true effect could actually satisfy them before you freeze
-them.
 
 ## First
 
 Confirm the two workflows are green, then form your own view of the repo. Parts
-of this brief will be stale — it has been wrong before, in ways that mattered:
-it once said the prune freed 825 slots when the rule as written freed 489, and
-that `2023-01` was 28 days downloaded when the snapshot said 22. **Correct it
-rather than trusting it, and say what you found that differs.**
-
-Two habits that paid off on 2026-09-13 and are worth repeating. Check a fix
-against live state instead of assuming it took — the release was simulated
-asset-by-asset before the change was pushed, which is how two further defects
-surfaced. And when a failure is opaque, make it explain itself rather than
-guessing from outside; the unmatched segment was found in one line only after
-the check was made to print its rows.
+of this brief will be stale — it has been wrong before in ways that mattered. It
+once said a prune freed 825 slots when the rule as written freed 489, and that
+2023-01 was 28 days downloaded when the snapshot said 22. **Correct it rather
+than trusting it, and say what you found that differs.**
