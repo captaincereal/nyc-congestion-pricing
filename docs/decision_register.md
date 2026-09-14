@@ -13,7 +13,7 @@ says so.
 
 The handoff asked for three things and said the most likely way to damage the
 study now was to find something to run. Nothing was run against the data. Both
-workflows were green on arrival, 264 tests pass, and `outputs/tables/` is
+workflows were green on arrival, the suite passes, and `outputs/tables/` is
 untouched by this session — checkable in the diff.
 
 ### The timing result: supported, with the emphasis reversed
@@ -33,8 +33,9 @@ It recovers a planted difference exactly and returns **exactly zero** when both
 series jump together, so the argument that a clock and a sensor artefact cancel
 is sound. **Differential curvature does not cancel.** Give the two series
 different quadratic curvature and plant no discontinuity at all, and the
-estimator returns about two thirds of the curvature gap — up to +0.667 out of
-nothing in the fixtures run. The claim repeated in H009 and in this register,
+estimator returns the curvature **gap ÷ 6** on a ±60 minute window, exactly —
+two series whose ramps differ by four log points across the hour produce +0.667
+out of nothing at all. The claim repeated in H009 and in this register,
 that "no clock, sensor artefact or polynomial misfit does that, because each
 would move both series together", is right about the first two and wrong about
 the third.
@@ -124,13 +125,19 @@ specific to the machine it was written on. This session ran on Linux with no
 instead, which worked. The underlying warning still holds: without some
 authenticated path to the Actions API, failures are undiagnosable from outside.
 
-`src/analysis/h009_exempt_control.py` has **no tests**. The H008 boundary
-estimator beside it has four, including a planted discontinuity and a planted
-zero, added in a commit of its own after H008 was answered. The function that
-produced the study's most-quoted estimate never got the same treatment. The
-fixtures written for the adjudication are the ones that would close it and they
-ran clean, so this is a gap in the permanent record rather than a defect in the
-result.
+`src/analysis/h009_exempt_control.py` had **no tests**, while the H008 boundary
+estimator beside it has four. The function that produced the study's most-quoted
+estimate never got the same treatment. **Closed the same day**, at the owner's
+direction: `tests/test_h009_exempt_control.py` adds nine, and the suite is now
+273. They pin that the estimator recovers a planted difference, reports the
+exempt series rather than the tolled one, returns **exactly zero** on a jump
+shared by both series, absorbs the order-of-magnitude level gap between them,
+and leaves the record's frozen exclusions at 18 placebo boundaries. One is a
+characterisation test rather than a correctness one: differential curvature
+comes through as gap ÷ 6 on a ±60 minute window, so changing that behaviour has
+to be deliberate. Each test was checked against deliberately broken copies of
+the estimator — swapping the two coefficients and absorbing fixed effects on
+date alone — and both mutations fail five and seven of the nine.
 
 H008's vehicle-class and detection-group cuts aggregate to day-of-week before
 estimating (`src/analysis/h008_toll_timing.py:248`), so their standard errors

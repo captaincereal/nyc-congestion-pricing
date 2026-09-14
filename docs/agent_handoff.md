@@ -64,7 +64,7 @@ Both newest runs should be green. If they are, there is no pipeline work.
 - **Results current.** `analysis.yml` rebuilds the panel and Phases 6-9 when the
   backfill completes, and takes `workflow_dispatch`. About five minutes.
 - **Decisions closed.** D1-D7 resolved 2026-09-14; no code changed as a result.
-- **264 tests pass.** State lives in the `data-raw` release, which sits in
+- **273 tests pass.** State lives in the `data-raw` release, which sits in
   the low hundreds of assets and no longer drifts toward the 1000 ceiling.
   The exact count moves as months complete and their day checkpoints are
   pruned; what matters is that it is nowhere near the cap.
@@ -187,15 +187,19 @@ it: its sandbox denied CONNECT to every data host tried, including the two this
 project downloads from daily. That says nothing about the sources. Confirm the
 endpoint from a runner with normal egress before writing ingestion code.
 
-### One gap left open deliberately
+### A gap found and closed
 
-`src/analysis/h009_exempt_control.py` has no tests, while the H008 estimator
-beside it has four including a planted discontinuity and a planted zero. The
-function that produced the study's most-quoted estimate never got the same
-treatment. The adjudication ran those fixtures by hand and they came back clean,
-so this is a gap in the permanent record rather than a defect in the result —
-but it should be closed, and the fixtures to close it are described in
-`ADJUDICATION-timing.md`.
+`src/analysis/h009_exempt_control.py` had no tests while the H008 estimator
+beside it had four. `tests/test_h009_exempt_control.py` now covers it with nine,
+and each was checked against deliberately broken copies of the estimator rather
+than assumed to bite.
+
+One of them is a characterisation test rather than a correctness one. Curvature
+differing between the two series comes through the difference as gap ÷ 6 on a
+±60 minute window, and the test pins that number. **It records the limitation
+and does not remove it**, which is why the 05:00 estimate is reported as
+directional. If you change that behaviour, change the test deliberately and say
+why in a record.
 
 
 ## Where results can and cannot come from

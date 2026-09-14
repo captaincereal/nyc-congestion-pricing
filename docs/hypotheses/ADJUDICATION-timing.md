@@ -79,10 +79,13 @@ different quadratic curvature and plant no discontinuity anywhere:
 | +4.0 | +2.0 | +0.3333 |
 | −4.0 | 0 | −0.6667 |
 
-The bias tracks the *difference* in curvature between the two series and is
-about two thirds of it in this parameterisation. Common curvature cancels; a
-gap in curvature does not. A jump of two thirds of a log point out of nothing
-at all is the same order as the largest estimate in the thread.
+The bias tracks the *difference* in curvature between the two series and
+nothing else — (4.0, 2.0) returns exactly what (2.0, 0) does. The relationship
+is exact at **gap ÷ 6** on a ±60 minute window, where the curvature figures are
+log points at the edge of that window: two series whose ramps differ by four log
+points over the hour produce a spurious difference of two thirds of a log point.
+Common curvature cancels; a gap in curvature does not. Two thirds of a log point
+out of nothing at all is the same order as the largest estimate in the thread.
 
 So the sentence that appears in H009, in the decision register and in the
 README — "No clock, sensor artefact or curvature does that, because each would
@@ -261,15 +264,23 @@ It says nothing about whether the exempt series rising at 05:00 is route
 substitution. That is [H010](H010-exempt-route-substitution.md), registered and
 not yet run, and this file deliberately takes no position on how it comes out.
 
-## One gap this exposed
+## One gap this exposed, now closed
 
-`src/analysis/h009_exempt_control.py` has no tests. The H008 boundary estimator
-has four, including a planted discontinuity and a planted zero
-(`tests/test_h008_toll_timing.py`), added in a commit of its own after H008 was
-answered. The function that produced the study's most-quoted estimate never got
-the same treatment, and the fixtures in this file are the ones that would do it:
-recovery of a planted difference, a zero on a shared jump, and the curvature
-sensitivity above pinned so that changing it has to be deliberate.
+`src/analysis/h009_exempt_control.py` had no tests, while the H008 boundary
+estimator beside it has four (`tests/test_h008_toll_timing.py`), added in a
+commit of its own after H008 was answered. The function that produced the
+study's most-quoted estimate never got the same treatment.
 
-The fixtures ran clean, so this is a gap in the permanent record rather than a
-defect in the result.
+The fixtures used above are now permanent, as
+`tests/test_h009_exempt_control.py`: recovery of a planted difference, the right
+coefficient reported as the control's own discontinuity, **exactly zero** on a
+jump shared by both series, absorption of the level gap between them, the
+record's frozen exclusions holding at 18 placebo boundaries, and the curvature
+sensitivity pinned at gap ÷ 6 so that changing it has to be deliberate.
+
+They were checked against broken copies of the estimator rather than assumed to
+bite. Swapping the two reported coefficients fails five of the nine; absorbing
+fixed effects on date alone instead of date × series fails seven.
+
+The fixtures ran clean on the real code, so this was a gap in the permanent
+record rather than a defect in the result.

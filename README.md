@@ -442,10 +442,12 @@ first is supported.
   come from five clusters while their point estimates use all 609 dates. The
   point estimates are sound; nothing in this study quotes those standard errors
   and nothing should.
-- **The H009 estimator has no tests.** The function producing the study's
-  most-quoted estimate is untested, while the H008 estimator beside it has four.
-  Synthetic fixtures run during the 2026-09-14 adjudication came back clean, so
-  this is a gap in the permanent record rather than a known defect.
+- **The 05:00 bias channel is pinned by a test, not closed.** The H009
+  estimator had no tests until 2026-09-14; `tests/test_h009_exempt_control.py`
+  now covers it, including a characterisation test showing that curvature
+  differing between the two series comes through the difference as gap ÷ 6 on a
+  ±60 minute window. The test records the limitation so that changing it has to
+  be deliberate. It does not remove it.
 
 ## Recommendation
 

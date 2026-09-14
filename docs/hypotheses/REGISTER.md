@@ -205,8 +205,8 @@ and reported two; against the other 22, the 21:00 difference is **the most
 positive of all 24**, with the next most positive a fifth of its size, while
 seven placebo boundaries exceed it in absolute value and all seven run the other
 way. Synthetic fixtures show the estimator returns exactly zero on a shared jump,
-as H009 argues, and passes **differential curvature straight through** at about
-two thirds of the curvature gap, which H009 argues is impossible — and 06:00,
+as H009 argues, and passes **differential curvature straight through** at
+exactly the curvature gap ÷ 6, which H009 argues is impossible — and 06:00,
 07:00 and 08:00 carry the same opposite-direction signature the record calls
 decisive, at a quarter to a third of the magnitude. The raw block profile shows
 the fitted estimate is 1.18× the model-free jump at 21:00 and 1.63× it at 05:00.
