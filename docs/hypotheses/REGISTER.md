@@ -151,3 +151,33 @@ minutes, by vehicles that are never charged and face no price change.
 
 Nine hypotheses are registered. The 21:00 discontinuity has now been examined
 twice, and a reader is entitled to that count.
+
+### H009 answered, 2026-09-13
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H009](H009-toll-timing-exempt-control.md) | Does the entry-timing response survive a control group that pays no toll? | answered | 2026-09-13 | Does not support **as specified**, and none of the three branches fits. Criterion 2 required a control series to show no *significant* same-direction movement, which 609 days and 125M entries can never deliver. Refute 1 encoded the same test correctly, with a magnitude threshold, and did not fire |
+
+Supersedes the row above, which recorded H009 as proposed.
+
+**The substantive result is strong and is stated separately from the verdict.**
+At 05:00 tolled and exempt entries move in **opposite directions** on the same
+sensors in the same minutes — tolled −0.6889, exempt +0.0701, difference −0.7589
+[−0.7946, −0.7232] — consistently at all four dual-recording points. No clock,
+batching artefact or polynomial misfit produces that, because each would move
+both series together. At 21:00 the design separated a shared evening rhythm of
+5.6 log points from a price-attributable 7.1, which H008's raw 12.7 conflated.
+Both persist across 2025 and 2026.
+
+**Two consecutive records have had flawed criteria and the register should say
+so plainly.** H008 compared a point estimate to a maximum over a contaminated
+placebo set; H009 required a significant zero. Both are gates built on the wrong
+scale — tail statistics and significance where magnitude thresholds belonged.
+One is bad luck; two in a row by the same author within an hour is a systematic
+weakness in drafting, and it should discount the pre-registration value of both.
+It is also why no H010 re-runs this comparison with the criterion rewritten:
+the estimate would not move, only the label, and the label would then have been
+chosen by someone who already knew it.
+
+Nine hypotheses are registered and answered. The 21:00 discontinuity has been
+examined twice and the reader is entitled to that count.

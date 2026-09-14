@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | proposed |
+| **Status** | answered — **does not support as specified** |
 | **Registered** | 2026-09-13 |
 | **Registered by** | Claude Opus 5, same session that ran H008 |
-| **Answered by** | |
+| **Answered by** | Claude Opus 5, same session, 2026-09-13 |
 | **Supersedes / superseded by** | **Supersedes [H008](H008-toll-timing-bunching.md)** |
 
 ## Question
@@ -170,11 +170,132 @@ All available. No new source, no cost. One additional Socrata aggregate carrying
 
 ## Result
 
-*Filled in after running. Leave empty until then.*
+Answered 2026-09-13. `python -m src.analysis.h009_exempt_control`.
+
+**Panel.** 350,933 date × block × detection-group rows at the four
+dual-recording points, 609 dates, carrying 86,364,677 tolled and 39,014,923
+exempt entries.
+
+**The difference in discontinuities**, weekday, pooled across the four points
+([H009_difference.csv](../../outputs/tables/H009_difference.csv)):
+
+| Boundary | tau tolled | tau exempt | **delta** | 95% CI | delta as % |
+|---|---:|---:|---:|---|---:|
+| **05:00** peak begins | −0.6889 | **+0.0701** | **−0.7589** | [−0.7946, −0.7232] | −53.2% |
+| **21:00** peak ends | +0.1265 | **+0.0555** | **+0.0710** | [0.0478, 0.0942] | +7.4% |
+
+**At 05:00 the two series move in opposite directions.** Tolled entries collapse
+by 69 log points while exempt entries on the same sensors in the same minutes
+*rise* by 7. Nothing about a clock, a batching artefact or a polynomial misfit
+produces that, because all three would move both series together.
+
+**At 21:00 both series rise**, tolled by 12.7 log points and exempt by 5.6. The
+difference is +7.1 log points, tightly estimated.
+
+### The three criteria, applied as written
+
+**Criterion 1 — delta positive at 21:00 with a CI excluding zero. PASSES.**
++0.0710, CI [0.0478, 0.0942].
+
+**Criterion 2 — the exempt series must not jump in the same direction as the
+tolled series. FAILS.** tau(exempt) at 21:00 is +0.0555 with SE 0.0128, CI
+[+0.0303, +0.0807]: positive and significant, the same direction as tolled. At
+05:00 it is +0.0701, not negative, so that half passes.
+
+**Criterion 3 — delta correctly signed at 05:00. PASSES.** −0.7589.
+
+### The refutation conditions, none of which fire
+
+**Not refute 1.** It required the exempt series to share the tolled sign at
+**both** boundaries *and* reach at least half its magnitude. The signs diverge
+at 05:00, and at 21:00 exempt reaches 0.0555 against half of 0.1265, which is
+0.0633. Both halves fail.
+
+**Not refute 2.** It required delta's interval to cover zero. It does not, and
+the tolled estimate also clears the corrected bar.
+
+**Not refute 3.** The difference is not confined to one point
+([H009_by_detection_group.csv](../../outputs/tables/H009_by_detection_group.csv)).
+At 05:00 all four groups are negative with intervals excluding zero, from
+−0.8908 at the FDR to −0.4586 at the Carey Tunnel. At 21:00 three of four are
+positive and all four intervals exclude zero; the Carey Tunnel is −0.0281, a
+small reversal.
+
+### The corrected placebo bar
+
+As frozen — 95th percentile, curvature hours 05:00–08:00 and midnight excluded
+in advance, 18 placebo boundaries remaining
+([H009_placebo_bar.csv](../../outputs/tables/H009_placebo_bar.csv)): tolled p95
+= 0.1155, exempt p95 = 0.0752. tau(tolled) at 21:00 is 0.1265 and **clears** it.
+
+This is reported and it is deliberately not load-bearing. The record predicted
+that the percentile fix alone would probably let H008's estimate through, which
+is exactly why it was not made the primary criterion. It came out as predicted
+and it proves nothing that was in doubt.
+
+### Persistence
+
+Stable across twenty months
+([H009_by_year.csv](../../outputs/tables/H009_by_year.csv)). delta at 21:00 is
++0.0769 in 2025 and +0.0609 in 2026; at 05:00, −0.8090 and −0.6725. Mild decay,
+no collapse. The prediction of stability at ~55% was weakly right.
 
 ## Verdict
 
-*Filled in after running.*
+**Does not support, as specified — and none of the three branches describes what
+happened.** That is a defect in the criteria and it is recorded as one.
+
+Criterion 2 failed, so support cannot be claimed. No refutation condition fired.
+And the uninformative branch describes a delta whose interval covers zero,
+whereas this delta is [0.0478, 0.0942] at 21:00 and [−0.7946, −0.7232] at 05:00.
+The criteria admitted a fourth state and did not name it.
+
+**What criterion 2 got wrong, specifically.** It demanded that a control series
+show *no significant* movement in the same direction. On 609 days and 125M
+entries, any movement whatever is significant; the criterion required a
+precisely estimated zero, which a sample this size will never produce. It
+conflated statistical significance with substantive magnitude. Refute 1, written
+three paragraphs later in the same record, encoded the same idea **correctly** —
+same sign *and* at least half the magnitude — and did not fire. The record
+therefore contains one well-built version of the test and one unsatisfiable
+version, and the unsatisfiable one sat in the Supports list.
+
+**This is the second consecutive record whose criteria were flawed, and that
+pattern is worth more attention than either individual flaw.** H008 compared a
+point estimate to a maximum over a contaminated placebo set; H009 required a
+significant zero. Both errors share a shape: a gate built on the wrong scale —
+tail statistics and significance tests where magnitude thresholds belonged. One
+such failure is bad luck. Two in a row, written by the same author within an
+hour, is a systematic weakness in how these criteria are being drafted, and a
+reader should weight the pre-registration of H008 and H009 accordingly. It is
+also a reason to stop here rather than write a third.
+
+**What the evidence shows, stated separately from the verdict.** The 05:00
+result does not depend on criterion 2 at all: tolled and exempt move in opposite
+directions on the same sensors in the same minutes, by 69 log points against 7,
+consistently at all four entry points. That is the cleanest identification in
+this project by a wide margin. At 21:00 the design did what it was built to do —
+it separated a shared evening rhythm of about 5.6 log points from a
+price-attributable difference of 7.1, which the raw H008 estimate of 12.7 had
+conflated. Both are precisely estimated and both persist across two years.
+
+**What this does not establish**, unchanged from H008. That the toll reduced
+congestion, reduced total entries, or changed speeds. Retiming an entry is not
+avoiding one, and nothing here bears on the speed finding.
+
+**On diversion.** The exempt series rising 7 log points at 05:00, as tolled
+entries collapse, is the first direct evidence of route substitution this
+project has obtained from any source — drivers moving onto the free roadways as
+the charge begins. H007 could not measure this on the speed feed because the
+sensors on those roads had failed. It is a by-product of this design rather than
+a registered question, so it is flagged here and claimed nowhere else, and it
+would need its own record before it could be reported.
+
+**What a third record should not do.** Re-run this comparison with criterion 2
+rewritten. The estimate would not change; only the label would, and the label
+would then have been chosen by someone who knew it. If the timing result is to
+be reported as supported, that judgement belongs to a reader of these three
+records, not to a fourth attempt by their author.
 
 ## Notes
 
