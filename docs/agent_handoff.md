@@ -10,9 +10,9 @@ below the rule is the mission.
 ---
 
 You are taking over a causal-inference study that is **essentially finished**.
-Seven pre-registered hypotheses are answered and they agree, the frozen 44-month
-archive is complete and verified, the pipeline is healthy, and the README
-reports the finding from current artefacts.
+Nine pre-registered hypotheses are answered, the frozen 44-month archive is
+complete and verified, the pipeline is healthy, and the README reports the
+finding from current artefacts.
 
 This is a different job from the one earlier handoffs described. It is not to
 keep testing the identification — that is settled — and not to repair the
@@ -113,7 +113,7 @@ comparison streets after tolling began on 2025-01-05, roughly 11% of the
 pre-tolling treated mean, on the complete 44-month archive. That association is
 robust. **It cannot be attributed to the toll.**
 
-Seven answered hypotheses, each with its prediction committed before its code
+Nine answered hypotheses, each with its prediction committed before its code
 ran:
 
 | | Finding |
@@ -125,6 +125,8 @@ ran:
 | **H005** | Breakdown values 0.005–0.171 on 96 pre-weeks, falling monotonically as the horizon widens |
 | **H006** | Every control set rejects on a clean July–September holdout; holidays roughly double the statistic but do not cause the failure |
 | **H007** | The secondary feed cannot measure diversion either: it stops reporting speeds on three of nine toll-exempt in-zone links, availability diverging 21.2 points against a 5-point bar. A measurement failure, not an identification one |
+| **H008** | Entries jump at both moments the toll price changes. Uninformative: the primary 21:00 boundary (+12.9%) missed a placebo maximum of 13.9%. Response confined to cars and motorcycles, which the record predicted backwards |
+| **H009** | Superseding H008 with a control that pays no toll. At 05:00 tolled entries fall 69 log points while exempt entries on the same sensors rise 7; difference -0.759 [-0.795, -0.723]. Does not support **as specified** -- a criterion required a significant zero |
 
 The joint pre-trend test rejects in all four samples on the full 104-week
 pre-period: χ² 97.9, 69.7, 102.2 and 46.7 on 11 dof. Lengthening the pre-period
@@ -146,54 +148,68 @@ every sentence you write; it is the study's contribution.
 
 ## The work that remains
 
-Very little, and none of it is analysis. Be honest with yourself about that
-before inventing something to run. **The study has reached its finding, the data
-are complete, and the pipeline is healthy.** Adding specifications now is the
-exact failure the protocol below exists to prevent.
+Very little, and none of it is a new specification against the speed panel. Be
+honest with yourself about that before inventing something to run.
 
-**Phase 10 is closed except for TLC.** The spillover half ran as
-[H007](hypotheses/H007-secondary-feed-diversion.md) and refutes: the secondary
-`i4gi-tjb9` feed carries the nine toll-exempt in-zone links traffic would divert
-onto, and stops reporting speeds on three of them across the toll date, so
-usable-hour availability diverges by 21.2 points against a 5-point bar. That is
-a **measurement** failure, not an identification one. The MTA entry check is
-closed structurally: `t6yz-b64h` begins on the tolling date, so it has no
-pre-treatment period and no estimator recovers a counterfactual that was never
-instrumented. Waiting does not fix it.
+**The speed question is closed.** Seven hypotheses established that this design
+cannot identify the toll's effect, and the completed archive did not rescue it.
+Do not reopen the control-set search.
 
-**TLC trip records are the only untried source with a pre-period.** They have
-not been ingested and would need their own registered record. Two cautions.
-Their current distribution is monthly files outside the Socrata endpoints this
-project uses, and that exact source has **not** been verified here — confirm it
-rather than assuming it. And weigh whether it is worth the ingest at all: the
-question it would answer is a mechanism check on a finding that is already
-"cannot identify", so a clean TLC result would not change the conclusion, only
-describe it better.
+**Phase 10 is closed except for TLC.** H007 answered spillover: the secondary
+feed carries the exempt roads but stops measuring three of the nine links across
+the toll date, a measurement failure rather than an identification one. The MTA
+entry check is closed structurally for before/after — `t6yz-b64h` begins on the
+tolling date — though see the timing thread below, which uses the same data for
+a different question.
 
-**Phase 11 is done.** The README's Evidence, Robustness and Limitations sections
-were rewritten from the completed archive on 2026-09-13 and every figure was
-checked against the CSV it cites. Treat it as the spine. If you extend it, keep
-the labelling discipline it now has: the association, pre-trend test and
-robustness table are rebuilt by `analysis.yml` from the current panel, while the
-hypothesis records each stand on the panel they were answered on, and the
-section says so explicitly. **Do not restate H001–H006 against the 44-month
-panel.** Rerunning one is a fresh draw and needs its own registration.
+**TLC trip records are the only untried source with a pre-period**, have not
+been ingested, and would need their own record. Weigh whether it is worth it: a
+clean TLC result would describe a "cannot identify" finding better rather than
+change it. Its current distribution is monthly files outside the Socrata
+endpoints this project uses, and that source has **not** been verified — confirm
+it rather than assuming.
 
-**What actually wants doing** is the owner's, not yours. D1, D2, D3, D5, D6 and
-D7 are still open and still reserved. D2's construction work is done and
-negative (H004, H006) and D3's sensitivity is measured and small — the
-`eleventh_as_treated` spec moves the coefficient by about 0.001 mph — so both
-are decisions waiting on a person, not on more evidence.
-[`owner_decision_prompt.md`](owner_decision_prompt.md) is written for handing
-those six to a model for a second opinion; it recommends and does not adopt, and
-its figures were checked against the committed tables. Keep that distinction if
-you use it.
+**The timing thread is the live one, and it needs a reader more than a runner.**
+H008 and H009 found a large, precisely estimated behavioural response to the
+toll's peak/overnight price schedule, identified off a discontinuity rather than
+parallel trends. The 05:00 result is the strongest identification in this
+project: tolled entries fall 69 log points while exempt entries on the same
+sensors rise 7, at all four dual-recording points.
 
-Before touching the secondary feed: read the zero-speed entry in `AGENTS.md`.
-Start from `data/processed/secondary_hourly_panel.parquet`
-(`python -m src.data.build_secondary_panel`), not from
-`spillover_diagnostics.py`, whose committed table averages 8.8M outages in as
-0 mph and is superseded.
+**Neither record cleared its own bar, and both criteria were flawed in the same
+way** — H008 compared to a maximum over a contaminated placebo set, H009
+required a control to show a significant zero. Two consecutive drafting failures
+by the same author, an hour apart, both gates built on the wrong scale.
+
+So the correct next move is **not** a third record rewriting the criterion. The
+estimate would not move; only the label would, and it would move for someone who
+already knew it. Whether this counts as supported is a judgement for a reader of
+the three records. If you disagree with that and want to register H010, say
+explicitly in it why you are not simply relabelling, and expect a reader to be
+sceptical.
+
+One genuine loose end, flagged in H009 and claimed nowhere: exempt entries
+**rising** as tolled ones collapse at 05:00 is the first direct evidence of route
+substitution in this project. H007 could not see it because the sensors on those
+roads had failed. It is a by-product of a design aimed at something else, so it
+would need its own record before it could be reported.
+
+**Phase 11 is done.** The README carries the speed finding, the spillover
+finding and the timing thread, each from current artefacts, each with its
+caveats. Keep its labelling discipline: the association, pre-trend test and
+robustness table are rebuilt by `analysis.yml` from the current panel, while
+each hypothesis record stands on the panel it was answered on. **Do not restate
+H001–H006 against the 44-month panel.**
+
+**What actually wants doing** is the owner's. D1, D2, D3, D5, D6 and D7 are open
+and reserved. D2's construction work is done and negative (H004, H006) and D3's
+sensitivity is measured and negligible, so both wait on a person rather than
+more evidence. [`owner_decision_prompt.md`](owner_decision_prompt.md) is written
+for taking a second opinion on them; it recommends and does not adopt.
+
+Before touching the secondary speed feed: read the zero-speed entry in
+`AGENTS.md`. Start from `data/processed/secondary_hourly_panel.parquet`, not
+`spillover_diagnostics.py`, whose committed table is superseded.
 
 Anything whose output could reach the README needs a hypothesis record committed
 before it runs.
@@ -225,7 +241,7 @@ leave a machine on. `backfill.yml` every six hours (verify, then deepen the
 pre-period backwards, then extend forward); `analysis.yml` rebuilds the panel
 and reruns Phases 6-9 when the backfill completes, and takes
 `workflow_dispatch`; `tests.yml` runs ruff, black and pytest.
-258 tests pass. State lives in the `data-raw` release.
+264 tests pass. State lives in the `data-raw` release.
 
 To work locally: pull month parts, the manifest and the segment table from the
 release, then `build_staging` → `geo` → `build_panel`.
@@ -261,10 +277,19 @@ hit something in the list above, when a measurement contradicts this brief in a
 way that changes the plan, or when the work is done.
 
 **The work may already be done.** If the two workflow checks are green, the
-register shows seven answered hypotheses, and the README quotes the current
+register shows nine answered hypotheses, and the README quotes the current
 tables, then the honest report is that there is nothing to do and the remaining
 items belong to the owner. Saying so is a valid outcome and a better one than
 manufacturing a hypothesis to fill the session.
+
+**And one warning specific to this project's recent history.** Two records in a
+row, H008 and H009, had criteria that failed for the same reason: a gate built
+on the wrong scale — a maximum over a contaminated placebo set, then a demand
+that a control show a statistically insignificant zero on 125M observations. If
+you register anything, state your acceptance criteria in terms of *magnitudes*
+you would find convincing, not in terms of significance or tail statistics, and
+sanity-check that a true effect could actually satisfy them before you freeze
+them.
 
 ## First
 

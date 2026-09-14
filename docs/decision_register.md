@@ -9,6 +9,59 @@ Six decisions are open. Earlier entries are historical and are superseded
 where the latest audit says so. Each open decision changes what the study reports, so it is
 deliberately left unmade rather than defaulted into the panel.
 
+## Update 2026-09-13 (later) — a behavioural response the study can actually identify
+
+The archive completed at 44 of 44 verified months and `analysis.yml` rebuilt
+everything from it. The headline association fell to **+1.05 mph** (SE 0.27,
+7.95M link-hours, 334 clusters) and the joint pre-trend test still rejects in
+all four samples on the full 104-week pre-period. The "too little pre-period"
+explanation is now exhausted rather than unlikely: there is no more to add.
+
+**Two new hypotheses opened a different line and it works.** The toll is higher
+in a peak window and discounted overnight, switching at 05:00 and 21:00 on
+weekdays and 09:00 at weekends — derived from the MTA feed's own `time_period`,
+not from the published tariff. That is a price discontinuity inside the
+post-period, so identification rests on the minutes either side of it and not on
+parallel trends.
+
+[H008](hypotheses/H008-toll-timing-bunching.md) found entries jumping at both
+boundaries. [H009](hypotheses/H009-toll-timing-exempt-control.md) superseded it
+with a control the speed study never had: `excluded_roadway_entries`, 38.7M
+vehicles on the toll-exempt roadways crossing the same detection points, on the
+same sensors, in the same ten-minute blocks, who are never charged.
+
+**At 05:00 the two series move in opposite directions** — tolled −0.6889, exempt
++0.0701, difference **−0.759 [−0.795, −0.723]** — at all four dual-recording
+points with every interval excluding zero. No clock, sensor artefact or
+polynomial misfit does that, because each would move both series together. At
+21:00 the design separated a shared evening rhythm of 5.6 log points from a
+price-attributable **+7.1** [4.8, 9.4]. Both persist across 2025 and 2026. The
+response is confined to cars and motorcycles; trucks, taxis and buses are flat
+or wrong-signed, which H008 predicted backwards.
+
+**Neither record cleared its own bar, and the register should be blunt about
+why.** H008 compared its estimate to a *maximum* over twenty-one placebo
+boundaries, a set contaminated by the morning ramp. H009 required its control to
+show no *significant* movement, which 609 days and 125M entries can never
+deliver — it demanded a precisely estimated zero. Both are gates built on the
+wrong scale, drafted by the same author within an hour. That pattern should
+discount the pre-registration value of both, and it is why no third record
+rewrites the criterion: the estimate would not move, only the label, and it
+would move for someone who already knew it.
+
+**Nothing here bears on the speed finding.** Retiming an entry is not avoiding
+one. The study still cannot say whether the toll reduced congestion, reduced
+entries, or changed speeds.
+
+**One by-product, flagged and claimed nowhere.** Exempt entries rising as tolled
+ones collapse at 05:00 is the first direct evidence of route substitution this
+project has obtained from any source. H007 could not measure it on the speed
+feed because the sensors on those roads had failed. It would need its own record
+before it could be reported.
+
+**Open decisions are unchanged.** D1, D2, D3, D5, D6 and D7 remain reserved to
+the owner and none has been adopted.
+
 ## Update 2026-09-13 — the secondary feed cannot measure diversion either, and the reason is measurement
 
 [H007](hypotheses/H007-secondary-feed-diversion.md) is answered and **refutes**.

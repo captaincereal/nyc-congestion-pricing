@@ -29,6 +29,15 @@ would divert onto, and it stops reporting speeds on three of the nine across the
 toll date, so it cannot measure diversion either. That failure is
 instrumentation rather than identification, which is a different problem with a
 different fix.
+
+**One thing the study can now show.** Drivers demonstrably respond to the toll's
+*price schedule*: entries collapse as the peak rate begins and rise as it ends,
+against a control of vehicles on exempt roads who are never charged and who move
+the opposite way. That is a behavioural response, cleanly identified off a price
+discontinuity rather than a parallel-trends assumption. It is reported under
+Evidence with the caveat it deserves — neither record cleared its own
+pre-registered bar — and it says nothing about congestion or speeds. Retiming an
+entry is not avoiding one.
 Owner decisions are laid out in [the decision memo](docs/owner_decisions.md).
 
 ---
@@ -40,8 +49,10 @@ Congestion Relief Zone (CRZ), and is there evidence that congestion shifted to
 areas just outside the zone boundary?
 
 Secondary: do effects differ peak vs off-peak and weekday vs weekend? Do MTA
-entry and TLC data support the mechanism? The MTA half of that question is
-answered below and the answer is that the data cannot address it.
+entry and TLC data support the mechanism? The MTA entry counts cannot say
+whether the toll reduced entries — the series begins on the tolling date — but
+their own peak/overnight price structure supports a separate question, **do
+drivers retime entries to avoid the peak rate**, which is answered below.
 
 ## Result
 
@@ -236,12 +247,58 @@ comparison of any kind, because the "before" was never measured. No estimator
 recovers a counterfactual that was never instrumented. This is a structural
 limit of the source rather than a gap that a longer wait fills.
 
-TLC trip records are the remaining candidate and the only one with the history
-the MTA feed lacks — the per-year archives on NYC Open Data reach back to at
-least 2014, so a pre-period exists. Ingesting them has not been attempted. They
-would need their own registered hypothesis, and the honest note is that the
-current trip records are distributed as monthly files outside the Socrata
-endpoints this project already uses; the exact current source has not been
+**But the same source answers a different question, and this one does not need
+parallel trends.** The toll is not a single price. It is higher in a peak window
+and discounted overnight, and the switch happens at a fixed clock time — 05:00
+and 21:00 on weekdays, 09:00 and 21:00 at weekends, derived from the feed's own
+`time_period` rather than assumed. That is a price discontinuity *within* the
+post-period, so the counterfactual is the minutes on the other side of it, and
+the assumption that defeated H001 through H006 is not required.
+
+[H008](docs/hypotheses/H008-toll-timing-bunching.md) and
+[H009](docs/hypotheses/H009-toll-timing-exempt-control.md) test it. **Neither
+cleared its own pre-registered bar, and the reasons are recorded in full**; what
+follows is reported as strong suggestive evidence, not as a positive finding.
+
+The sharpest result comes from a control the speed study never had.
+`excluded_roadway_entries` counts vehicles on the toll-exempt roadways — the
+FDR, the West Side Highway, the Carey Tunnel — crossing the same detection
+points, on the same sensors, in the same ten-minute blocks. They are never
+charged, so no price changes for them. **At 05:00, as the peak rate begins,
+tolled entries fall 69 log points while exempt entries rise 7**, a difference of
+−0.759 (95% CI −0.795 to −0.723), consistent at all four points that record
+both. No clock, sensor artefact or curvature explains that, because each would
+move both series together.
+
+At 21:00 both rise, and the design separates a shared evening rhythm of 5.6 log
+points from a price-attributable difference of **+7.1** (CI 4.8 to 9.4). Both
+results hold across 2025 and 2026.
+
+The response is confined to the vehicles with discretion over departure time.
+Cars and motorcycles carry all of it; single-unit trucks, multi-unit trucks,
+taxis and buses are flat or wrong-signed. Taxis pay a per-trip surcharge and
+drive to a passenger's schedule, freight runs to contracted windows, buses to a
+timetable. **That pattern was predicted backwards** — the record expected trucks
+to respond hardest — and is the most economically legible part of the result.
+
+Why neither record passed: H008 compared its estimate to a *maximum* over
+twenty-one placebo boundaries, a set contaminated by the morning ramp where
+entries rise fivefold within the hour; H009 required its control series to show
+no *significant* movement, which 609 days and 125M entries can never deliver.
+Both are gates built on the wrong scale, drafted by the same author within an
+hour, and that pattern should discount the pre-registration value of both.
+Deliberately not repaired by a third attempt: rewriting the criterion would move
+the label and not the estimate.
+
+**What this does not show.** That the toll reduced congestion, reduced total
+entries, or changed speeds. Retiming an entry is not avoiding one, and nothing
+here bears on the speed finding above.
+
+TLC trip records remain the only untried source with a genuine pre-period — the
+per-year archives on NYC Open Data reach back to at least 2014. Ingesting them
+has not been attempted and would need its own registered hypothesis. The honest
+note is that the current trip records are distributed as monthly files outside
+the Socrata endpoints this project already uses; that exact source has not been
 verified here and should be confirmed rather than assumed.
 
 Every hypothesis run against this study, including those that failed, is in the
@@ -307,10 +364,17 @@ first is supported.
 - **What the outcome is.** Hourly median speed on selected links, weighting a
   quiet link the same as a heavy corridor. Not network congestion, not volume,
   not door-to-door travel time, not welfare.
-- **The entry-count mechanism check is not available.** The MTA's vehicle-entry
-  series begins on the tolling date itself, so it has no pre-treatment period
-  and cannot corroborate or contradict anything about the toll's effect. TLC
-  trip records do have a pre-period and have not been ingested.
+- **No before-and-after on entry counts.** The MTA's vehicle-entry series begins
+  on the tolling date itself, so it cannot say whether the toll reduced entries.
+  H008 and H009 use its internal price variation instead, which answers a
+  narrower question — timing, not volume. TLC trip records do have a pre-period
+  and have not been ingested.
+- **The timing result did not clear its own bar, twice.** H008's placebo set was
+  contaminated by the morning ramp and summarised by a maximum; H009 required a
+  control series to show no significant movement, which its sample size makes
+  impossible. The underlying estimates are stable and precise, but two
+  consecutive flawed criteria by the same author should discount how much the
+  pre-registration is worth on this thread specifically.
 
 ## Recommendation
 
@@ -331,10 +395,16 @@ seventy-week matching window. The conclusion above is the finding.
 **Stop searching for a control set that passes.** Every further attempt is
 another draw against the same fixed data, and the register would have to carry
 the count. The spillover check has now run, on the one feed that covers the
-exempt routes, and it is reported above. Of the mechanism checks, the MTA entry
-counts turn out to be unusable for the purpose — the series begins on the
-tolling date — which leaves TLC trip records as the only untried source, and
-they need their own registered hypothesis before anyone starts.
+exempt routes, and it is reported above.
+
+**The productive direction is a different question on different data, not a
+better specification on this one.** The MTA entry counts cannot say whether the
+toll reduced entries, because they begin on the tolling date — but their
+internal peak/overnight price variation supports a design that needs no parallel
+trends, and H008 and H009 show it detects a large, precisely estimated
+behavioural response. That is where a usable positive finding is most likely to
+come from. TLC trip records are the only untried source with a genuine
+pre-period, and need their own registered hypothesis before anyone starts.
 
 What could still change the answer is different data, not a different
 specification: links nearer the cordon than the current 808 m nearest control,
