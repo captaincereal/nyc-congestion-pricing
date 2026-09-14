@@ -181,3 +181,56 @@ chosen by someone who already knew it.
 
 Nine hypotheses are registered and answered. The 21:00 discontinuity has been
 examined twice and the reader is entitled to that count.
+
+## 2026-09-14 — the timing thread is adjudicated, and route substitution is registered
+
+No hypothesis was re-scored and no specification was run against the data.
+
+**[ADJUDICATION-timing.md](ADJUDICATION-timing.md)** is a reader's verdict on
+H008, H009 and the register entries above, written by a session that did not
+write either record. `docs/agent_handoff.md` asked for one on the ground that
+the author of two flawed criteria should not be the one deciding what they
+amount to. It leaves both verdicts standing — H008 uninformative, H009 does not
+support as specified — and reaches a judgement about the underlying evidence
+that the verdicts do not carry.
+
+It finds the retiming response supported and **reverses which boundary carries
+it**. Every document in this project currently leads with 05:00 and its
+difference of −0.759 as the cleanest identification here. The adjudication puts
+21:00 first and demotes 05:00 to real in direction and unreliable in magnitude.
+
+Three things it drew on that the records did not, none of them a new draw. The
+frozen H009 run estimated the difference in discontinuities at all 24 boundaries
+and reported two; against the other 22, the 21:00 difference is **the most
+positive of all 24**, with the next most positive a fifth of its size, while
+seven placebo boundaries exceed it in absolute value and all seven run the other
+way. Synthetic fixtures show the estimator returns exactly zero on a shared jump,
+as H009 argues, and passes **differential curvature straight through** at about
+two thirds of the curvature gap, which H009 argues is impossible — and 06:00,
+07:00 and 08:00 carry the same opposite-direction signature the record calls
+decisive, at a quarter to a third of the magnitude. The raw block profile shows
+the fitted estimate is 1.18× the model-free jump at 21:00 and 1.63× it at 05:00.
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H010](H010-exempt-route-substitution.md) | Do drivers move onto toll-exempt roadways as the peak charge begins? | proposed | 2026-09-14 | |
+
+H009 flagged exempt entries rising at 05:00 as the project's first direct
+evidence of route substitution and claimed it nowhere. The decision register and
+the handoff repeat the claim; the README says the opposite, that diversion is
+unidentified on both feeds. This record tests it, in **vehicle counts rather
+than log points**, because a substitution claim has to balance in vehicles.
+
+Its author had seen every previously computed number at these boundaries and the
+record discloses each one, including the two of four detection points where the
+exempt rise is negative and the 21:00 mirror that runs against the simple
+diversion story. The criteria rest on two quantities nobody has measured: the
+count-based diversion share, and whether the exempt surplus is made of the
+vehicle classes H008 showed respond to the price. Criterion 2 carries a
+**feasibility gate declared in advance** — a baseline share above 0.90 makes it
+unreachable, and it is then recorded as untestable rather than failed. Two
+records here have frozen criteria a true effect could not satisfy, and the
+damage came from nobody noticing until afterwards.
+
+Ten hypotheses are registered, nine answered. The 05:00 boundary has now been
+examined four times and the reader is entitled to that count.

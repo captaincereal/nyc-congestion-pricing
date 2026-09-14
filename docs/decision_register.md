@@ -2,13 +2,154 @@
 
 **NYC Congestion Relief Zone · speed study**
 
-Compiled 2026-09-09, updated 2026-09-13 · treatment date 2025-01-05 ·
+Compiled 2026-09-09, updated 2026-09-14 · treatment date 2025-01-05 ·
 Validation details are recorded in the latest dated entry below.
 
-All six open decisions were resolved on 2026-09-14; see the entry immediately
+All six open decisions were resolved on 2026-09-14; that entry is the second
 below. Earlier entries are historical and are superseded where the latest audit
-says so. Each open decision changes what the study reports, so it is
-deliberately left unmade rather than defaulted into the panel.
+says so.
+
+## Update 2026-09-14 (later) — the timing result is adjudicated, and its headline boundary changes
+
+The handoff asked for three things and said the most likely way to damage the
+study now was to find something to run. Nothing was run against the data. Both
+workflows were green on arrival, 264 tests pass, and `outputs/tables/` is
+untouched by this session — checkable in the diff.
+
+### The timing result: supported, with the emphasis reversed
+
+[ADJUDICATION-timing.md](hypotheses/ADJUDICATION-timing.md) is a reader's
+verdict on H008, H009 and their register entries, written by a session that
+wrote none of them. It leaves both verdicts standing and takes no position that
+re-scores either.
+
+**It finds the retiming response supported, and it demotes 05:00.** Every
+document here — H009, this register, the README, the handoff — led with the
+05:00 difference of −0.759 as the cleanest identification in the project. That
+ordering is now reversed, and the reason is specific.
+
+Synthetic fixtures show what the difference estimator does and does not remove.
+It recovers a planted difference exactly and returns **exactly zero** when both
+series jump together, so the argument that a clock and a sensor artefact cancel
+is sound. **Differential curvature does not cancel.** Give the two series
+different quadratic curvature and plant no discontinuity at all, and the
+estimator returns about two thirds of the curvature gap — up to +0.667 out of
+nothing in the fixtures run. The claim repeated in H009 and in this register,
+that "no clock, sensor artefact or polynomial misfit does that, because each
+would move both series together", is right about the first two and wrong about
+the third.
+
+05:00 sits in the steepest ramp of the day, the band H009 itself excluded from
+its placebo set on curvature grounds before estimating its headline effect
+inside it. H009's own output shows the contamination: at 06:00, 07:00 and 08:00
+the difference is −0.218, −0.194 and −0.161, each with tolled falling and exempt
+rising — the opposite-direction signature the record calls impossible, at a
+quarter to a third of the magnitude. Against the raw block profile the fitted
+estimate is **1.63×** the model-free drop at 05:00 and **1.18×** it at 21:00.
+
+**21:00 is the boundary that holds.** `H009_difference.csv` carries the
+difference at all 24 hour boundaries; the record reported two. Those 22 are the
+natural placebo distribution for this estimand and nobody tabulated them. Under
+H009's own pre-registered exclusions, 18 placebos remain, their differences
+centred at **−0.061** with 17 of 18 negative. Against that, +0.0710 at 21:00 is
+**the most positive of all 24 boundaries**, with the next most positive a fifth
+of its size. Midnight's −0.747 matches the 05:00 estimate and is correctly
+excluded on a mechanical ground: `_signed_minutes` wraps modulo the day, so at
+that boundary the estimator compares a date's start to its own end 23 hours
+later.
+
+**The pre-registration is worth little on this thread and the support does not
+come from it.** Two records had criteria a true effect could not satisfy. The
+adjudication found a third weakness of the same family, a placebo bar built on
+each series separately when the estimand is a difference, which nobody caught
+before the run either. What carries the finding is a raw 10.8% jump at the
+minute the peak rate ends, a weekend-versus-weekday contrast of 4.91× at 09:00
+holding across six specifications, and a response confined to cars and
+motorcycles — a cut that does not run through the estimator's weak point,
+because curvature does not know a car from a bus.
+
+**Nothing here touches the speed finding.** Retiming an entry is not avoiding
+one.
+
+### Route substitution is registered as H010
+
+[H010](hypotheses/H010-exempt-route-substitution.md) tests the by-product H009
+flagged and claimed nowhere. The claim that exempt entries rising at 05:00 are
+this project's first direct evidence of route substitution appears in this
+register and in the handoff, while the README says diversion is unidentified on
+both feeds. One of those has to change whichever way H010 lands, which is why it
+clears the decision-relevance bar.
+
+It is posed in **vehicle counts rather than log points**, because a substitution
+claim has to balance in vehicles and a 7% rise on the smaller series cannot
+absorb a 27% fall on the larger one without the arithmetic being done. Its
+criteria rest on two unmeasured quantities: the count-based diversion share, and
+whether the surplus is made of the vehicle classes H008 showed respond. Its
+author had seen every previously computed number at these boundaries and the
+record discloses each, including the two of four detection points where the
+exempt rise is negative and the 21:00 mirror that runs against the simple
+diversion story.
+
+Criterion 2 carries a **feasibility gate declared in advance**: a baseline
+cars-and-motorcycles share above 0.90 makes the bar unreachable, and it is then
+recorded as untestable rather than failed. Two records here froze criteria a
+true effect could not satisfy, and the damage came from nobody noticing until
+afterwards.
+
+Registered and not run. The execution prompt is in
+[H010-execution-prompt.md](hypotheses/H010-execution-prompt.md) and belongs in a
+fresh session, per the protocol.
+
+### TLC trip records: recommended against, on evidence
+
+H008 measured the vehicle class TLC covers, at both price boundaries: TLC
+taxi/FHV gives τ = **−0.021** at 05:00 and **+0.004** at 21:00, against −0.862
+and +0.254 for cars. TLC data therefore cannot carry the one design in this
+project that does not need parallel trends, and a TLC before-and-after across
+the cordon would inherit the identification failure H001–H006 documented. What
+would justify revisiting it is an outcome other than link speed — zone-to-zone
+trip duration with a real pre-period — as its own hypothesis.
+
+**The distribution remains unverified and this session could not verify it.**
+Its sandbox network policy denied CONNECT to every data host tried, including
+`data.ny.gov` and `data.cityofnewyork.us`, which this project downloads from
+daily. The failure says nothing about the sources. Confirm the endpoint from a
+runner with normal egress before writing ingestion code.
+
+### Four smaller things found, and one correction to the handoff
+
+The handoff says to call `gh` at `C:/Program Files/GitHub CLI/gh.exe`. That is
+specific to the machine it was written on. This session ran on Linux with no
+`gh` at all and read run status, jobs and logs through the GitHub MCP tools
+instead, which worked. The underlying warning still holds: without some
+authenticated path to the Actions API, failures are undiagnosable from outside.
+
+`src/analysis/h009_exempt_control.py` has **no tests**. The H008 boundary
+estimator beside it has four, including a planted discontinuity and a planted
+zero, added in a commit of its own after H008 was answered. The function that
+produced the study's most-quoted estimate never got the same treatment. The
+fixtures written for the adjudication are the ones that would close it and they
+ran clean, so this is a gap in the permanent record rather than a defect in the
+result.
+
+H008's vehicle-class and detection-group cuts aggregate to day-of-week before
+estimating (`src/analysis/h008_toll_timing.py:248`), so their standard errors
+rest on **five clusters** while their point estimates use all 609 dates. The
+point estimates are sound. Nothing quotes those standard errors and nothing
+should.
+
+The README's Data section said the MTA entry feed was **"not ingested"** while
+its Evidence section reported two hypotheses run on 125M of its entries. True
+when the mechanism check was abandoned, wrong from H008 onward, and now
+corrected with the row counts.
+
+### What did not change
+
+The speed finding. +1.05 mph, pre-trends rejecting in all four samples on the
+full 104-week pre-period, causally uninterpretable. The archive is complete at
+44 of 44 verified months. D1–D7 stay as resolved on 2026-09-14 and none was
+reopened. No code changed, no specification ran, and no artefact in
+`outputs/tables/` was rewritten.
 
 ## Update 2026-09-14 — the six open decisions are resolved
 

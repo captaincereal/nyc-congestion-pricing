@@ -7,6 +7,7 @@
 | **Registered by** | Claude Opus 5, session that completed the archive and answered H007 |
 | **Answered by** | |
 | **Supersedes / superseded by** | **superseded by [H009](H009-toll-timing-exempt-control.md)** |
+| **Adjudicated** | 2026-09-14, by a session that wrote neither record — [ADJUDICATION-timing.md](ADJUDICATION-timing.md). It leaves this verdict standing and reads the underlying evidence separately. |
 
 ## Question
 

@@ -14,9 +14,17 @@ that matters: the data are complete, the pipeline is healthy, nine
 pre-registered hypotheses are answered, the six open design decisions are
 resolved, and the README reports the finding from current artefacts.
 
-**The job left is judgement, not production.** One result needs a verdict that
-its own author should not give. One by-product deserves a record. One dataset is
-untried and may not be worth trying. Everything else is done.
+**The job left is judgement, not production.** The previous session's three
+items are closed: the timing result has been adjudicated by a reader who did not
+write it, the route-substitution by-product is registered as **H010**, and TLC
+has been decided against on measured grounds. See the 2026-09-14 (later) entry
+in `docs/decision_register.md`.
+
+**One thing is left and it is an execution, not a judgement.** H010 is
+registered, committed and not run. `docs/hypotheses/H010-execution-prompt.md`
+holds the prompt. The protocol wants it run by a session that did not write it,
+so if you are reading this fresh, you are the right session — and if you have
+already argued about this thread, you are not.
 
 Read "Where results can and cannot come from" before planning anything. **The
 most likely way to damage this study now is to find something to run.**
@@ -34,10 +42,19 @@ of asking.
 
 ## The state, in one pass
 
-Confirm rather than re-derive:
+Confirm rather than re-derive. Use whatever reaches the Actions API from where
+you are running, and check `analysis.yml`, `backfill.yml` and `tests.yml`:
 
-    "C:/Program Files/GitHub CLI/gh.exe" run list --workflow analysis.yml --limit 3
-    "C:/Program Files/GitHub CLI/gh.exe" run list --workflow backfill.yml --limit 3
+    gh run list --workflow analysis.yml --limit 3
+
+On the machine this brief was first written for, `gh` was installed and
+authenticated but **not on the Git Bash PATH**, so it needed its full path
+(`"C:/Program Files/GitHub CLI/gh.exe"`) or PowerShell. That is specific to that
+machine. A session on Linux with no `gh` at all read runs, jobs and logs through
+the GitHub MCP tools on 2026-09-14 and it worked fine. The durable point is the
+one underneath: without some authenticated path to the Actions API the log
+endpoint returns 403 and failures are undiagnosable from outside, so establish
+that path before you need it.
 
 Both newest runs should be green. If they are, there is no pipeline work.
 
@@ -63,10 +80,6 @@ that. A failing HARD data-quality check **prints its offending rows** to stderr.
 And the segment roster is **reconciled** against the parts on disk rather than
 sampled — `missing_segment_sids` plus `top_up_segments`, before staging.
 
-`gh` is installed and authenticated but **not on the Git Bash PATH**. Call it by
-full path or from PowerShell. Without it the Actions log API returns 403 and
-failures are undiagnosable from outside.
-
 Scheduled runs are delayed hours past their cron slots. **State that has not
 changed shortly after a push means the job has not run, not that it failed.**
 Check `run_started_at` or an asset's `created_at` against your push before
@@ -89,7 +102,9 @@ to the toll.**
 | **H006** | Every control set rejects on a clean July–September holdout; holidays aggravate the failure but do not cause it |
 | **H007** | The secondary feed cannot measure diversion either — it stops reporting on three of nine exempt in-zone links, availability diverging 21.2 points against a 5-point bar. A measurement failure, not an identification one |
 | **H008** | Entries jump at both moments the toll price changes. Uninformative: the 21:00 boundary (+12.9%) missed a placebo maximum of 13.9%. Response confined to cars and motorcycles, predicted backwards |
-| **H009** | Superseding H008 with a control that pays no toll. At 05:00 tolled entries fall 69 log points while exempt entries on the same sensors rise 7; difference −0.759 [−0.795, −0.723]. Does not support **as specified** |
+| **H009** | Superseding H008 with a control that pays no toll. Difference at 21:00 **+0.071** [0.048, 0.094]; at 05:00 −0.759 [−0.795, −0.723]. Does not support **as specified** |
+| **Adjudication** | A reader who wrote neither record finds the retiming response **supported**, and moves the weight from 05:00 to 21:00. 21:00 is the most positive of all 24 boundaries the frozen run estimated, by 5×. 05:00 sits in the ramp where differential curvature survives the differencing: directional, magnitude unpinned |
+| **H010** | Registered 2026-09-14, **not run**. Is the exempt rise at 05:00 route substitution, counted in vehicles? |
 
 The joint pre-trend test rejects in all four samples on the full 104-week
 pre-period: χ² 97.9, 69.7, 102.2, 46.7 on 11 dof. Lengthening the pre-period
@@ -104,41 +119,84 @@ that congestion pricing did nothing; it is evidence that this comparison design
 cannot tell you either way. Hold that distinction in every sentence you write —
 it is the study's contribution.
 
-## The three things actually left
+## The one thing actually left
 
-**1. The timing result needs a verdict, and its author should not give it.**
+**H010 is registered and not run.** `docs/hypotheses/H010-exempt-route-substitution.md`
+was committed on 2026-09-14 and the prompt to execute it is in
+`docs/hypotheses/H010-execution-prompt.md`. The commit order is the
+pre-registration, so run it against that record as written and do not adjust the
+criteria on the way.
 
-H008 and H009 found a large, precisely estimated behavioural response to the
-toll's peak/overnight price schedule, identified off a discontinuity rather than
-parallel trends. The strongest piece: at 05:00 tolled entries fall 69 log points
-while toll-exempt vehicles on the same sensors, in the same ten-minute blocks,
-*rise* 7 — a difference of −0.759, consistent at all four dual-recording points.
-No clock, sensor artefact or curvature does that, because each would move both
-series together.
+It asks whether exempt-roadway entries rising at 05:00 are drivers taking a free
+road to avoid the charge. It is posed in **vehicle counts rather than log
+points**, because a substitution claim has to balance in vehicles: a 7% rise on
+the smaller series cannot absorb a 27% fall on the larger one without the
+arithmetic being done, and nobody has done it. The answer changes what two
+documents say. `docs/decision_register.md` and this brief have both carried the
+claim that this is the project's first direct evidence of route substitution,
+while the README says diversion is unidentified on both feeds.
 
-Neither record cleared its own pre-registered bar, and both criteria were flawed
-in the same way. **A third record rewriting the criterion is the wrong move**:
-the estimate would not shift, only the label, and the label would then have been
-chosen by someone who already knew it. Whether this counts as supported is a
-judgement for a reader of the three records. If you disagree and register H010,
-say in it explicitly why you are not simply relabelling, and expect scepticism.
+The record's criterion 2 carries a feasibility gate declared in advance — a
+baseline share above 0.90 makes its bar unreachable and it is then recorded as
+untestable rather than failed. Honour that gate. It exists because two records
+here froze criteria a true effect could not satisfy.
 
-**2. Route substitution is unregistered and unclaimed.**
+If you are the session that would rather not run it, say so and hand it on. What
+you must not do is answer it by reasoning from the log-point numbers already in
+`H009_difference.csv`, which is how it would get answered without being measured.
 
-Exempt-roadway entries *rising* as tolled entries collapse at 05:00 is the first
-direct evidence of diversion this project has obtained from any source. H007
-could not see it on the speed feed because the sensors on those roads had
-failed. It is a by-product of a design aimed at something else, so it is flagged
-in H009 and claimed nowhere. It would need its own record — and that record
-would be a genuinely new question, not a re-score.
+### What the previous three items came to
 
-**3. TLC trip records are the only untried source with a pre-period.**
+**1. The timing result was adjudicated on 2026-09-14** by a session that wrote
+neither record, which is what this brief asked for.
+`docs/hypotheses/ADJUDICATION-timing.md` is the verdict. It leaves H008 and H009
+standing as written, ran no specification against the data, and reached its
+reading from three places: the 22 boundaries H009's own frozen run estimated and
+never tabulated, synthetic fixtures measuring what the estimator does and does
+not remove, and the raw block profile.
 
-Not ingested. Would need its own record. Weigh whether it is worth it: a clean
-TLC result would describe a "cannot identify" finding better rather than change
-it. Its current distribution is monthly files outside the Socrata endpoints this
-project uses, and that source has **not** been verified — confirm it rather than
-assuming.
+It finds the retiming response **supported** and **reverses which boundary
+carries it**. This brief used to say the strongest piece was 05:00, and that no
+clock, sensor artefact or curvature could move the two series in opposite
+directions. The first half of that is now demoted and the second half is wrong.
+The estimator returns exactly zero on a jump shared by both series, so a clock
+and a sensor artefact do cancel. Curvature cancels only when both series curve
+alike, and at 06:00, 07:00 and 08:00 — no price changes — the two series still
+move apart by up to 0.22 with the same opposite-direction signature. 05:00 sits
+in that ramp and its fitted estimate is 1.63× the model-free drop. The boundary
+that holds is **21:00**, where the fit adds a sixth rather than two thirds and
+the difference is the most positive of all 24 boundaries by a factor of five.
+
+Quote 21:00 first. Treat −0.759 as directional with an unpinned magnitude. If
+you ever need a defensible number at 05:00, that needs its own record with a
+curvature-robust estimator chosen before it is run.
+
+**2. Route substitution became H010**, above.
+
+**3. TLC is decided against, for now, on a measured ground.** H008 already
+estimated the vehicle class TLC covers: TLC taxi/FHV gives τ = −0.021 at 05:00
+and +0.004 at 21:00, against −0.862 and +0.254 for cars. They pay a per-trip
+surcharge and drive to a passenger's schedule, so the one design here that does
+not need parallel trends is invisible in TLC by construction, and a TLC
+before-and-after across the cordon inherits the identification failure H001–H006
+documented. What would justify revisiting it is an outcome other than link speed
+— zone-to-zone trip duration with a real pre-period — as its own hypothesis.
+
+Its distribution is still **unverified**. The 2026-09-14 session could not check
+it: its sandbox denied CONNECT to every data host tried, including the two this
+project downloads from daily. That says nothing about the sources. Confirm the
+endpoint from a runner with normal egress before writing ingestion code.
+
+### One gap left open deliberately
+
+`src/analysis/h009_exempt_control.py` has no tests, while the H008 estimator
+beside it has four including a planted discontinuity and a planted zero. The
+function that produced the study's most-quoted estimate never got the same
+treatment. The adjudication ran those fixtures by hand and they came back clean,
+so this is a gap in the permanent record rather than a defect in the result —
+but it should be closed, and the fixtures to close it are described in
+`ADJUDICATION-timing.md`.
+
 
 ## Where results can and cannot come from
 
@@ -164,7 +222,8 @@ confirmed that and added nothing, say so — that is a valid and correct outcome
 
 ## How this project has recently gone wrong
 
-Two habits, both learned the hard way on 2026-09-13.
+Three habits. The first two were learned the hard way on 2026-09-13, the third
+on 2026-09-14.
 
 **Acceptance criteria failed twice in a row, the same way.** H008 compared an
 estimate to a *maximum* over 21 placebo boundaries, a set contaminated by a
@@ -179,6 +238,20 @@ significance or tail statistics**, and before freezing, ask whether a true
 effect of the size you expect could actually satisfy them. Two consecutive
 failures by one author should also tell you to have criteria read by something
 other than whatever wrote them.
+
+That advice came too late for a third failure of the same family, found on
+2026-09-14 and not by its author: H009's placebo bar was computed on each series
+separately when the estimand is the *difference* between them. So the record
+compared a difference to a distribution of levels. The right bar was sitting in
+the record's own output file, which held the difference at all 24 boundaries and
+reported two of them.
+
+**Report the whole table, not the cells that answer the question.** H009
+estimated 24 boundaries and published 2. Nothing was hidden — the file is
+committed — but no one looked at the other 22 for a day, and they turned out to
+carry both the strongest evidence for the result and the clearest evidence
+against its headline magnitude. When a run produces a distribution, tabulate the
+distribution.
 
 **Check a fix against live state instead of assuming it took.** The release
 prune was simulated asset-by-asset before being pushed, and that is how two
@@ -259,15 +332,18 @@ Work through this without pausing for permission between steps. Stop when you
 hit something in the list above, when a measurement contradicts this brief in a
 way that changes the plan, or when the work is done.
 
-**The work may already be done.** If both workflows are green, the register
-shows nine answered hypotheses, and the README quotes the current tables, then
-the honest report is that there is nothing to do. Saying so is better than
-manufacturing a hypothesis to fill the session.
+**Most of the work is already done.** If both workflows are green, the register
+shows ten registered hypotheses with nine answered, and the README quotes the
+current tables, then H010 is the only outstanding item and there is nothing else
+to start. Saying so is better than manufacturing a hypothesis to fill the
+session.
 
 ## First
 
 Confirm the two workflows are green, then form your own view of the repo. Parts
 of this brief will be stale — it has been wrong before in ways that mattered. It
 once said a prune freed 825 slots when the rule as written freed 489, and that
-2023-01 was 28 days downloaded when the snapshot said 22. **Correct it rather
-than trusting it, and say what you found that differs.**
+2023-01 was 28 days downloaded when the snapshot said 22. On 2026-09-14 it sent
+a Linux session to a Windows path for `gh`, and it repeated a claim about
+curvature that the study's own artefacts contradict. **Correct it rather than
+trusting it, and say what you found that differs.**

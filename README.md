@@ -30,14 +30,22 @@ toll date, so it cannot measure diversion either. That failure is
 instrumentation rather than identification, which is a different problem with a
 different fix.
 
-**One thing the study can now show.** Drivers demonstrably respond to the toll's
-*price schedule*: entries collapse as the peak rate begins and rise as it ends,
-against a control of vehicles on exempt roads who are never charged and who move
-the opposite way. That is a behavioural response, cleanly identified off a price
+**One thing the study can now show.** Drivers respond to the toll's *price
+schedule*: entries rise as the peak rate ends and fall as it begins, measured
+against vehicles on exempt roads who cross the same sensors in the same minutes
+and are never charged. That is a behavioural response identified off a price
 discontinuity rather than a parallel-trends assumption. It is reported under
 Evidence with the caveat it deserves — neither record cleared its own
-pre-registered bar — and it says nothing about congestion or speeds. Retiming an
-entry is not avoiding one.
+pre-registered bar, and a later independent reading found the estimator sound on
+shared shocks and exposed at one of the two boundaries — and it says nothing
+about congestion or speeds. Retiming an entry is not avoiding one.
+
+**Updated 2026-09-14.** The six open owner decisions are resolved, the timing
+result has been adjudicated by a session that did not produce it, and the route
+substitution it turned up is now a registered hypothesis rather than an
+unclaimed by-product. None of that changed the speed finding, and nothing new
+was run against the data.
+
 Owner decisions are laid out in [the decision memo](docs/owner_decisions.md).
 
 ---
@@ -255,19 +263,33 @@ the assumption that defeated H001 through H006 is not required.
 cleared its own pre-registered bar, and the reasons are recorded in full**; what
 follows is reported as strong suggestive evidence, not as a positive finding.
 
-The sharpest result comes from a control the speed study never had.
+The design uses a control the speed study never had.
 `excluded_roadway_entries` counts vehicles on the toll-exempt roadways — the
 FDR, the West Side Highway, the Carey Tunnel — crossing the same detection
 points, on the same sensors, in the same ten-minute blocks. They are never
-charged, so no price changes for them. **At 05:00, as the peak rate begins,
-tolled entries fall 69 log points while exempt entries rise 7**, a difference of
-−0.759 (95% CI −0.795 to −0.723), consistent at all four points that record
-both. No clock, sensor artefact or curvature explains that, because each would
-move both series together.
+charged, so no price changes for them, and the estimand is the difference
+between the two series at the boundary. A shared clock, a sensor batching at
+hour boundaries and a jump common to both series all cancel in that difference;
+synthetic fixtures confirm the estimator returns exactly zero on a shared jump.
 
-At 21:00 both rise, and the design separates a shared evening rhythm of 5.6 log
-points from a price-attributable difference of **+7.1** (CI 4.8 to 9.4). Both
-results hold across 2025 and 2026.
+**At 21:00, as the peak rate ends, entries rise 10.8% in the raw ten-minute
+blocks**, against a declining evening trend. The difference against the exempt
+series is **+7.1 log points** (CI 4.8 to 9.4), separating a shared evening
+rhythm of 5.6 from what the price accounts for. The same frozen run estimated
+that difference at all 24 hour boundaries, and 21:00 is the most positive of
+them, with the next most positive a fifth of its size. It holds in both years
+and at three of the four points that record both series, though it leans on
+Brooklyn Bridge (+20.9 log points) against the Carey Tunnel (−2.8).
+
+**At 05:00, as the peak rate begins, entries fall 27.0% raw** while exempt
+entries on the same sensors rise, and the fitted difference is **−0.759** (CI
+−0.795 to −0.723) at all four points. The direction is not in doubt. The
+magnitude is much less certain. 05:00 sits in the steepest ramp of the day, the
+fitted estimate runs 1.63 times the model-free drop, and one thing does survive
+the differencing — curvature that differs between the two series. The same run shows it at 06:00,
+07:00 and 08:00, where no price changes and the two series still move apart by
+up to 0.22 with the same opposite-direction signature. Read 05:00 as directional
+and treat its size as unpinned.
 
 The response is confined to the vehicles with discretion over departure time.
 Cars and motorcycles carry all of it; single-unit trucks, multi-unit trucks,
@@ -276,25 +298,53 @@ drive to a passenger's schedule, freight runs to contracted windows, buses to a
 timetable. **That pattern was predicted backwards** — the record expected trucks
 to respond hardest — and is the most economically legible part of the result.
 
-Why neither record passed: H008 compared its estimate to a *maximum* over
-twenty-one placebo boundaries, a set contaminated by the morning ramp where
-entries rise fivefold within the hour; H009 required its control series to show
-no *significant* movement, which 609 days and 125M entries can never deliver.
-Both are gates built on the wrong scale, drafted by the same author within an
-hour, and that pattern should discount the pre-registration value of both.
-Deliberately not repaired by a third attempt: rewriting the criterion would move
-the label and not the estimate.
+Why neither record passed, and what a reader did with that. H008 compared its
+estimate to a *maximum* over twenty-one placebo boundaries, a set contaminated
+by the morning ramp where entries rise fivefold within the hour; H009 required
+its control series to show no *significant* movement, which 609 days and 125M
+entries can never deliver. Both are gates built on the wrong scale, drafted by
+the same author within an hour, and that pattern should discount the
+pre-registration value of both. No third record rewrites the criterion, because
+that would move the label while leaving the estimate where it is.
+
+A session that wrote neither record adjudicated all three instead
+([ADJUDICATION-timing.md](docs/hypotheses/ADJUDICATION-timing.md)). It leaves
+both verdicts standing, runs no new specification, and reaches its reading from
+the 22 boundaries H009's own frozen run estimated and never tabulated, from
+synthetic fixtures measuring what the estimator does and does not remove, and
+from the raw block profile. It finds the retiming response supported, and
+reverses which boundary carries it. The figures above follow that reading, which
+is why 21:00 now leads and the −0.759 at 05:00 no longer does.
 
 **What this does not show.** That the toll reduced congestion, reduced total
 entries, or changed speeds. Retiming an entry is not avoiding one, and nothing
 here bears on the speed finding above.
 
-TLC trip records remain the only untried source with a genuine pre-period — the
-per-year archives on NYC Open Data reach back to at least 2014. Ingesting them
-has not been attempted and would need its own registered hypothesis. The honest
-note is that the current trip records are distributed as monthly files outside
-the Socrata endpoints this project already uses; that exact source has not been
-verified here and should be confirmed rather than assumed.
+**The exempt series rising at 05:00 is now a registered question rather than a
+by-product.** Whether that rise is drivers taking a free road to avoid the charge
+is [H010](docs/hypotheses/H010-exempt-route-substitution.md), registered on
+2026-09-14 and not yet run. It is posed in vehicle counts rather than log points,
+because a substitution claim has to balance in vehicles, and a 7% rise on the
+smaller series cannot absorb a 27% fall on the larger one without the arithmetic
+being done. Until it is answered this study claims no diversion result from any
+source.
+
+TLC trip records remain the only untried source with a genuine pre-period, and
+the recommendation is now **against ingesting them**, on a measured ground rather
+than an impression. TLC records cover yellow, green and for-hire vehicles, and
+H008 measured exactly that class at both price boundaries: TLC taxi and FHV
+entries give −0.021 at 05:00 and +0.004 at 21:00, against −0.862 and +0.254 for
+cars. They pay a per-trip surcharge and drive to a passenger's schedule, so the
+one design this study has that does not need parallel trends is invisible in
+them by construction. A TLC before-and-after across the cordon would inherit the
+identification failure documented above. What TLC could still offer is an outcome
+other than link speed — trip duration between zones — which is one of the three
+things named under Recommendation as capable of changing the answer, so the
+question is deferred rather than closed. Anyone reopening it should confirm the
+distribution first: the current records are monthly files outside the Socrata
+endpoints this project uses, and that source is **unverified** — the session that
+wrote this could not reach any data host from its sandbox, including the two the
+project depends on daily, so it could neither confirm nor refute it.
 
 Every hypothesis run against this study, including those that failed, is in the
 [hypothesis register](docs/hypotheses/REGISTER.md), each with its prediction
@@ -365,15 +415,37 @@ first is supported.
   not door-to-door travel time, not welfare.
 - **No before-and-after on entry counts.** The MTA's vehicle-entry series begins
   on the tolling date itself, so it cannot say whether the toll reduced entries.
-  H008 and H009 use its internal price variation instead, which answers a
-  narrower question — timing, not volume. TLC trip records do have a pre-period
-  and have not been ingested.
+  H008 and H009 use its internal price variation instead, which answers the
+  narrower question of timing rather than volume. TLC trip records do have a
+  pre-period and have not been ingested; they cover the vehicle class that shows
+  no timing response, so they would not extend this design.
 - **The timing result did not clear its own bar, twice.** H008's placebo set was
   contaminated by the morning ramp and summarised by a maximum; H009 required a
   control series to show no significant movement, which its sample size makes
   impossible. The underlying estimates are stable and precise, but two
   consecutive flawed criteria by the same author should discount how much the
-  pre-registration is worth on this thread specifically.
+  pre-registration is worth on this thread specifically. An independent reading
+  on 2026-09-14 found a third weakness of the same family, a placebo bar built
+  on each series separately when the estimand is a difference, which nobody
+  caught before the run either.
+- **The 05:00 magnitude is unpinned.** The difference estimator removes anything
+  shared by the tolled and exempt series, including a clock and a sensor
+  artefact, and does not remove curvature that differs between them. 05:00 sits
+  in the steepest ramp of the day; the fitted estimate is 1.63 times the
+  model-free drop, and the placebo boundaries inside the same ramp reach 0.22
+  with the same signature. The direction stands and the −0.759 should not be
+  quoted as a clean estimate. Producing a corrected one would mean choosing a
+  specification while knowing what the old one returned, so it needs its own
+  record, frozen in advance.
+- **Two cuts rest on five clusters.** H008's vehicle-class and detection-group
+  tables aggregate to day-of-week before estimating, so their standard errors
+  come from five clusters while their point estimates use all 609 dates. The
+  point estimates are sound; nothing in this study quotes those standard errors
+  and nothing should.
+- **The H009 estimator has no tests.** The function producing the study's
+  most-quoted estimate is untested, while the H008 estimator beside it has four.
+  Synthetic fixtures run during the 2026-09-14 adjudication came back clean, so
+  this is a gap in the permanent record rather than a known defect.
 
 ## Recommendation
 
@@ -400,10 +472,13 @@ exempt routes, and it is reported above.
 better specification on this one.** The MTA entry counts cannot say whether the
 toll reduced entries, because they begin on the tolling date — but their
 internal peak/overnight price variation supports a design that needs no parallel
-trends, and H008 and H009 show it detects a large, precisely estimated
-behavioural response. That is where a usable positive finding is most likely to
-come from. TLC trip records are the only untried source with a genuine
-pre-period, and need their own registered hypothesis before anyone starts.
+trends, and H008 and H009 show it detects a large behavioural response. That is
+where a usable positive finding is most likely to come from, and
+[H010](docs/hypotheses/H010-exempt-route-substitution.md) is the next question
+on that thread. TLC trip records are the only untried source with a genuine
+pre-period, and the recommendation is against ingesting them for now: they cover
+the one vehicle class H008 measured at essentially zero response, so they cannot
+carry the design that works here. The reasoning is under Evidence.
 
 What could still change the answer is different data, not a different
 specification: links nearer the cordon than the current 808 m nearest control,
@@ -459,10 +534,17 @@ as 0 mph, and start from `data/processed/secondary_hourly_panel.parquet` rather
 than the superseded `spillover_diagnostics.py` table.
 
 **Mechanism — MTA Congestion Relief Zone Vehicle Entries** (`t6yz-b64h`,
-data.ny.gov). Hourly entries by detection point and vehicle class, 2025-01-05
-onward. Held for completeness only: it starts on the tolling date, so it carries
-no pre-treatment period and cannot support a before-and-after comparison. Not
-ingested.
+data.ny.gov). Entries in ten-minute blocks by detection point and vehicle class,
+2025-01-05 to 2026-09-05, carrying both `crz_entries` and the 38.7M
+`excluded_roadway_entries` recorded on the toll-exempt roadways at the same
+points. It starts on the tolling date, so it carries no pre-treatment period and
+supports no before-and-after comparison — and its internal peak/overnight price
+structure supports a design that needs none, which is what H008, H009 and H010
+use. **Ingested** as cached Socrata aggregates under `data/raw/mta_crz/`;
+609 dates, 87,696 date × block rows on the full roster and 350,933 at the four
+dual-recording points. An earlier version of this entry said "not ingested",
+which was true when the mechanism check was abandoned and wrong from H008
+onward.
 
 Schema and conventions in `docs/data_dictionary.md`; open questions in
 `docs/decision_register.md`; further sources in `docs/future_data_sources.md`.

@@ -7,6 +7,7 @@
 | **Registered by** | Claude Opus 5, same session that ran H008 |
 | **Answered by** | Claude Opus 5, same session, 2026-09-13 |
 | **Supersedes / superseded by** | **Supersedes [H008](H008-toll-timing-bunching.md)** |
+| **Adjudicated** | 2026-09-14, by a session that wrote neither record — [ADJUDICATION-timing.md](ADJUDICATION-timing.md). It leaves this verdict standing and reads the underlying evidence separately. |
 
 ## Question
 
