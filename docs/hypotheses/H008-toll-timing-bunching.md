@@ -6,7 +6,7 @@
 | **Registered** | 2026-09-13 |
 | **Registered by** | Claude Opus 5, session that completed the archive and answered H007 |
 | **Answered by** | |
-| **Supersedes / superseded by** | none |
+| **Supersedes / superseded by** | **superseded by [H009](H009-toll-timing-exempt-control.md)** |
 
 ## Question
 

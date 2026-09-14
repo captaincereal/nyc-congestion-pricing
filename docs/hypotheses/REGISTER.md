@@ -129,3 +129,25 @@ schedule, freight runs to contracted windows, buses to a timetable.
 Eight hypotheses are registered and answered. H008 is the first to use a design
 that does not rest on parallel trends, and the first run against a dataset other
 than the speed panel.
+
+## 2026-09-13 — registration appended
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H009](H009-toll-timing-exempt-control.md) | Does the entry-timing response survive a control group that pays no toll? | proposed | 2026-09-13 | |
+
+Supersedes [H008](H008-toll-timing-bunching.md), whose verdict of uninformative
+stands and is not revised. H008's placebo set was the wrong instrument; this
+record replaces it and says in advance why.
+
+**The correction is not the point of this record, and the register should be
+clear about that.** A percentile bar instead of a maximum would probably let
+H008's 21:00 estimate through, and it was chosen by someone who already knew the
+old bar had failed by 0.017 log points. A re-score is not a result. So the
+primary criterion is a quantity never computed at any boundary: the difference
+in discontinuities between tolled entries and the 38.7M `excluded_roadway_entries`
+recorded at the same four detection points, on the same sensors and in the same
+minutes, by vehicles that are never charged and face no price change.
+
+Nine hypotheses are registered. The 21:00 discontinuity has now been examined
+twice, and a reader is entitled to that count.
