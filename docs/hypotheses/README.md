@@ -37,6 +37,15 @@ analysis, so a later reader can check the commit order. If the criteria turn
 out to be wrong, supersede the record with a new one that says so and explains
 why. Do not rewrite it.
 
+**That enforcement does not reach H001 through H004, and a reader should know
+it.** `main` is an orphan history rooted at c573209 on 2026-09-12, and those
+four records enter in that root commit already carrying their Results. There is
+no order on `main` to check for them. For H001, H002 and H003 the order is
+demonstrable on the `codex/verify-then-aggregate` branch; for H004 it is not
+demonstrable anywhere. From H005 on, the registration commits are on `main` and
+the mechanism works as written. The 2026-09-14 entry in
+`docs/decision_register.md` has the detail and the commit hashes.
+
 ## Reporting
 
 A hypothesis that fails is recorded with the same care as one that succeeds,

@@ -5,9 +5,105 @@
 Compiled 2026-09-09, updated 2026-09-14 · treatment date 2025-01-05 ·
 Validation details are recorded in the latest dated entry below.
 
-All six open decisions were resolved on 2026-09-14; that entry is the second
+All six open decisions were resolved on 2026-09-14; that entry is the third
 below. Earlier entries are historical and are superseded where the latest audit
 says so.
+
+## Update 2026-09-14 (later still) — `main` is an orphan history, and four hypotheses have no commit-order evidence on it
+
+Found while cleaning up merged branches. It is recorded because it bears on the
+protocol rather than on the plumbing.
+
+### What the history actually looks like
+
+`main` begins at **c573209** ("Report the findings in the README", 2026-09-12),
+which is a **root commit with no parent**. It shares **no common ancestor** with
+either surviving `codex/*` branch. The project's original development history —
+Phase 1-2 ingestion through Phase 8, the geometric treatment assignment, the
+creation of this register — lives only on `codex/verify-then-aggregate`
+(**b591c8e**, 51 commits unreachable from `main`).
+`codex/finish-study-handoff` (**4b51954**) is a strict subset of it.
+
+Every file is on `main`. The history behind them is not.
+
+### Why that matters, stated plainly
+
+`docs/hypotheses/README.md` says: "Git history is the enforcement: the record is
+committed before the analysis, so a later reader can check the commit order."
+
+**For H001, H002, H003 and H004 there is no such order on `main` to check.** All
+four records enter in the root commit c573209, already carrying their Results
+and Verdicts. A reader auditing `main` alone cannot distinguish a record written
+before its analysis from one written after, for any of the four.
+
+From H005 onward the enforcement works as described, and the commits are on
+`main`:
+
+| Hypothesis | Registration commit on `main` |
+|---|---|
+| H001–H004 | none — the records arrive fully answered in the root commit |
+| H005, H006 | f01f988 Preregister H005 and H006 on the 27-month archive |
+| H007 | 1faf8aa Preregister H007: can the secondary feed identify diversion? |
+| H008 | ac96825 Preregister H008: do drivers retime entries to avoid the peak rate? |
+| H009 | 4b57794 Preregister H009: does the timing response survive an unpaying control? |
+| H010 | ac02681 Adjudicate the timing result, register H010, decide TLC |
+
+The order for H001, H002 and H003 is demonstrable, but only on the codex branch:
+
+    07e9c04  Add a hypothesis protocol and a skill that enforces it
+    b6ee5ae  Register H002: Rambachan-Roth sensitivity
+    141cc13  H001 answered: magnitude beats chance in 3 of 4 samples, peak does not
+    d5b4558  Preregister H003 temporal aggregation before execution
+
+**H004 has no registration commit in either history.** Its order is not
+demonstrable from git at all, on any branch.
+
+### What this does and does not undermine
+
+It does not imply anything went wrong. H001 through H004 may well have been
+registered before they ran, and their records read as though they were. What it
+means is narrower and still worth saying: for those four the pre-registration
+rests on the records' own text and on `REGISTER.md`'s dated appends rather than
+on the mechanism the protocol names as its enforcement. A sceptical reader is
+entitled to know which of the ten they are looking at.
+
+H001 and H003 are two of the four lines of attack the README cites behind the
+headline finding, so this is not confined to a corner of the study.
+
+### The `data-raw` tag does not preserve it
+
+`data-raw` points at **3ec6d90**, which sits on the codex branches **six commits
+before** 07e9c04. An ancestor does not keep its descendants reachable, so
+deleting the codex branches would leave the four commits above unreferenced and
+eventually collectable, with `data-raw` unaffected.
+
+### What was attempted and what blocked it
+
+The owner directed: tag the history, then delete both codex branches. The tag
+was created locally as an annotated tag `preregistration-history` at b591c8e.
+**Pushing it failed**, as did deleting any branch, so **nothing was deleted** —
+completing half of a tag-then-delete is the one outcome worse than doing
+neither.
+
+The failure is environmental rather than a property of the repository. This
+session's git relay accepts pushes that add commits to a branch and silently
+drops every other ref update: `git push origin --delete <branch>` and
+`git push origin refs/tags/<tag>` both return "the remote end hung up
+unexpectedly" followed by "Everything up-to-date", five attempts each with
+backoff, while pushes of commits to `main` succeeded throughout the same
+session. A later session on a different runner, or the owner locally, should
+find these work normally.
+
+### What is still to do
+
+Push the tag, confirm it with `git ls-remote --tags origin`, and only then
+delete `codex/verify-then-aggregate`, `codex/finish-study-handoff` and the
+merged `claude/agent-handoff-mission-wo4wc7`. The confirmation step is not
+optional: the tag is the only thing standing between a routine branch cleanup
+and the loss of the H001–H003 audit trail.
+
+If the branches are ever deleted without that tag, say so in this register
+rather than leaving a reader to infer it from an absence.
 
 ## Update 2026-09-14 (later) — the timing result is adjudicated, and its headline boundary changes
 
