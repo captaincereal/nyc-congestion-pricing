@@ -150,9 +150,12 @@ def monthly_panel(classification: pd.DataFrame, direction: str | None = None) ->
     tunnels only.
     """
     where = f"direction='{direction}'" if direction else None
+    # The alias belongs in $select only. SoQL rejects "expr as name" inside
+    # $group with a bare 400, which no local test sees because it needs the
+    # live endpoint to say so.
     frame = _fetch(
         "facility,date_trunc_ym(date) as month,sum(traffic_count) as crossings",
-        "facility,date_trunc_ym(date) as month",
+        "facility,date_trunc_ym(date)",
         where=where,
     )
     frame["crossings"] = pd.to_numeric(frame["crossings"])

@@ -214,3 +214,25 @@ def test_the_committed_classification_covers_the_real_roster():
         "Hugh L. Carey Tunnel",
         "Queens Midtown Tunnel",
     ]
+
+
+def test_no_aggregate_puts_an_alias_in_its_group_clause(monkeypatch):
+    """SoQL rejects `expr as name` inside $group with a bare HTTP 400.
+
+    Local tests never see that, because only the live endpoint objects. This
+    checks the query shape instead, after a dispatched run failed on exactly it.
+    """
+    seen = []
+
+    def spy(select, group, where=None):
+        seen.append({"select": select, "group": group, "where": where})
+        return pd.DataFrame(
+            {"facility": ["Crossing A"], "month": ["2023-01-01T00:00:00.000"], "crossings": [1]}
+        )
+
+    monkeypatch.setattr(h11, "_fetch", spy)
+    h11.monthly_panel(_classification())
+
+    assert seen, "monthly_panel should have issued a query"
+    for query in seen:
+        assert " as " not in query["group"].lower(), f"alias leaked into $group: {query['group']}"
