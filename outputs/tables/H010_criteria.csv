@@ -1,0 +1,2 @@
+support_1_f_clears_bars,support_2_responders_concentrated,refute_1_f_below_floor,refute_2_f_negative_somewhere,refute_3_responders_absent,uninformative,counterfactual_spread,spread_threshold,spread_over,criterion_2_testable
+False,False,True,True,False,False,1.0507052277023325,2.0,loglinear/quadratic,True
