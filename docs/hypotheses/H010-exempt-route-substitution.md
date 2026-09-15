@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | proposed — **amended 2026-09-15 before execution, at the owner's direction. Original criteria retained below.** |
+| **Status** | answered — **refutes** (amended 2026-09-15 before execution; original criteria retained below) |
 | **Registered** | 2026-09-14 |
 | **Registered by** | Claude Opus 5, a session that did not write H008 or H009 and adjudicated them in [ADJUDICATION-timing.md](ADJUDICATION-timing.md) |
-| **Answered by** | |
+| **Answered by** | Claude Opus 5, 2026-09-15 — **the same session that registered and amended it**, at the owner's direction. See Verdict. |
 | **Supersedes / superseded by** | none. Claims a by-product flagged in [H009](H009-toll-timing-exempt-control.md) and claimed nowhere. |
 
 ## Question
@@ -288,11 +288,115 @@ is not used and is not affected.
 
 ## Result
 
-*Filled in after running.*
+Answered 2026-09-15. `python -m src.analysis.h010_route_substitution`, dispatched
+to a hosted runner. 435 weekday dates at the four dual-recording points.
+
+**The feed does populate `excluded_roadway_entries` at vehicle-class grain** —
+six classes, 3,493,839 exempt entries in the window — so criterion 2 was
+reachable on that count, which the Method required confirming rather than
+assuming.
+
+**The diversion share at 05:00**
+([H010_diversion_share.csv](../../outputs/tables/H010_diversion_share.csv)):
+
+| Counterfactual | Tolled deficit | Exempt surplus | f | 95% CI |
+|---|---:|---:|---:|---|
+| **log-linear (frozen)** | 1,300,899 | **−188,886** | **−0.145** | [−0.167, −0.122] |
+| flat (reported, not scored) | 501,476 | −1,115 | −0.002 | [−0.052, +0.057] |
+| quadratic | 1.58 × 10¹¹ | −2.18 × 10¹⁰ | −0.138 | [−4.28, −0.02] |
+
+**The exempt series has a deficit rather than a surplus.** It sits below its own
+counterfactual at 05:00, so there is no mass to attribute to diversion. That
+holds at all four detection points — Brooklyn Bridge −99,434, FDR −80,296, Carey
+Tunnel −7,340, West Side Highway −1,816 — and in both years.
+
+**The 21:00 mirror is uninformative.** Under both fitted counterfactuals the
+tolled deficit is negative there, so f is undefined and reported as such.
+
+**By vehicle class, and this points the other way**
+([H010_by_vehicle_class.csv](../../outputs/tables/H010_by_vehicle_class.csv)):
+cars show a *positive* surplus of 8,657 (f = +0.027) and motorcycles 100
+(f = +1.18), while taxis, trucks and buses are negative or negligible.
+
+**Criterion 2 could not be computed.** The baseline cars-and-motorcycles share
+of exempt volume is 0.854, below the 0.90 feasibility ceiling, so the gate
+declared the criterion testable. But the aggregate surplus is negative, so the
+responder *share of a surplus* is undefined and the implementation returned NaN
+while still reporting `testable: True`. That inconsistency is a defect, recorded
+below rather than resolved by picking a label.
 
 ## Verdict
 
-*Filled in after running.*
+**Refutes**, on criteria 1 and 2 as written after the amendment: f = −0.145 is
+below the 0.02 floor, and f is negative under both fitted counterfactuals.
+
+**The substantive finding, stated plainly: there is no route substitution to
+find.** Exempt-roadway entries do not gain vehicles at 05:00. Under the
+model-free flat counterfactual the exempt series is essentially unmoved — a
+deficit of 1,115 vehicles against a tolled deficit of 501,476, which is 0.2%.
+Whatever happens to the traffic the charge deters at 05:00, it does not appear
+on the toll-exempt roadways in the twenty minutes afterwards.
+
+**This withdraws a claim the study has been repeating.** H009 flagged the exempt
+rise as "the first direct evidence of route substitution this project has
+obtained from any source", and `docs/decision_register.md` and
+`docs/agent_handoff.md` both carry it. Counted in vehicles, it is not evidence of
+substitution at all. The README's position — that diversion is unidentified on
+every source — was the correct one.
+
+**Why this disagrees with H009's +0.0701, which is not a contradiction.** H009
+measured a log *jump at the boundary* from a ±60-minute local linear fit. This
+measures *counts against an extrapolated pre-boundary ramp across the three
+blocks after it*. A series can step up at the boundary and still fall below an
+extrapolated rising ramp over the following half hour. The two estimands differ,
+and the record chose counts because a substitution claim has to balance in
+vehicles.
+
+### Three defects in this record's own execution, recorded rather than smoothed
+
+**The log-linear counterfactual over-extrapolates the morning ramp, and most of
+the measured deficit is that rather than any drop.** The flat counterfactual puts
+the tolled deficit at 501,476 and the log-linear one at 1,300,899, so **62% of
+the frozen deficit comes from extrapolating the ramp forward**. This is the
+curvature problem [the adjudication](ADJUDICATION-timing.md) identified at 05:00,
+reaching the count estimator as well as the log one. A reader should treat the
+−0.145 as a ratio of two heavily model-dependent quantities.
+
+**The quadratic counterfactual produced nonsense and was still scored.** Its
+deficit is 1.58 × 10¹¹ vehicles — exponentiating a quadratic fit three blocks
+past a steep ramp. Refutation 2 fired on the log-linear estimate independently,
+so the verdict does not rest on it, but the spread check compared |f| values
+whose components differ by five orders of magnitude and passed at 1.05. **That
+check passed for the wrong reason** and should not be read as evidence the
+counterfactuals agree.
+
+**The per-class figures do not sum to the aggregate.** Per-class deficits total
+about 329,940 against an aggregate of 1,300,899, and per-class surpluses total
+about +8,078 against an aggregate of −188,886 — opposite in sign. Fitting
+log1p(total) and extrapolating is not the same as summing expm1 of per-class
+fits, and on a steep ramp the gap is large rather than a rounding effect. The
+aggregate is what the criteria scored; the class cut is not a decomposition of it
+and must not be read as one.
+
+**What that means for the verdict.** The criteria are applied as written and the
+verdict stands. A reader should nonetheless weigh that the refutation rides
+partly on the same over-extrapolation that inflates the deficit, and that the
+one cut least exposed to it — vehicle class — shows small positive surpluses in
+exactly the classes H008 found responsive. The flat counterfactual is the
+cleanest evidence here and it says the exempt series barely moves, which
+supports the same conclusion by a different route: **nothing to attribute.**
+
+**On who ran this.** The record's author registered it, amended it and ran it,
+which is the separation the protocol asks for and did not get. The mitigation is
+weaker than H011's, because these criteria have five conditions rather than one
+threshold. What is offered instead is the list above: every defect found is
+recorded, including the two that would have been easiest to leave out.
+
+**What a superseding record would need.** A counterfactual that does not
+extrapolate a ramp three blocks forward. The flat comparison is the honest one
+available today and it was excluded from scoring for the reason the amendment
+gives. Answering the substitution question properly needs a design whose
+counterfactual is credible at 05:00, and that is a different record.
 
 ## Notes
 

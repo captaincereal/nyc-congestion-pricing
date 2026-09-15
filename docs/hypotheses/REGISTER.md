@@ -370,3 +370,48 @@ no label to choose, but a reader is entitled to the fact.
 
 Eleven hypotheses are registered, ten answered. H010 remains implemented and
 unrun.
+
+### H010 answered, 2026-09-15
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H010](H010-exempt-route-substitution.md) | Do drivers move onto toll-exempt roadways as the peak charge begins? | answered | 2026-09-14 | **Refutes**: f = −0.145 against a 0.02 floor, and negative under both fitted counterfactuals. The exempt series sits *below* its counterfactual at all four points; under the model-free flat comparison it barely moves at all |
+
+Supersedes the row above.
+
+**A claim this project has been repeating is withdrawn.** H009 flagged the
+exempt rise at 05:00 as "the first direct evidence of route substitution this
+project has obtained from any source", and both `docs/decision_register.md` and
+`docs/agent_handoff.md` carry it. Counted in vehicles it is not evidence of
+substitution: exempt entries gain nothing at 05:00, and under the flat
+counterfactual the exempt series moves by 1,115 vehicles against a tolled
+deficit of 501,476 — two tenths of one percent. **The README's position, that
+diversion is unidentified on every source available, was the correct one.**
+
+This does not contradict H009's +0.0701. That was a log jump at the boundary
+from a ±60-minute fit; this is counts against an extrapolated ramp across the
+three blocks after it. A series can step up at the boundary and still fall below
+the extrapolation. The record chose counts because a substitution claim has to
+balance in vehicles, and this is why.
+
+**Three defects in the execution are recorded in the record rather than
+smoothed.** The log-linear counterfactual over-extrapolates the morning ramp, so
+62% of the frozen deficit is extrapolation rather than any drop. The quadratic
+counterfactual returned 1.58 × 10¹¹ vehicles and was still scored, and the
+spread check passed at 1.05 comparing quantities five orders of magnitude apart
+— **it passed for the wrong reason**. And the per-class figures do not sum to the
+aggregate, opposite in sign on the surplus, because fitting log1p of a total is
+not the same as summing per-class fits.
+
+The verdict stands on the criteria as written. A reader should weigh that the
+refutation rides partly on the same over-extrapolation, and that the cut least
+exposed to it shows small positive surpluses in exactly the classes H008 found
+responsive. The flat comparison is the cleanest evidence available and points
+the same way for a different reason: nothing to attribute.
+
+**Disclosure.** The record's author registered it, amended it and ran it. That
+is weaker than H011's mitigation, because these criteria carry five conditions
+rather than one threshold. What is offered instead is the defect list above,
+including the two items easiest to have left out.
+
+Eleven hypotheses are registered and **all eleven are answered**.
