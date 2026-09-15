@@ -1,0 +1,20 @@
+facility,facility_id,direction,row_count,crossings,earliest,latest
+Bronx - Whitestone Bridge,23,Northbound to Bronx,979613,180847222,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Bronx - Whitestone Bridge,23,Southbound to Queens,996665,192147960,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Cross Bay Bridge,26,Northbound,554977,31776249,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Cross Bay Bridge,26,Southbound,585530,28767471,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Henry Hudson Bridge,24,Northbound to Bronx,340986,82111180,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Henry Hudson Bridge,24,Southbound to Manhattan,363306,103206225,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Hugh L. Carey Tunnel,28,Northbound to Manhattan,527387,79984128,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Hugh L. Carey Tunnel,28,Southbound to Brooklyn,518871,77568626,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Marine Parkway Bridge,25,Northbound to Brooklyn,457344,29571134,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Marine Parkway Bridge,25,Southbound to Queens,442826,30871289,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Queens Midtown Tunnel,27,Eastbound to Queens,641427,101737128,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Queens Midtown Tunnel,27,Westbound to Manhattan,624011,115215117,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Robert F. Kennedy Bridge Bronx,21,Northbound to Manhattan or Bronx,958685,217003185,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Robert F. Kennedy Bridge Bronx,21,Southbound to Manhattan or Queens,943786,163875771,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Robert F. Kennedy Bridge Manhattan,22,Eastbound to Bronx or Queens,717311,118499758,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Throgs Neck Bridge,29,Northbound to Bronx,997318,152918141,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Throgs Neck Bridge,29,Southbound to Queens,1002177,167698002,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
+Verrazzano - Narrows Bridge,30,Eastbound to Brooklyn,790143,230723516,2020-12-01T00:00:00.000,2026-09-01T00:00:00.000
+Verrazzano - Narrows Bridge,30,Westbound to Staten Island,1072392,292914136,2019-01-01T00:00:00.000,2026-09-01T00:00:00.000
