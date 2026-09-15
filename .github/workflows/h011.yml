@@ -44,4 +44,4 @@ jobs:
           NYC_OPENDATA_APP_TOKEN: ${{ secrets.NYC_OPENDATA_APP_TOKEN }}
         run: >-
           python -m scripts.run_h011 --stage ${{ inputs.stage }}
-          ${{ inputs.direction && format("--direction {0}", inputs.direction) || '' }}
+          ${{ inputs.direction && format('--direction {0}', inputs.direction) || '' }}
