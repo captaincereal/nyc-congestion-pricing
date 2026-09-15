@@ -5,9 +5,114 @@
 Compiled 2026-09-09, updated 2026-09-14 · treatment date 2025-01-05 ·
 Validation details are recorded in the latest dated entry below.
 
-All six open decisions were resolved on 2026-09-14; that entry is the third
+All six open decisions were resolved on 2026-09-14; that entry is the fourth
 below. Earlier entries are historical and are superseded where the latest audit
 says so.
+
+## Update 2026-09-15 — H010 has a hosted path, and its frozen criteria cannot be satisfied
+
+The owner asked for a hosted path so H010 could run on Actions rather than on a
+machine someone has to leave on. It is built. Building it surfaced a defect in
+the record's own acceptance criteria, found before any result exists, and that
+is the part worth reading.
+
+### The defect
+
+H010's Method names three counterfactuals and calls the flat one — the last
+pre-boundary block, held level — "the model-free floor", on the reasoning that
+"it cannot manufacture a deficit out of a ramp, and it will understate both D
+and S".
+
+**It does the opposite, and the direction matters.** Holding the last
+pre-boundary block level puts the counterfactual *below* a rising series, which
+shrinks the measured deficit and inflates the measured surplus. Both biases push
+f the same way. On a fixture planting a deficit of 2,000 and a surplus of 200 per
+block on a realistic morning ramp:
+
+| Counterfactual | Deficit (true 6,000) | Surplus (true 600) | f (true 0.100) |
+|---|---:|---:|---:|
+| loglinear | 6,000.0 | 600.0 | **0.1000** |
+| quadratic | 6,000.0 | 600.0 | **0.1000** |
+| flat | **−2,098.2** | **8,698.2** | **undefined** |
+
+The two fitted counterfactuals recover the planted truth exactly. The flat one
+returns a **negative** deficit and a surplus fourteen times the truth.
+
+### What that does to the criteria
+
+Support criterion 1 requires f ≥ 0.05 under the frozen counterfactual **and**
+≥ 0.02 under the flat one. At 05:00 the entries series rises steeply — that is
+the whole reason the adjudication demoted the 05:00 estimate — so the flat
+deficit is negative and f under it is undefined. **The second conjunct cannot be
+satisfied by a true effect of any size, so support is unreachable.**
+
+Refutation criterion 2 fires when "f is negative under any of the three
+counterfactuals". A negative deficit against a positive surplus is a negative
+ratio, so as written **that condition fires automatically**, before any data is
+consulted.
+
+Taken together the record would return "refutes" mechanically, whatever the
+answer is. The implementation returns `NaN` rather than a negative number when
+the deficit is not positive, on the ground that dividing by a negative deficit
+is meaningless — so the code and the record's words disagree, and that
+disagreement is disclosed here rather than resolved quietly in either direction.
+
+### The pattern, stated plainly
+
+This is the fourth criteria failure of the same family in this project, after
+H008's maximum over a contaminated placebo set, H009's demand for a significant
+zero, and the placebo bar the adjudication found computed on levels when the
+estimand was a difference.
+
+**It was written by the same session that diagnosed the first three, in the
+document that diagnosed them.** The handoff's instruction — state criteria as
+magnitudes and check that a true effect of the expected size could satisfy them
+before freezing — was followed for the magnitudes and not for the check. A bar
+was set on a statistic whose behaviour had not been measured.
+
+The cheap lesson is that the rule needs a mechanical step rather than an
+intention: before freezing a criterion, plant a true effect of the expected size
+in a fixture and confirm the criterion passes. That check takes minutes and
+would have caught all four.
+
+### Not amended here
+
+No result exists, so a prospective amendment is available and precedented — the
+2026-09-12 H003 amendment was made before execution, at the owner's direction,
+with the original text retained. **This session has not made one**, because it
+wrote the criteria it would be amending and the weaker reading of an author
+loosening their own frozen bar is one the record should not have to carry.
+
+The recommendation, for the owner to accept or reject: drop the flat
+counterfactual from support criterion 1 and from refutation criterion 2, keeping
+it as a reported diagnostic. The spread condition already in the criteria — f
+moving by more than a factor of two across the three counterfactuals makes the
+result uninformative — was written to stop a ramp artefact carrying the finding,
+and it does that job without resting on a statistic that inverts.
+
+**Until that is settled, H010 should not be dispatched.** Running it now
+produces a mechanically determined refutation that means nothing.
+
+### What was built
+
+`src/analysis/h010_route_substitution.py` implements the record's Method as
+written, including the flat counterfactual, so the code embodies no correction
+the record has not made. Eleven tests in
+`tests/test_h010_route_substitution.py` plant known deficits and surpluses and
+check f comes back exactly; one is a characterisation test pinning the flat
+counterfactual's inversion so it cannot quietly disappear.
+
+`scripts/run_h010.py` and `.github/workflows/h010.yml` run it on a hosted
+runner. The workflow is **`workflow_dispatch` only**, deliberately: `analysis.yml`
+fires on every backfill completion and on pushes under `src/analysis/`, and a
+pre-registered hypothesis re-answered on every push is a fresh draw each time.
+The script also refuses to overwrite existing H010 artefacts without an explicit
+`--allow-rerun`, because a silent second run would replace what an answered
+record cites with nothing in the diff to show a second draw was taken.
+
+Suite is 284 tests, ruff and black clean. Nothing has been run against the MTA
+feed: the session that built this cannot reach `data.ny.gov`, and in any case
+wrote the record, so execution and the Verdict belong elsewhere.
 
 ## Update 2026-09-14 (later still) — `main` is an orphan history, and four hypotheses have no commit-order evidence on it
 

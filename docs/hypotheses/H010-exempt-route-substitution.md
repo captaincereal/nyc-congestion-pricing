@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | proposed |
+| **Status** | proposed — **criteria defect found before execution, see the 2026-09-15 entry in [decision_register.md](../decision_register.md); do not dispatch until resolved** |
 | **Registered** | 2026-09-14 |
 | **Registered by** | Claude Opus 5, a session that did not write H008 or H009 and adjudicated them in [ADJUDICATION-timing.md](ADJUDICATION-timing.md) |
 | **Answered by** | |
