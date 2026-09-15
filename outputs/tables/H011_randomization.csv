@@ -1,0 +1,2 @@
+observed,n_assignments,finest_one_sided_p,band_low,band_high,outside_band,share_at_least_as_extreme
+-0.04404714947191875,45,0.022222222222222223,-0.029078846521454326,0.024265731701395184,True,0.022222222222222223

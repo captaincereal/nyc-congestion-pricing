@@ -1,0 +1,441 @@
+facility,month,crossings,is_crz_entry,log_crossings,post
+Bronx - Whitestone Bridge,2023-01,3955925,False,15.190725265786387,False
+Bronx - Whitestone Bridge,2023-02,3628837,False,15.104423044801992,False
+Bronx - Whitestone Bridge,2023-03,4194372,False,15.249254423065441,False
+Bronx - Whitestone Bridge,2023-04,4136656,False,15.235398531684808,False
+Bronx - Whitestone Bridge,2023-05,4384006,False,15.293473704324041,False
+Bronx - Whitestone Bridge,2023-06,4337982,False,15.282920051504663,False
+Bronx - Whitestone Bridge,2023-07,4470059,False,15.312912389318459,False
+Bronx - Whitestone Bridge,2023-08,4532557,False,15.326797017999208,False
+Bronx - Whitestone Bridge,2023-09,4194281,False,15.2492327270963,False
+Bronx - Whitestone Bridge,2023-10,4299767,False,15.274071625719877,False
+Bronx - Whitestone Bridge,2023-11,4129600,False,15.233691350100662,False
+Bronx - Whitestone Bridge,2023-12,4090654,False,15.224215661896137,False
+Bronx - Whitestone Bridge,2024-01,3747875,False,15.136699837481519,False
+Bronx - Whitestone Bridge,2024-02,3687034,False,15.12033316998381,False
+Bronx - Whitestone Bridge,2024-03,4151120,False,15.23888897621284,False
+Bronx - Whitestone Bridge,2024-04,4109154,False,15.228727969227585,False
+Bronx - Whitestone Bridge,2024-05,4296677,False,15.273352723947427,False
+Bronx - Whitestone Bridge,2024-06,4316456,False,15.27794548483351,False
+Bronx - Whitestone Bridge,2024-07,4412543,False,15.299961951845361,False
+Bronx - Whitestone Bridge,2024-08,4487206,False,15.316741017167915,False
+Bronx - Whitestone Bridge,2024-09,4210276,False,15.253038999218585,False
+Bronx - Whitestone Bridge,2024-10,4378281,False,15.29216696796448,False
+Bronx - Whitestone Bridge,2024-11,4034621,False,15.210423175000516,False
+Bronx - Whitestone Bridge,2024-12,4062424,False,15.217290643911252,False
+Bronx - Whitestone Bridge,2025-02,3487317,False,15.064643517370074,True
+Bronx - Whitestone Bridge,2025-03,4121798,False,15.231800276507064,True
+Bronx - Whitestone Bridge,2025-04,4172965,False,15.244137611924874,True
+Bronx - Whitestone Bridge,2025-05,4460628,False,15.31080034544239,True
+Bronx - Whitestone Bridge,2025-06,4477520,False,15.314580103023259,True
+Bronx - Whitestone Bridge,2025-07,4615850,False,15.345006807619631,True
+Bronx - Whitestone Bridge,2025-08,4697980,False,15.362643399918658,True
+Bronx - Whitestone Bridge,2025-09,4289356,False,15.27164739622067,True
+Bronx - Whitestone Bridge,2025-10,4320684,False,15.278924512465036,True
+Bronx - Whitestone Bridge,2025-11,4191544,False,15.248579959015778,True
+Bronx - Whitestone Bridge,2025-12,4077606,False,15.22102085470259,True
+Bronx - Whitestone Bridge,2026-01,3675046,False,15.11707647966294,True
+Bronx - Whitestone Bridge,2026-02,3352474,False,15.025209436988614,True
+Bronx - Whitestone Bridge,2026-03,4156329,False,15.24014303132136,True
+Bronx - Whitestone Bridge,2026-04,4208504,False,15.252618035704822,True
+Bronx - Whitestone Bridge,2026-05,4458411,False,15.310303206782379,True
+Bronx - Whitestone Bridge,2026-06,4436391,False,15.30535199144719,True
+Bronx - Whitestone Bridge,2026-07,4435691,False,15.305194193121238,True
+Bronx - Whitestone Bridge,2026-08,4480169,False,15.315171550099793,True
+Bronx - Whitestone Bridge,2026-09,138753,False,11.840457860021967,True
+Cross Bay Bridge,2023-01,595627,False,13.297371590104047,False
+Cross Bay Bridge,2023-02,536608,False,13.193024989102856,False
+Cross Bay Bridge,2023-03,644800,False,13.376697021041839,False
+Cross Bay Bridge,2023-04,607087,False,13.316429034822036,False
+Cross Bay Bridge,2023-05,710488,False,13.473708744344552,False
+Cross Bay Bridge,2023-06,705167,False,13.466191351278319,False
+Cross Bay Bridge,2023-07,775153,False,13.56081699827275,False
+Cross Bay Bridge,2023-08,709856,False,13.472818820281388,False
+Cross Bay Bridge,2023-09,650736,False,13.385860845707596,False
+Cross Bay Bridge,2023-10,647766,False,13.381286342773139,False
+Cross Bay Bridge,2023-11,600012,False,13.304706600630231,False
+Cross Bay Bridge,2023-12,600793,False,13.306007392697774,False
+Cross Bay Bridge,2024-01,575388,False,13.262801612780944,False
+Cross Bay Bridge,2024-02,551703,False,13.22076694955144,False
+Cross Bay Bridge,2024-03,622716,False,13.341847440953606,False
+Cross Bay Bridge,2024-04,604362,False,13.311930289770242,False
+Cross Bay Bridge,2024-05,696526,False,13.45386183670549,False
+Cross Bay Bridge,2024-06,755004,False,13.534479650725789,False
+Cross Bay Bridge,2024-07,749086,False,13.526610410627066,False
+Cross Bay Bridge,2024-08,706653,False,13.468296433291137,False
+Cross Bay Bridge,2024-09,656911,False,13.395305346334355,False
+Cross Bay Bridge,2024-10,657062,False,13.395535183280515,False
+Cross Bay Bridge,2024-11,596084,False,13.298138553328249,False
+Cross Bay Bridge,2024-12,602580,False,13.308977375144748,False
+Cross Bay Bridge,2025-02,556894,False,13.230131991264875,True
+Cross Bay Bridge,2025-03,658989,False,13.398463638862681,True
+Cross Bay Bridge,2025-04,647469,False,13.380827739436135,True
+Cross Bay Bridge,2025-05,691988,False,13.447325338519708,True
+Cross Bay Bridge,2025-06,736191,False,13.509246233255682,True
+Cross Bay Bridge,2025-07,764258,False,13.546662015934968,True
+Cross Bay Bridge,2025-08,723501,False,13.491858589389869,True
+Cross Bay Bridge,2025-09,641985,False,13.372321775580742,True
+Cross Bay Bridge,2025-10,634359,False,13.360371895612538,True
+Cross Bay Bridge,2025-11,579737,False,13.270331556326587,True
+Cross Bay Bridge,2025-12,589371,False,13.286812842219046,True
+Cross Bay Bridge,2026-01,539751,False,13.198865053789364,True
+Cross Bay Bridge,2026-02,483274,False,13.088341128789892,True
+Cross Bay Bridge,2026-03,614676,False,13.328852205569085,True
+Cross Bay Bridge,2026-04,604514,False,13.312181762624906,True
+Cross Bay Bridge,2026-05,662226,False,13.403363676444387,True
+Cross Bay Bridge,2026-06,722655,False,13.490688592617031,True
+Cross Bay Bridge,2026-07,734909,False,13.507503321717893,True
+Cross Bay Bridge,2026-08,705663,False,13.4668944825093,True
+Cross Bay Bridge,2026-09,19346,False,9.870292647678488,True
+Henry Hudson Bridge,2023-01,1898517,False,14.456584139778393,False
+Henry Hudson Bridge,2023-02,1784254,False,14.394511519127272,False
+Henry Hudson Bridge,2023-03,2122012,False,14.567875724433247,False
+Henry Hudson Bridge,2023-04,2112619,False,14.563439441333866,False
+Henry Hudson Bridge,2023-05,2338503,False,14.665021966644797,False
+Henry Hudson Bridge,2023-06,2251566,False,14.627136976220156,False
+Henry Hudson Bridge,2023-07,2106143,False,14.560369345406897,False
+Henry Hudson Bridge,2023-08,2161092,False,14.58612467019467,False
+Henry Hudson Bridge,2023-09,2062885,False,14.539616531195465,False
+Henry Hudson Bridge,2023-10,2242503,False,14.62310365663702,False
+Henry Hudson Bridge,2023-11,2144535,False,14.578433769928036,False
+Henry Hudson Bridge,2023-12,2057460,False,14.536983256311185,False
+Henry Hudson Bridge,2024-01,1774240,False,14.388883283808491,False
+Henry Hudson Bridge,2024-02,1856979,False,14.43446207021761,False
+Henry Hudson Bridge,2024-03,2109414,False,14.5619212158262,False
+Henry Hudson Bridge,2024-04,2156252,False,14.583882551065187,False
+Henry Hudson Bridge,2024-05,2299429,False,14.648171824098462,False
+Henry Hudson Bridge,2024-06,2205171,False,14.606316068356035,False
+Henry Hudson Bridge,2024-07,2087241,False,14.551354135254556,False
+Henry Hudson Bridge,2024-08,2115307,False,14.56471098633755,False
+Henry Hudson Bridge,2024-09,2176852,False,14.593390813821074,False
+Henry Hudson Bridge,2024-10,2288404,False,14.643365626306828,False
+Henry Hudson Bridge,2024-11,2099641,False,14.557277411970459,False
+Henry Hudson Bridge,2024-12,2074249,False,14.545110200526532,False
+Henry Hudson Bridge,2025-02,1696486,False,14.344070200341813,True
+Henry Hudson Bridge,2025-03,2075498,False,14.545712164663502,True
+Henry Hudson Bridge,2025-04,2139110,False,14.57590088012626,True
+Henry Hudson Bridge,2025-05,2319572,False,14.656893674978758,True
+Henry Hudson Bridge,2025-06,2220859,False,14.613405066220729,True
+Henry Hudson Bridge,2025-07,2167775,False,14.589212315170478,True
+Henry Hudson Bridge,2025-08,2213881,False,14.610258093630735,True
+Henry Hudson Bridge,2025-09,2215710,False,14.61108390318206,True
+Henry Hudson Bridge,2025-10,2270620,False,14.635563920326545,True
+Henry Hudson Bridge,2025-11,2130930,False,14.572069531391826,True
+Henry Hudson Bridge,2025-12,2059411,False,14.537931063127697,True
+Henry Hudson Bridge,2026-01,1765406,False,14.383891816667466,True
+Henry Hudson Bridge,2026-02,1622810,False,14.299670388699147,True
+Henry Hudson Bridge,2026-03,2069434,False,14.542786181124875,True
+Henry Hudson Bridge,2026-04,2118769,False,14.56634628959437,True
+Henry Hudson Bridge,2026-05,2295146,False,14.646307451713104,True
+Henry Hudson Bridge,2026-06,2263156,False,14.63227129914248,True
+Henry Hudson Bridge,2026-07,2138714,False,14.575715739355632,True
+Henry Hudson Bridge,2026-08,2148999,False,14.580513175624647,True
+Henry Hudson Bridge,2026-09,66156,False,11.099785984050369,True
+Hugh L. Carey Tunnel,2023-01,1758078,True,14.3797322936465,False
+Hugh L. Carey Tunnel,2023-02,1675622,True,14.331695594387165,False
+Hugh L. Carey Tunnel,2023-03,1955677,True,14.486247494348373,False
+Hugh L. Carey Tunnel,2023-04,1846586,True,14.428849628330543,False
+Hugh L. Carey Tunnel,2023-05,1986983,True,14.502128469161322,False
+Hugh L. Carey Tunnel,2023-06,1959924,True,14.488416765168441,False
+Hugh L. Carey Tunnel,2023-07,1859815,True,14.435988116064827,False
+Hugh L. Carey Tunnel,2023-08,1964228,True,14.490610359877444,False
+Hugh L. Carey Tunnel,2023-09,1905058,True,14.460023537191951,False
+Hugh L. Carey Tunnel,2023-10,2040849,True,14.528876945705615,False
+Hugh L. Carey Tunnel,2023-11,1904831,True,14.459904373677684,False
+Hugh L. Carey Tunnel,2023-12,1915685,True,14.465586340992871,False
+Hugh L. Carey Tunnel,2024-01,1751681,True,14.376087027154798,False
+Hugh L. Carey Tunnel,2024-02,1734099,True,14.36599910478664,False
+Hugh L. Carey Tunnel,2024-03,1954194,True,14.485488901897355,False
+Hugh L. Carey Tunnel,2024-04,1851839,True,14.431690297367611,False
+Hugh L. Carey Tunnel,2024-05,2025715,True,14.521433776274925,False
+Hugh L. Carey Tunnel,2024-06,1906169,True,14.460606551244096,False
+Hugh L. Carey Tunnel,2024-07,1849057,True,14.43018687818448,False
+Hugh L. Carey Tunnel,2024-08,1872457,True,14.442762564215416,False
+Hugh L. Carey Tunnel,2024-09,1909338,True,14.4622676668272,False
+Hugh L. Carey Tunnel,2024-10,1977099,True,14.497141682562972,False
+Hugh L. Carey Tunnel,2024-11,1859379,True,14.435753656788146,False
+Hugh L. Carey Tunnel,2024-12,1935051,True,14.475644757469949,False
+Hugh L. Carey Tunnel,2025-02,1580357,True,14.273161961615743,True
+Hugh L. Carey Tunnel,2025-03,1854318,True,14.433028070717167,True
+Hugh L. Carey Tunnel,2025-04,1801103,True,14.40391036818771,True
+Hugh L. Carey Tunnel,2025-05,1932344,True,14.474244849241192,True
+Hugh L. Carey Tunnel,2025-06,1848370,True,14.429815268610419,True
+Hugh L. Carey Tunnel,2025-07,1859513,True,14.435825721224539,True
+Hugh L. Carey Tunnel,2025-08,1900452,True,14.457602836771517,True
+Hugh L. Carey Tunnel,2025-09,1883471,True,14.448627440062667,True
+Hugh L. Carey Tunnel,2025-10,1944875,True,14.480708779788994,True
+Hugh L. Carey Tunnel,2025-11,1875752,True,14.444520736766952,True
+Hugh L. Carey Tunnel,2025-12,1867874,True,14.440311979043694,True
+Hugh L. Carey Tunnel,2026-01,1607442,True,14.290155275678298,True
+Hugh L. Carey Tunnel,2026-02,1489700,True,14.214085986643555,True
+Hugh L. Carey Tunnel,2026-03,1858949,True,14.43552237016113,True
+Hugh L. Carey Tunnel,2026-04,1795268,True,14.400665429400753,True
+Hugh L. Carey Tunnel,2026-05,1877188,True,14.445286003094052,True
+Hugh L. Carey Tunnel,2026-06,1856727,True,14.434326356801053,True
+Hugh L. Carey Tunnel,2026-07,1794786,True,14.400396909910866,True
+Hugh L. Carey Tunnel,2026-08,1717039,True,14.356112436055547,True
+Hugh L. Carey Tunnel,2026-09,62202,True,11.038158509075423,True
+Marine Parkway Bridge,2023-01,575297,False,13.26264344639827,False
+Marine Parkway Bridge,2023-02,518594,False,13.158878510698148,False
+Marine Parkway Bridge,2023-03,627136,False,13.348920296544684,False
+Marine Parkway Bridge,2023-04,587376,False,13.283422141379102,False
+Marine Parkway Bridge,2023-05,724055,False,13.492624016442944,False
+Marine Parkway Bridge,2023-06,741208,False,13.51603791579129,False
+Marine Parkway Bridge,2023-07,834529,False,13.634623971108315,False
+Marine Parkway Bridge,2023-08,787601,False,13.576748165103965,False
+Marine Parkway Bridge,2023-09,674036,False,13.42104028453014,False
+Marine Parkway Bridge,2023-10,653695,False,13.39039769056726,False
+Marine Parkway Bridge,2023-11,612373,False,13.32509848595322,False
+Marine Parkway Bridge,2023-12,612292,False,13.32496620509627,False
+Marine Parkway Bridge,2024-01,562688,False,13.240482356625353,False
+Marine Parkway Bridge,2024-02,525048,False,13.17124687055181,False
+Marine Parkway Bridge,2024-03,618887,False,13.335679598300507,False
+Marine Parkway Bridge,2024-04,598519,False,13.302215220297356,False
+Marine Parkway Bridge,2024-05,717510,False,13.483543557508847,False
+Marine Parkway Bridge,2024-06,794380,False,13.58531847400512,False
+Marine Parkway Bridge,2024-07,816515,False,13.612801787036545,False
+Marine Parkway Bridge,2024-08,774494,False,13.5599664830403,False
+Marine Parkway Bridge,2024-09,690873,False,13.445712741694676,False
+Marine Parkway Bridge,2024-10,661508,False,13.402278867886771,False
+Marine Parkway Bridge,2024-11,617191,False,13.33293543762434,False
+Marine Parkway Bridge,2024-12,616502,False,13.331818467754745,False
+Marine Parkway Bridge,2025-02,520994,False,13.163495723760471,True
+Marine Parkway Bridge,2025-03,629796,False,13.353152824220759,True
+Marine Parkway Bridge,2025-04,631505,False,13.355862721915196,True
+Marine Parkway Bridge,2025-05,721256,False,13.488750802129967,True
+Marine Parkway Bridge,2025-06,783572,False,13.571619508103606,True
+Marine Parkway Bridge,2025-07,858381,False,13.66280450083366,True
+Marine Parkway Bridge,2025-08,824307,False,13.62229952545864,True
+Marine Parkway Bridge,2025-09,679697,False,13.42940386085578,True
+Marine Parkway Bridge,2025-10,650010,False,13.38474456480555,True
+Marine Parkway Bridge,2025-11,619364,False,13.336450038628282,True
+Marine Parkway Bridge,2025-12,618955,False,13.335789466749308,True
+Marine Parkway Bridge,2026-01,546565,False,13.21141034783379,True
+Marine Parkway Bridge,2026-02,488849,False,13.099810972933817,True
+Marine Parkway Bridge,2026-03,630490,False,13.354254159899822,True
+Marine Parkway Bridge,2026-04,612169,False,13.324765300699138,True
+Marine Parkway Bridge,2026-05,694073,False,13.45033386204663,True
+Marine Parkway Bridge,2026-06,800924,False,13.593522588707856,True
+Marine Parkway Bridge,2026-07,816207,False,13.612424503425043,True
+Marine Parkway Bridge,2026-08,799495,False,13.591736808116677,True
+Marine Parkway Bridge,2026-09,22013,False,9.999433893583337,True
+Queens Midtown Tunnel,2023-01,2348528,True,14.669299732680377,False
+Queens Midtown Tunnel,2023-02,2230356,True,14.617672220309414,False
+Queens Midtown Tunnel,2023-03,2591236,True,14.767645925835799,False
+Queens Midtown Tunnel,2023-04,2511063,True,14.736217125668357,False
+Queens Midtown Tunnel,2023-05,2667287,True,14.796572783835716,False
+Queens Midtown Tunnel,2023-06,2619406,True,14.778458514241587,False
+Queens Midtown Tunnel,2023-07,2568026,True,14.758648457755408,False
+Queens Midtown Tunnel,2023-08,2636298,True,14.784886597610447,False
+Queens Midtown Tunnel,2023-09,2568045,True,14.758655856404143,False
+Queens Midtown Tunnel,2023-10,2736702,True,14.822264469164452,False
+Queens Midtown Tunnel,2023-11,2534048,True,14.745328976692837,False
+Queens Midtown Tunnel,2023-12,2492856,True,14.728940000250805,False
+Queens Midtown Tunnel,2024-01,2331876,True,14.662184080636099,False
+Queens Midtown Tunnel,2024-02,2324496,True,14.659014229511815,False
+Queens Midtown Tunnel,2024-03,2578278,True,14.762632680054551,False
+Queens Midtown Tunnel,2024-04,2518541,True,14.739190720622,False
+Queens Midtown Tunnel,2024-05,2703144,True,14.80992646791894,False
+Queens Midtown Tunnel,2024-06,2614085,True,14.776425072395586,False
+Queens Midtown Tunnel,2024-07,2539793,True,14.74759353334354,False
+Queens Midtown Tunnel,2024-08,2559922,True,14.75548773787839,False
+Queens Midtown Tunnel,2024-09,2545459,True,14.749821938195954,False
+Queens Midtown Tunnel,2024-10,2706598,True,14.811203423157245,False
+Queens Midtown Tunnel,2024-11,2494419,True,14.729566795213737,False
+Queens Midtown Tunnel,2024-12,2516451,True,14.738360530905771,False
+Queens Midtown Tunnel,2025-02,2104183,True,14.559438301487475,True
+Queens Midtown Tunnel,2025-03,2443446,True,14.708920305258625,True
+Queens Midtown Tunnel,2025-04,2494689,True,14.729675030951277,True
+Queens Midtown Tunnel,2025-05,2700885,True,14.809090425293878,True
+Queens Midtown Tunnel,2025-06,2593525,True,14.768528897785998,True
+Queens Midtown Tunnel,2025-07,2591892,True,14.767899054738027,True
+Queens Midtown Tunnel,2025-08,2639504,True,14.786101957542176,True
+Queens Midtown Tunnel,2025-09,2630605,True,14.78272479586269,True
+Queens Midtown Tunnel,2025-10,2692753,True,14.806075019682158,True
+Queens Midtown Tunnel,2025-11,2506434,True,14.734371982774135,True
+Queens Midtown Tunnel,2025-12,2444081,True,14.70918015026561,True
+Queens Midtown Tunnel,2026-01,2208339,True,14.607751660031818,True
+Queens Midtown Tunnel,2026-02,2016940,True,14.517092565145107,True
+Queens Midtown Tunnel,2026-03,2475590,True,14.721989713358427,True
+Queens Midtown Tunnel,2026-04,2400735,True,14.69128591497223,True
+Queens Midtown Tunnel,2026-05,2564621,True,14.75732165730616,True
+Queens Midtown Tunnel,2026-06,2499234,True,14.731495243010876,True
+Queens Midtown Tunnel,2026-07,2518073,True,14.739004881558094,True
+Queens Midtown Tunnel,2026-08,2488818,True,14.727318858737645,True
+Queens Midtown Tunnel,2026-09,78994,True,11.27713983830695,True
+Robert F. Kennedy Bridge Bronx,2023-01,3937363,False,15.186022021836978,False
+Robert F. Kennedy Bridge Bronx,2023-02,3661539,False,15.11339438190809,False
+Robert F. Kennedy Bridge Bronx,2023-03,4309881,False,15.276421083514887,False
+Robert F. Kennedy Bridge Bronx,2023-04,4233680,False,15.258582385372808,False
+Robert F. Kennedy Bridge Bronx,2023-05,4637602,False,15.349708195893772,False
+Robert F. Kennedy Bridge Bronx,2023-06,4509783,False,15.321759816762082,False
+Robert F. Kennedy Bridge Bronx,2023-07,4475763,False,15.314187621376007,False
+Robert F. Kennedy Bridge Bronx,2023-08,4587243,False,15.338789965973158,False
+Robert F. Kennedy Bridge Bronx,2023-09,4302540,False,15.274716336365833,False
+Robert F. Kennedy Bridge Bronx,2023-10,4488718,False,15.317077918344307,False
+Robert F. Kennedy Bridge Bronx,2023-11,4318478,False,15.27841381489107,False
+Robert F. Kennedy Bridge Bronx,2023-12,4291216,False,15.272080933657474,False
+Robert F. Kennedy Bridge Bronx,2024-01,4005767,False,15.203245880400566,False
+Robert F. Kennedy Bridge Bronx,2024-02,3918674,False,15.181264144424238,False
+Robert F. Kennedy Bridge Bronx,2024-03,4351102,False,15.285939934141538,False
+Robert F. Kennedy Bridge Bronx,2024-04,4306212,False,15.275569421544638,False
+Robert F. Kennedy Bridge Bronx,2024-05,4609422,False,15.343613244449523,False
+Robert F. Kennedy Bridge Bronx,2024-06,4560809,False,15.333010797294895,False
+Robert F. Kennedy Bridge Bronx,2024-07,4511733,False,15.322192116521473,False
+Robert F. Kennedy Bridge Bronx,2024-08,4590742,False,15.339552442574949,False
+Robert F. Kennedy Bridge Bronx,2024-09,4432469,False,15.304467548718087,False
+Robert F. Kennedy Bridge Bronx,2024-10,4557003,False,15.332175948016097,False
+Robert F. Kennedy Bridge Bronx,2024-11,4293586,False,15.272633072077921,False
+Robert F. Kennedy Bridge Bronx,2024-12,4368824,False,15.290004652198874,False
+Robert F. Kennedy Bridge Bronx,2025-02,3731359,False,15.13228333642552,True
+Robert F. Kennedy Bridge Bronx,2025-03,4425019,False,15.302785356187965,True
+Robert F. Kennedy Bridge Bronx,2025-04,4409773,False,15.299333998944315,True
+Robert F. Kennedy Bridge Bronx,2025-05,4631776,False,15.348451153725435,True
+Robert F. Kennedy Bridge Bronx,2025-06,4497216,False,15.318969318980455,True
+Robert F. Kennedy Bridge Bronx,2025-07,4588104,False,15.338977642758538,True
+Robert F. Kennedy Bridge Bronx,2025-08,4681506,False,15.359130624607213,True
+Robert F. Kennedy Bridge Bronx,2025-09,4447663,False,15.307889572490954,True
+Robert F. Kennedy Bridge Bronx,2025-10,4516796,False,15.323313672294105,True
+Robert F. Kennedy Bridge Bronx,2025-11,4310246,False,15.276505769022544,True
+Robert F. Kennedy Bridge Bronx,2025-12,4279494,False,15.26934556994233,True
+Robert F. Kennedy Bridge Bronx,2026-01,3865070,False,15.167490609821996,True
+Robert F. Kennedy Bridge Bronx,2026-02,3572562,False,15.088793823340257,True
+Robert F. Kennedy Bridge Bronx,2026-03,4415372,False,15.300602873162777,True
+Robert F. Kennedy Bridge Bronx,2026-04,4291718,False,15.272197909946373,True
+Robert F. Kennedy Bridge Bronx,2026-05,4527705,False,15.325725967428534,True
+Robert F. Kennedy Bridge Bronx,2026-06,4538451,False,15.328096542711332,True
+Robert F. Kennedy Bridge Bronx,2026-07,4592223,False,15.339874996279615,True
+Robert F. Kennedy Bridge Bronx,2026-08,4598597,False,15.341262032394969,True
+Robert F. Kennedy Bridge Bronx,2026-09,143380,False,11.873260701855969,True
+Robert F. Kennedy Bridge Manhattan,2023-01,1246155,False,14.035574171134645,False
+Robert F. Kennedy Bridge Manhattan,2023-02,1174526,False,13.97637607132262,False
+Robert F. Kennedy Bridge Manhattan,2023-03,1378706,False,14.136656661393513,False
+Robert F. Kennedy Bridge Manhattan,2023-04,1359078,False,14.122317822422401,False
+Robert F. Kennedy Bridge Manhattan,2023-05,1498580,False,14.22002921833204,False
+Robert F. Kennedy Bridge Manhattan,2023-06,1459432,False,14.19355856209035,False
+Robert F. Kennedy Bridge Manhattan,2023-07,1421771,False,14.167414538937141,False
+Robert F. Kennedy Bridge Manhattan,2023-08,1455701,False,14.190998816461267,False
+Robert F. Kennedy Bridge Manhattan,2023-09,1378516,False,14.13651884161514,False
+Robert F. Kennedy Bridge Manhattan,2023-10,1463723,False,14.196494431140236,False
+Robert F. Kennedy Bridge Manhattan,2023-11,1383250,False,14.139947083695212,False
+Robert F. Kennedy Bridge Manhattan,2023-12,1382524,False,14.139422095397768,False
+Robert F. Kennedy Bridge Manhattan,2024-01,1244913,False,14.034577009189846,False
+Robert F. Kennedy Bridge Manhattan,2024-02,1264896,False,14.05050125390383,False
+Robert F. Kennedy Bridge Manhattan,2024-03,1440542,False,14.180530683807465,False
+Robert F. Kennedy Bridge Manhattan,2024-04,1424384,False,14.169250699580521,False
+Robert F. Kennedy Bridge Manhattan,2024-05,1543249,False,14.249401140256142,False
+Robert F. Kennedy Bridge Manhattan,2024-06,1496392,False,14.218568103551576,False
+Robert F. Kennedy Bridge Manhattan,2024-07,1494969,False,14.217616697715949,False
+Robert F. Kennedy Bridge Manhattan,2024-08,1495139,False,14.217730405907409,False
+Robert F. Kennedy Bridge Manhattan,2024-09,1436616,False,14.177801602048577,False
+Robert F. Kennedy Bridge Manhattan,2024-10,1486143,False,14.211695404006363,False
+Robert F. Kennedy Bridge Manhattan,2024-11,1377775,False,14.135981162915632,False
+Robert F. Kennedy Bridge Manhattan,2024-12,1413936,False,14.16188856999063,False
+Robert F. Kennedy Bridge Manhattan,2025-02,1246553,False,14.035893502307049,True
+Robert F. Kennedy Bridge Manhattan,2025-03,1496642,False,14.218735158007707,True
+Robert F. Kennedy Bridge Manhattan,2025-04,1479245,False,14.207043056462275,True
+Robert F. Kennedy Bridge Manhattan,2025-05,1578966,False,14.272281393716028,True
+Robert F. Kennedy Bridge Manhattan,2025-06,1521073,False,14.234927222260449,True
+Robert F. Kennedy Bridge Manhattan,2025-07,1507286,False,14.225821904068267,True
+Robert F. Kennedy Bridge Manhattan,2025-08,1484507,False,14.210593962191302,True
+Robert F. Kennedy Bridge Manhattan,2025-09,1468508,False,14.199758158304789,True
+Robert F. Kennedy Bridge Manhattan,2025-10,1502462,False,14.222616319464324,True
+Robert F. Kennedy Bridge Manhattan,2025-11,1403104,False,14.154198195913619,True
+Robert F. Kennedy Bridge Manhattan,2025-12,1412488,False,14.16086395436179,True
+Robert F. Kennedy Bridge Manhattan,2026-01,1258344,False,14.04530792347735,True
+Robert F. Kennedy Bridge Manhattan,2026-02,1154193,False,13.95891282283967,True
+Robert F. Kennedy Bridge Manhattan,2026-03,1416453,False,14.16366712331665,True
+Robert F. Kennedy Bridge Manhattan,2026-04,1424516,False,14.169343366860824,True
+Robert F. Kennedy Bridge Manhattan,2026-05,1540563,False,14.24765914110883,True
+Robert F. Kennedy Bridge Manhattan,2026-06,1511415,False,14.228557517724182,True
+Robert F. Kennedy Bridge Manhattan,2026-07,1520307,False,14.234423503874401,True
+Robert F. Kennedy Bridge Manhattan,2026-08,1533026,False,14.242754770223314,True
+Robert F. Kennedy Bridge Manhattan,2026-09,47832,False,10.775471056848307,True
+Throgs Neck Bridge,2023-01,3243062,False,14.992028811557748,False
+Throgs Neck Bridge,2023-02,3034267,False,14.925480767224226,False
+Throgs Neck Bridge,2023-03,3497554,False,15.067574710916356,False
+Throgs Neck Bridge,2023-04,3571205,False,15.08841391183519,False
+Throgs Neck Bridge,2023-05,3885833,False,15.17284819055986,False
+Throgs Neck Bridge,2023-06,3866881,False,15.167959055513045,False
+Throgs Neck Bridge,2023-07,3948153,False,15.18875868586695,False
+Throgs Neck Bridge,2023-08,3939932,False,15.186674276053386,False
+Throgs Neck Bridge,2023-09,3624057,False,15.103104950431948,False
+Throgs Neck Bridge,2023-10,3746539,False,15.13634330536103,False
+Throgs Neck Bridge,2023-11,3622701,False,15.102730714217191,False
+Throgs Neck Bridge,2023-12,3596538,False,15.095482552106745,False
+Throgs Neck Bridge,2024-01,3325608,False,15.01716337319547,False
+Throgs Neck Bridge,2024-02,3275419,False,15.001956663103705,False
+Throgs Neck Bridge,2024-03,3696593,False,15.12292241311627,False
+Throgs Neck Bridge,2024-04,3632726,False,15.105494163871178,False
+Throgs Neck Bridge,2024-05,3941416,False,15.187050861287524,False
+Throgs Neck Bridge,2024-06,3954789,False,15.190438060429045,False
+Throgs Neck Bridge,2024-07,4025461,False,15.208150244856476,False
+Throgs Neck Bridge,2024-08,4039734,False,15.211689653726543,False
+Throgs Neck Bridge,2024-09,3835097,False,15.159705546563902,False
+Throgs Neck Bridge,2024-10,3932608,False,15.184813631267248,False
+Throgs Neck Bridge,2024-11,3720460,False,15.129358143302477,False
+Throgs Neck Bridge,2024-12,3802319,False,15.151121964717035,False
+Throgs Neck Bridge,2025-02,3152875,False,14.963825610129362,True
+Throgs Neck Bridge,2025-03,3763976,False,15.140986669148015,True
+Throgs Neck Bridge,2025-04,3727417,False,15.131226326720439,True
+Throgs Neck Bridge,2025-05,4028552,False,15.20891781237448,True
+Throgs Neck Bridge,2025-06,3890408,False,15.174024851455835,True
+Throgs Neck Bridge,2025-07,4035818,False,15.21071981306745,True
+Throgs Neck Bridge,2025-08,4113463,False,15.2297760538815,True
+Throgs Neck Bridge,2025-09,3819317,False,15.155582430612247,True
+Throgs Neck Bridge,2025-10,3919394,False,15.181447863120813,True
+Throgs Neck Bridge,2025-11,3706628,False,15.125633396196465,True
+Throgs Neck Bridge,2025-12,3651326,False,15.11060122112999,True
+Throgs Neck Bridge,2026-01,3223309,False,14.985919339852023,True
+Throgs Neck Bridge,2026-02,2980332,False,14.907545597205026,True
+Throgs Neck Bridge,2026-03,3723143,False,15.130079030591954,True
+Throgs Neck Bridge,2026-04,3750451,False,15.137386924016369,True
+Throgs Neck Bridge,2026-05,3988016,False,15.198804672843146,True
+Throgs Neck Bridge,2026-06,3976515,False,15.195916617010111,True
+Throgs Neck Bridge,2026-07,4039483,False,15.211627519007807,True
+Throgs Neck Bridge,2026-08,4169758,False,15.243368798339873,True
+Throgs Neck Bridge,2026-09,118251,False,11.68057321953039,True
+Verrazzano - Narrows Bridge,2023-01,6362382,False,15.6659135506738,False
+Verrazzano - Narrows Bridge,2023-02,5846393,False,15.58133561889272,False
+Verrazzano - Narrows Bridge,2023-03,6750813,False,15.725173648170603,False
+Verrazzano - Narrows Bridge,2023-04,6607964,False,15.703786297558754,False
+Verrazzano - Narrows Bridge,2023-05,7088210,False,15.773943539447002,False
+Verrazzano - Narrows Bridge,2023-06,7077113,False,15.772376755448741,False
+Verrazzano - Narrows Bridge,2023-07,7032783,False,15.766093202462486,False
+Verrazzano - Narrows Bridge,2023-08,7086072,False,15.77364186635844,False
+Verrazzano - Narrows Bridge,2023-09,6602525,False,15.70296286104798,False
+Verrazzano - Narrows Bridge,2023-10,6874603,False,15.743344599857965,False
+Verrazzano - Narrows Bridge,2023-11,6601810,False,15.702854563296915,False
+Verrazzano - Narrows Bridge,2023-12,6830771,False,15.736948255906185,False
+Verrazzano - Narrows Bridge,2024-01,6235764,False,15.645811824036644,False
+Verrazzano - Narrows Bridge,2024-02,6095128,False,15.62300048556279,False
+Verrazzano - Narrows Bridge,2024-03,6734944,False,15.722820201497786,False
+Verrazzano - Narrows Bridge,2024-04,6582949,False,15.699993531099887,False
+Verrazzano - Narrows Bridge,2024-05,7051379,False,15.768733900313812,False
+Verrazzano - Narrows Bridge,2024-06,7031853,False,15.765960955901805,False
+Verrazzano - Narrows Bridge,2024-07,7002889,False,15.761833478960384,False
+Verrazzano - Narrows Bridge,2024-08,7048701,False,15.768354044362308,False
+Verrazzano - Narrows Bridge,2024-09,6773969,False,15.728597883652085,False
+Verrazzano - Narrows Bridge,2024-10,6900107,False,15.747047621618908,False
+Verrazzano - Narrows Bridge,2024-11,6609227,False,15.703977412268792,False
+Verrazzano - Narrows Bridge,2024-12,6933697,False,15.751903850774154,False
+Verrazzano - Narrows Bridge,2025-02,5811229,False,15.575302810380665,True
+Verrazzano - Narrows Bridge,2025-03,6813796,False,15.734460085153753,True
+Verrazzano - Narrows Bridge,2025-04,6768975,False,15.727860377909042,True
+Verrazzano - Narrows Bridge,2025-05,7100002,False,15.775605764546667,True
+Verrazzano - Narrows Bridge,2025-06,7000901,False,15.761549555861077,True
+Verrazzano - Narrows Bridge,2025-07,7096627,False,15.775130299619306,True
+Verrazzano - Narrows Bridge,2025-08,7136781,False,15.780772532439757,True
+Verrazzano - Narrows Bridge,2025-09,6797390,False,15.732049420053098,True
+Verrazzano - Narrows Bridge,2025-10,6906871,False,15.748027415975256,True
+Verrazzano - Narrows Bridge,2025-11,6623828,False,15.706184159496622,True
+Verrazzano - Narrows Bridge,2025-12,6760644,False,15.726628857668684,True
+Verrazzano - Narrows Bridge,2026-01,6058676,False,15.617002017379226,True
+Verrazzano - Narrows Bridge,2026-02,5475889,False,15.515865377533494,True
+Verrazzano - Narrows Bridge,2026-03,6812248,False,15.73423287323818,True
+Verrazzano - Narrows Bridge,2026-04,6647726,False,15.709785549692283,True
+Verrazzano - Narrows Bridge,2026-05,7038360,False,15.766885888529188,True
+Verrazzano - Narrows Bridge,2026-06,7107824,False,15.776706847807285,True
+Verrazzano - Narrows Bridge,2026-07,7019275,False,15.764170636780193,True
+Verrazzano - Narrows Bridge,2026-08,7074617,False,15.772024007103042,True
+Verrazzano - Narrows Bridge,2026-09,222199,False,12.311333156187667,True

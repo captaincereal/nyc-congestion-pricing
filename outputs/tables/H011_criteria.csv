@@ -1,0 +1,2 @@
+supports,refute_1_breakdown_below_floor,refute_2_effect_negligible,refute_3_wrong_signed_and_not_noise,uninformative,breakdown_value,effect_log,effect_pct,threshold_support_m,threshold_refute_m
+False,True,False,False,False,0.0341796875,-0.04404714947191875,-4.309116133702634,1.0,0.3
