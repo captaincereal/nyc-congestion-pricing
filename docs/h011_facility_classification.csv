@@ -1,0 +1,11 @@
+facility,is_crz_entry,source
+Bronx - Whitestone Bridge,False,"Roster: no Manhattan-bound direction."
+Cross Bay Bridge,False,"Roster: Northbound/Southbound within Queens; neither reaches Manhattan."
+Henry Hudson Bridge,False,"Roster: Southbound to Manhattan, but lands near Dyckman St, far above the 60th St cordon."
+Hugh L. Carey Tunnel,True,"Roster: Northbound to Manhattan, landing at the Battery, inside the CRZ. Named in docs/project_brief.md as a CRZ-excluded roadway and used as a detection group by H009."
+Marine Parkway Bridge,False,"Roster: Northbound/Southbound between Queens and the Rockaways; neither reaches Manhattan."
+Queens Midtown Tunnel,True,"Roster: Westbound to Manhattan, landing near 36th St, inside the CRZ. Named in docs/project_brief.md as a CRZ-excluded roadway."
+Robert F. Kennedy Bridge Bronx,False,"Roster: directions combine destinations (to Manhattan OR Bronx / OR Queens) and cannot be split; the Manhattan leg lands at 125th St, above the cordon."
+Robert F. Kennedy Bridge Manhattan,False,"Roster: only an outbound direction is recorded (Eastbound to Bronx or Queens)."
+Throgs Neck Bridge,False,"Roster: no Manhattan-bound direction."
+Verrazzano - Narrows Bridge,False,"Roster: no Manhattan-bound direction. Eastbound counts begin 2020-12, outside the frozen window and so immaterial."

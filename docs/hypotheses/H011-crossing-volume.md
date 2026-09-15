@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | proposed |
+| **Status** | proposed — **amended 2026-09-15 before execution**, after the roster stage. Original text retained below. |
 | **Registered** | 2026-09-15 |
 | **Registered by** | Claude Opus 5, the session that ran the source survey. **Has seen no outcome data from this source** — see Prediction. |
 | **Answered by** | |
@@ -198,6 +198,67 @@ the predicted 2–12% range clears it if the crossings are as stable as fixed
 counting equipment should make them, and misses it if they are not. That is the
 bar doing its job rather than being unreachable, and the table is here so a
 reader can check that claim rather than take it.
+
+## Amendment, 2026-09-15 — before execution, after the roster stage
+
+*The criteria above are retained as frozen. This changes the outcome definition
+and corrects a count, and it was written after stage one returned the facility
+list and before any estimate existed. The gate between the two stages exists to
+make exactly this possible.*
+
+### What the roster showed
+
+**There are ten facilities, not nine.** The Robert F. Kennedy Bridge appears
+twice, as Bronx (`facility_id` 21) and Manhattan (22) plazas. So randomization
+enumerates **C(10,2) = 45** assignments and the finest achievable one-sided p is
+**0.022**, where the frozen text says 36 and 0.028. A factual correction.
+
+**"Inbound direction only" is not well defined, and the Method said it was.**
+The feed carries fifteen distinct `direction` labels across ten facilities, each
+facility with its own. Neither direction of the Cross Bay or Marine Parkway
+bridges reaches Manhattan at all, so there is no facility-independent notion of
+inbound to filter on.
+
+### What changes
+
+**The primary outcome is total monthly crossings per facility, both
+directions.** It is the least arbitrary comparable measure: mixing a
+direction-specific count at the treated tunnels with an all-direction count at
+the controls compares different quantities.
+
+**This dilutes the effect and the record says so now rather than later.** The
+charge applies to one direction of the two treated tunnels, so summing both
+roughly halves what is measurable. A true 6% fall on the charged direction shows
+up as roughly 3% here, which sits at the lower edge of the 2–12% predicted range
+and near the 2% support floor. That is a real loss of power, accepted because the
+alternative is an incomparable outcome.
+
+The Manhattan-bound direction at the two treated tunnels is reported as a
+**secondary, descriptive** cut via `--direction`, and is not scored.
+
+**No magnitude in the criteria changes.** 0.05, 0.02, 1.0, 0.3 and the 90% band
+all stand, as does the Prediction.
+
+### The classification, committed before estimating
+
+`docs/h011_facility_classification.csv` carries all ten facilities with a
+`source` for each. Two are treated: **Hugh L. Carey Tunnel**, northbound to
+Manhattan landing at the Battery, and **Queens Midtown Tunnel**, westbound to
+Manhattan landing near 36th Street. Both are named in `docs/project_brief.md`
+and the Carey Tunnel is one of H009's detection groups.
+
+Three exclusions are worth stating because they are judgements rather than
+readings. **Henry Hudson** does reach Manhattan, at Dyckman Street, far above
+the cordon. **RFK Bronx** records directions that combine destinations — "to
+Manhattan or Bronx" — which cannot be split, and its Manhattan leg lands at
+125th Street in any case. **RFK Manhattan** records only an outbound direction.
+
+### The author problem, stated again
+
+This amendment was written by the record's author, as H010's was. It changes an
+outcome definition rather than a threshold, it was made before any estimate
+existed, and it reduces the measurable effect rather than enlarging it. A
+sceptical reader should check that last point, which is the one that matters.
 
 ## Data required
 

@@ -16,7 +16,9 @@ import pytest
 
 from src.analysis import h011_crossing_volume as h11
 
-FACILITIES = [f"Crossing {letter}" for letter in "ABCDEFGHI"]
+# Ten, matching the roster the feed actually returned. The RFK Bridge appears
+# twice, as Bronx and Manhattan plazas with distinct facility ids.
+FACILITIES = [f"Crossing {letter}" for letter in "ABCDEFGHIJ"]
 TREATED = FACILITIES[:2]
 
 
@@ -98,7 +100,7 @@ def test_a_well_formed_classification_loads(tmp_path):
     loaded = h11.load_classification(path)
 
     assert loaded["is_crz_entry"].sum() == 2
-    assert len(loaded) == 9
+    assert len(loaded) == 10
 
 
 def test_the_estimator_recovers_a_planted_effect():
@@ -128,8 +130,8 @@ def test_facility_and_month_levels_are_absorbed_not_fitted():
 def test_randomization_enumerates_every_assignment_and_reports_its_ceiling():
     drawn = h11.randomization(_panel(effect=-0.06, noise=0.01))
 
-    assert drawn["n_assignments"] == 36, "C(9,2)"
-    assert abs(drawn["finest_one_sided_p"] - 1 / 36) < 1e-12
+    assert drawn["n_assignments"] == 45, "C(10,2), from the real roster"
+    assert abs(drawn["finest_one_sided_p"] - 1 / 45) < 1e-12
     assert drawn["band_low"] <= drawn["band_high"]
 
 
@@ -187,3 +189,28 @@ def test_the_frozen_constants_are_what_the_record_says():
     assert h11.TREATMENT_MONTH == "2025-01"
     assert h11.POST_START == "2025-02"
     assert h11.RANDOMIZATION_BAND == 0.90
+
+
+def test_the_event_study_recovers_a_flat_pre_period_and_the_planted_step():
+    """Pre-period coefficients near zero, post ones at the planted effect."""
+    moments = h11.event_study(_panel(effect=-0.06, noise=0.0))
+    beta = dict(zip(moments["k"], moments["beta"], strict=True))
+
+    assert max(abs(v) for k, v in beta.items() if k < 0) < 1e-9
+    assert all(abs(v - (-0.06)) < 1e-9 for k, v in beta.items() if k > 0)
+    assert moments["n_clusters"] == 10
+    assert moments["vcov"].shape[0] == len(moments["k"])
+
+
+def test_the_committed_classification_covers_the_real_roster():
+    """The gate is only as good as the file it loads."""
+    from src.config import PROJECT_ROOT
+
+    roster = pd.read_csv(PROJECT_ROOT / "outputs/tables/H011_facility_roster.csv")
+    committed = h11.load_classification()
+
+    assert set(committed["facility"]) == set(roster["facility"])
+    assert sorted(committed.loc[committed["is_crz_entry"], "facility"]) == [
+        "Hugh L. Carey Tunnel",
+        "Queens Midtown Tunnel",
+    ]

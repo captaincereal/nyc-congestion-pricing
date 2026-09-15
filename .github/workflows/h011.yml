@@ -12,8 +12,8 @@ on:
         type: choice
         options: [roster, estimate]
         default: roster
-      inbound:
-        description: 'For estimate only: the direction value meaning into Manhattan'
+      direction:
+        description: 'For the secondary cut only: restrict to one direction label'
         type: string
         default: ''
 
@@ -44,4 +44,4 @@ jobs:
           NYC_OPENDATA_APP_TOKEN: ${{ secrets.NYC_OPENDATA_APP_TOKEN }}
         run: >-
           python -m scripts.run_h011 --stage ${{ inputs.stage }}
-          ${{ inputs.inbound && format('--inbound {0}', inputs.inbound) || '' }}
+          ${{ inputs.direction && format("--direction {0}", inputs.direction) || '' }}

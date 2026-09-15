@@ -35,10 +35,10 @@ MESSAGES = {
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stage", choices=("roster", "estimate"), required=True)
-    parser.add_argument("--inbound", default="")
+    parser.add_argument("--direction", default="")
     args = parser.parse_args()
 
-    extra = ["--inbound", args.inbound] if args.stage == "estimate" and args.inbound else []
+    extra = ["--direction", args.direction] if args.stage == "estimate" and args.direction else []
     module(MODULE, "--stage", args.stage, *extra)
     commit_results(PATHS, MESSAGES[args.stage])
 

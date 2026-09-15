@@ -135,12 +135,25 @@ def load_classification(path=CLASSIFICATION) -> pd.DataFrame:
     return frame
 
 
-def monthly_panel(classification: pd.DataFrame, inbound: str) -> pd.DataFrame:
-    """Facility x month inbound crossings, log1p, over the frozen window."""
+def monthly_panel(classification: pd.DataFrame, direction: str | None = None) -> pd.DataFrame:
+    """Facility x month crossings, log1p, over the frozen window.
+
+    **All directions by default**, per the 2026-09-15 amendment. The roster
+    showed fifteen distinct direction labels across ten facilities and no
+    facility-independent notion of "inbound": neither direction of the Cross Bay
+    or Marine Parkway bridges goes to Manhattan at all. Summing both directions
+    is the least arbitrary comparable outcome. It dilutes the effect, because
+    the charge applies to one direction of the treated tunnels, and the record
+    says so rather than leaving it to be discovered.
+
+    `direction` restricts to one label, for the secondary cut at the treated
+    tunnels only.
+    """
+    where = f"direction='{direction}'" if direction else None
     frame = _fetch(
         "facility,date_trunc_ym(date) as month,sum(traffic_count) as crossings",
         "facility,date_trunc_ym(date) as month",
-        where=f"direction='{inbound}'",
+        where=where,
     )
     frame["crossings"] = pd.to_numeric(frame["crossings"])
     frame["month"] = pd.to_datetime(frame["month"]).dt.strftime("%Y-%m")
@@ -221,6 +234,61 @@ def randomization(panel: pd.DataFrame) -> dict:
     }
 
 
+def event_study(panel: pd.DataFrame) -> dict:
+    """Treated x event-month coefficients with their full cluster-robust vcov.
+
+    The off-diagonal terms are the point: the Rambachan-Roth restriction is on
+    differences between adjacent event-time coefficients, whose variance depends
+    on their covariance. Passing only the diagonal would understate it.
+    """
+    months = sorted(panel["month"].unique())
+    reference = pd.Period(TREATMENT_MONTH, freq="M")
+    event = {m: (pd.Period(m, freq="M") - reference).n for m in months}
+    ks = sorted({event[m] for m in months} - {REFERENCE_K})
+
+    facility_codes, _ = pd.factorize(panel["facility"], sort=True)
+    month_codes, _ = pd.factorize(panel["month"], sort=True)
+    treated = panel["is_crz_entry"].to_numpy().astype(float)
+    k_of_row = np.array([event[m] for m in panel["month"]])
+
+    design = np.column_stack([treated * (k_of_row == k) for k in ks])
+    y = _absorb(panel["log_crossings"].to_numpy(), facility_codes, month_codes)
+    X = _absorb(design, facility_codes, month_codes)
+
+    xtx = X.T @ X
+    beta = np.linalg.solve(xtx, X.T @ y)
+    resid = y - X @ beta
+    inverse = np.linalg.inv(xtx)
+    meat = np.zeros_like(xtx)
+    for cluster in range(facility_codes.max() + 1):
+        rows = facility_codes == cluster
+        score = X[rows].T @ resid[rows]
+        meat += np.outer(score, score)
+    n_clusters = facility_codes.max() + 1
+    vcov = inverse @ meat @ inverse * (n_clusters / max(n_clusters - 1, 1))
+    return {
+        "k": ks,
+        "beta": beta,
+        "se": np.sqrt(np.diag(vcov)),
+        "vcov": vcov,
+        "n_obs": int(len(panel)),
+        "n_clusters": int(n_clusters),
+    }
+
+
+def breakdown_value(moments: dict) -> float:
+    """Smallest violation multiple at which the robust set stops excluding zero.
+
+    Directly comparable to the 0.005-0.171 H002 and H005 report on the link
+    panel, which is why the record chose it.
+    """
+    from diff_diff import HonestDiD
+
+    from src.analysis.honest_did import to_container
+
+    return float(HonestDiD(method="relative_magnitude").breakdown_value(to_container(moments)))
+
+
 def evaluate_criteria(breakdown_value: float, effect: float, drawn: dict) -> dict:
     """The frozen criteria, applied mechanically. The Verdict is not written here."""
     support = bool(
@@ -251,7 +319,11 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--stage", choices=("roster", "estimate"), required=True)
     parser.add_argument("--out-prefix", default="H011")
-    parser.add_argument("--inbound", default="", help="direction value meaning inbound")
+    parser.add_argument(
+        "--direction",
+        default="",
+        help="restrict to one direction label, for the secondary cut only",
+    )
     args = parser.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
@@ -268,23 +340,25 @@ def main() -> None:
         )
         return
 
-    if not args.inbound:
-        raise SystemExit(
-            "--inbound is required for the estimate stage: pass the direction "
-            "value the roster shows for travel into Manhattan, rather than "
-            "letting the code guess which label means inbound."
-        )
     classification = load_classification()
-    panel = monthly_panel(classification, args.inbound)
+    panel = monthly_panel(classification, args.direction or None)
     panel.to_csv(TABLES_DIR / f"{args.out_prefix}_panel.csv", index=False)
+
     drawn = randomization(panel)
     pd.DataFrame([drawn]).to_csv(TABLES_DIR / f"{args.out_prefix}_randomization.csv", index=False)
-    log.info("ATT %.4f log points; randomization %s", drawn["observed"], drawn)
-    log.info(
-        "Event study and the Rambachan-Roth breakdown value are the remaining "
-        "step; feed the event-study coefficients and their full cluster-robust "
-        "covariance to src.analysis.honest_did, then evaluate_criteria."
+
+    moments = event_study(panel)
+    pd.DataFrame({"k": moments["k"], "beta": moments["beta"], "se": moments["se"]}).to_csv(
+        TABLES_DIR / f"{args.out_prefix}_event_study.csv", index=False
     )
+    value = breakdown_value(moments)
+
+    verdict = evaluate_criteria(value, drawn["observed"], drawn)
+    pd.DataFrame([verdict]).to_csv(TABLES_DIR / f"{args.out_prefix}_criteria.csv", index=False)
+    log.info("ATT %.4f log points (%.2f%%)", drawn["observed"], verdict["effect_pct"])
+    log.info("breakdown value %.4f", value)
+    log.info("randomization %s", drawn)
+    log.info("criteria as frozen and amended: %s", verdict)
 
 
 if __name__ == "__main__":
