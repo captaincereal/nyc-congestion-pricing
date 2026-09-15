@@ -331,3 +331,42 @@ ingestion.
 
 Eleven hypotheses are registered, nine answered. H010 and H011 are both
 implemented-or-registered and **unrun**.
+
+### H011 answered, 2026-09-15
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H011](H011-crossing-volume.md) | Did tolling reduce vehicle volume entering the zone, measured at the crossings? | answered | 2026-09-15 | **Refutes**: breakdown value 0.034 against a 0.3 floor. Crossings at the two CRZ-bound tunnels fall 4.31% and the estimate is the most extreme of 45 reassignments, but the pre-period already wanders to −0.111 and the post path is a hump rather than a step |
+
+Supersedes the row above, which recorded H011 as proposed.
+
+**The source with the best pre-period this project has found is no better at
+identification than the one it was meant to replace.** H002 and H005 report
+Rambachan–Roth breakdown values of 0.005 to 0.171 on the link panel. H011 gives
+**0.034** — inside that range — on six years of one operator's own counts of
+fixed physical assets.
+
+**The estimate and the inference are not what failed.** −4.31% is a plausible
+magnitude, inside the predicted 2–12%, and being the most extreme of all 45
+facility reassignments is the strongest randomization result this design can
+produce. What failed is parallel trends, for the seventh time: the treated
+tunnels already moved against the control bridges by −0.111 in mid-2024,
+recovering before the toll date, which is larger than the effect claimed. The
+post path compounds it, deepening to −0.122 by month six and returning to −0.009
+by month ten — a hump where a price change should give a step.
+
+**The two-stage gate earned its place before any of that.** Stage one returned
+the facility roster and contradicted the record twice: ten facilities rather than
+nine, so C(10,2) = 45 assignments rather than 36, and no facility-independent
+notion of "inbound" to filter on, since neither direction of the Cross Bay or
+Marine Parkway bridges reaches Manhattan. Both were corrected in a dated
+amendment before any estimate existed, and the amendment reduced the measurable
+effect rather than enlarging it.
+
+**Disclosure the register should carry.** The record's author ran it, which the
+Prediction's claim to clean pre-registration does not cover. The verdict is
+mechanical — one threshold on one number, frozen before any fetch — so there was
+no label to choose, but a reader is entitled to the fact.
+
+Eleven hypotheses are registered, ten answered. H010 remains implemented and
+unrun.

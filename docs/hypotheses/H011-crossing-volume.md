@@ -2,10 +2,10 @@
 
 | | |
 |---|---|
-| **Status** | proposed — **amended 2026-09-15 before execution**, after the roster stage. Original text retained below. |
+| **Status** | answered — **refutes** |
 | **Registered** | 2026-09-15 |
 | **Registered by** | Claude Opus 5, the session that ran the source survey. **Has seen no outcome data from this source** — see Prediction. |
-| **Answered by** | |
+| **Answered by** | Claude Opus 5, 2026-09-15 — **the same session that registered it**, at the owner's direction. See Verdict. |
 | **Supersedes / superseded by** | none |
 
 ## Question
@@ -267,11 +267,79 @@ backfill or the release. The speed archive is not touched.
 
 ## Result
 
-*Filled in after running.*
+Answered 2026-09-15. `python -m src.analysis.h011_crossing_volume --stage estimate`,
+dispatched to a hosted runner.
+
+**Panel.** 440 facility-months: 10 facilities over 44 months, 2023-01 to
+2026-09, with 2025-01 excluded as the transition month. Two facilities treated,
+eight control, from the committed classification.
+
+**The estimate.** Total monthly crossings at the two CRZ-bound tunnels fall
+**4.31%** relative to the operator's other crossings
+([H011_criteria.csv](../../outputs/tables/H011_criteria.csv)): −0.0440 log
+points. That sits inside the record's predicted 2–12% range, and roughly doubles
+if the both-directions dilution is taken at face value.
+
+**Randomization inference is as strong as this design permits**
+([H011_randomization.csv](../../outputs/tables/H011_randomization.csv)). Across
+all 45 facility reassignments the observed estimate is **the most extreme**, at
+a share of 1/45 = 0.022, against a 90% band of [−0.0291, +0.0243].
+
+**The breakdown value is 0.034**, against a support bar of 1.0 and a refutation
+floor of 0.3.
+
+**The event study says why** ([H011_event_study.csv](../../outputs/tables/H011_event_study.csv)).
+The 23 pre-period coefficients wander between **−0.111 and +0.032** with a
+standard deviation of 0.043, the largest month-to-month first difference being
+0.060. The treated tunnels were already moving against the control bridges,
+before the toll existed, by more than the post-period effect. The 20 post
+coefficients average −0.064 and range −0.165 to −0.009.
+
+**And the post path is a hump rather than a step.** It runs −0.035 at the first
+month, deepens to −0.122 by the sixth, then returns to −0.032, −0.011 and −0.009
+by months eight to ten. A persistent price effect on a fixed crossing should
+look like a level shift. This does not.
 
 ## Verdict
 
-*Filled in after running.*
+**Refutes**, on criterion 1 as written: the breakdown value of 0.034 is below
+the 0.3 floor.
+
+**The comparison the record was built to make.** H002 and H005 report
+Rambachan–Roth breakdown values of 0.005 to 0.171 on the link panel. This gives
+**0.034 — squarely inside that range.** The crossings feed has six years of
+pre-period, one operator, one counting system and fixed physical assets, and on
+the statistic that measures whether a design can survive plausible differential
+drift it is **no better than the speed panel it was meant to improve on.**
+
+**The point estimate and the inference are both fine, and neither is the
+problem.** −4.31% is a plausible magnitude, and being the most extreme of 45
+reassignments is the strongest randomization result available here. What fails
+is the same thing that failed six times before: the treated and control units
+were not on parallel paths beforehand. A pre-period excursion to −0.111 around
+mid-2024, recovering by the toll date, is larger than the effect being claimed.
+
+**The hump makes it worse rather than better.** An effect that deepens for six
+months and then substantially disappears by month ten is hard to tell from the
+pre-period wandering that surrounds it, and it is not the shape a permanent
+change in the price of entry should produce.
+
+**What this does not say.** That volume did not fall. A 4.3% fall may well be
+real, and the randomization result is genuinely the cleanest this project has
+produced on a volume outcome. What the breakdown value says is that this design
+cannot separate it from drift the data already show, which is a statement about
+the comparison rather than about the world.
+
+**What would change it.** Control crossings that track the treated tunnels
+before the toll. The eight used here serve different trip types — outer-borough
+commuting and Staten Island traffic against two Manhattan tunnels — and that
+difference, not the counting, is what the pre-period exposes.
+
+**On who ran this.** The record's author ran it, at the owner's direction, which
+the Prediction's disclosure about clean pre-registration does not cover. The
+mitigation is that the verdict is mechanical: criterion 1 is a threshold on one
+number, that number is 0.034, and the floor of 0.3 was frozen before any data
+was fetched. There was no label to choose.
 
 ## Notes
 
