@@ -65,13 +65,19 @@ BOOTSTRAP_ALPHA = 0.05
 # respect vehicle class, which is what makes this cut informative.
 RESPONDER_PREFIXES = ("1 -", "5 -")
 
+# The counterfactuals the criteria are scored on. The flat one is reported and
+# deliberately excluded: the 2026-09-15 amendment took it out of support 1, out
+# of refutation 2 and out of the spread condition, because holding the last
+# pre-boundary block level on a rising series drives the deficit negative and
+# inflates the surplus, which made support unreachable and refutation automatic.
+FITTED_COUNTERFACTUALS = ("loglinear", "quadratic")
+
 # Frozen in the record, before anything was measured.
 SUPPORT_F = 0.05  # f under the frozen counterfactual
-SUPPORT_F_FLOOR = 0.02  # f under the flat counterfactual; see _counterfactual
 REFUTE_F = 0.02
 SUPPORT_RATIO = 1.10  # responder share of surplus / share of baseline volume
 REFUTE_RATIO = 0.95
-COUNTERFACTUAL_SPREAD = 2.0  # f moving by more than this across the three
+COUNTERFACTUAL_SPREAD = 2.0  # f moving by more than this across the fitted pair
 # Declared in advance: above this baseline share the ratio cannot reach 1.10
 # however concentrated the surplus is, and criterion 2 is untestable.
 FEASIBILITY_CEILING = 0.90
@@ -287,20 +293,22 @@ def responder_concentration(frame: pd.DataFrame, boundary_hour: int, method: str
 
 
 def evaluate_criteria(by_counterfactual: pd.DataFrame, concentration: dict) -> dict:
-    """The frozen criteria, applied mechanically so they cannot drift.
+    """The criteria, applied mechanically so they cannot drift.
+
+    As amended on 2026-09-15 at the owner's direction, before execution: the
+    flat counterfactual is reported but scored on nothing. Everything else is as
+    frozen on 2026-09-14. The record retains both texts.
 
     This reports which conditions fired. It does not write the Verdict — that
     belongs to whoever runs this, in the record.
     """
-    frozen = by_counterfactual.set_index("counterfactual").loc[FROZEN_COUNTERFACTUAL]
-    flat = by_counterfactual.set_index("counterfactual").loc["flat"]
-    values = by_counterfactual["f"].to_numpy(dtype=float)
-    finite = values[np.isfinite(values)]
+    indexed = by_counterfactual.set_index("counterfactual")
+    frozen = indexed.loc[FROZEN_COUNTERFACTUAL]
+    fitted = indexed.loc[list(FITTED_COUNTERFACTUALS), "f"].to_numpy(dtype=float)
+    finite = fitted[np.isfinite(fitted)]
     spread = float(np.nanmax(np.abs(finite)) / np.nanmin(np.abs(finite))) if len(finite) else np.nan
 
-    support_1 = bool(
-        frozen["f"] >= SUPPORT_F and flat["f"] >= SUPPORT_F_FLOOR and frozen["ci_low"] > REFUTE_F
-    )
+    support_1 = bool(frozen["f"] >= SUPPORT_F and frozen["ci_low"] > REFUTE_F)
     support_2 = concentration["verdict_input"] == "supports"
     refute_1 = bool(frozen["f"] < REFUTE_F)
     refute_2 = bool(np.nanmin(finite) < 0) if len(finite) else False
@@ -319,6 +327,7 @@ def evaluate_criteria(by_counterfactual: pd.DataFrame, concentration: dict) -> d
         "uninformative": uninformative,
         "counterfactual_spread": spread,
         "spread_threshold": COUNTERFACTUAL_SPREAD,
+        "spread_over": "/".join(FITTED_COUNTERFACTUALS),
         "criterion_2_testable": concentration["testable"],
     }
 

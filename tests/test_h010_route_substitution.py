@@ -25,6 +25,7 @@ def _planted(
     dates: int = 40,
     groups: tuple[str, ...] = ("FDR Drive at 60th St", "Brooklyn Bridge"),
     responder_fraction: float = 0.8,
+    surplus_responder_fraction: float | None = None,
     boundary_hour: int = 5,
 ) -> pd.DataFrame:
     """Both series on a log-linear ramp, with a known deficit and surplus planted.
@@ -33,14 +34,26 @@ def _planted(
     find: `responder_fraction` of the exempt surplus lands on the responder
     class.
     """
+    if surplus_responder_fraction is None:
+        surplus_responder_fraction = responder_fraction
     runs = np.arange(-h10.PRE_BLOCKS, h10.POST_BLOCKS) * h10.BLOCK_MINUTES
     base = np.expm1(RAMP_INTERCEPT + slope * runs)
     rows = []
     for day in range(dates):
         for group in groups:
-            for label, responder, share in (
-                ("1 - Cars, Pickups and Vans", True, responder_fraction),
-                ("3 - Multi-Unit Trucks", False, 1.0 - responder_fraction),
+            for label, responder, share, surplus_share in (
+                (
+                    "1 - Cars, Pickups and Vans",
+                    True,
+                    responder_fraction,
+                    surplus_responder_fraction,
+                ),
+                (
+                    "3 - Multi-Unit Trucks",
+                    False,
+                    1.0 - responder_fraction,
+                    1.0 - surplus_responder_fraction,
+                ),
             ):
                 for index, run in enumerate(runs):
                     post = index >= h10.PRE_BLOCKS
@@ -55,9 +68,19 @@ def _planted(
                             "tolled": base[index] * share
                             - (deficit_per_block * share if post else 0.0),
                             "exempt": base[index] * share
-                            + (surplus_per_block * share if post else 0.0),
+                            + (surplus_per_block * surplus_share if post else 0.0),
                         }
                     )
+    return pd.DataFrame(rows)
+
+
+def _shares(frame: pd.DataFrame, boundary_hour: int = 5) -> pd.DataFrame:
+    """The table `main` feeds to `evaluate_criteria`, built the same way."""
+    rows = []
+    for method in h10.COUNTERFACTUALS:
+        result = h10.diversion_share(h10.deficit_and_surplus(frame, boundary_hour, method))
+        result["counterfactual"] = method
+        rows.append(result)
     return pd.DataFrame(rows)
 
 
@@ -175,9 +198,8 @@ def test_cells_missing_blocks_are_dropped_not_interpolated():
     assert h10.deficit_and_surplus(trimmed, 5, "loglinear").shape[0] == 5
 
 
-def test_the_frozen_thresholds_are_what_the_record_says():
+def test_the_thresholds_are_what_the_record_says():
     assert h10.SUPPORT_F == 0.05
-    assert h10.SUPPORT_F_FLOOR == 0.02
     assert h10.REFUTE_F == 0.02
     assert h10.SUPPORT_RATIO == 1.10
     assert h10.REFUTE_RATIO == 0.95
@@ -186,3 +208,74 @@ def test_the_frozen_thresholds_are_what_the_record_says():
     assert h10.BOOTSTRAP_DRAWS == 500
     assert h10.FROZEN_COUNTERFACTUAL == "loglinear"
     assert h10.COUNTERFACTUALS == ("loglinear", "flat", "quadratic")
+    # The 2026-09-15 amendment: reported, scored on nothing.
+    assert h10.FITTED_COUNTERFACTUALS == ("loglinear", "quadratic")
+    assert not hasattr(h10, "SUPPORT_F_FLOOR")
+
+
+# --- Satisfiability. The check that was missing when these criteria were frozen.
+#
+# Three criteria failures in this project shared one shape: a bar a true effect
+# could not clear. The cheap defence is mechanical rather than intentional —
+# plant a true effect of the size the record predicts and confirm the criterion
+# actually fires. These are that check, and they are the reason the amendment
+# can be trusted where the original could not.
+
+
+def _criteria(frame: pd.DataFrame) -> dict:
+    return h10.evaluate_criteria(
+        _shares(frame), h10.responder_concentration(frame, 5, h10.FROZEN_COUNTERFACTUAL)
+    )
+
+
+def test_a_true_effect_the_size_the_record_predicts_reaches_support():
+    """The record predicts f between 0.05 and 0.25. Plant 0.10 and check."""
+    verdict = _criteria(_planted(2000.0, 200.0, surplus_responder_fraction=0.95))
+
+    assert verdict["support_1_f_clears_bars"] is True
+    assert verdict["support_2_responders_concentrated"] is True
+    assert verdict["refute_1_f_below_floor"] is False
+    assert verdict["refute_2_f_negative_somewhere"] is False
+    assert verdict["refute_3_responders_absent"] is False
+    assert verdict["uninformative"] is False
+
+
+def test_support_is_reachable_across_the_whole_predicted_range():
+    for deficit, surplus in ((4000.0, 200.0), (2000.0, 200.0), (1000.0, 250.0)):
+        verdict = _criteria(_planted(deficit, surplus, surplus_responder_fraction=0.95))
+        assert verdict["support_1_f_clears_bars"] is True, f"{surplus}/{deficit} should clear"
+
+
+def test_a_negligible_share_refutes():
+    """f = 0.01, an order of magnitude below the bar."""
+    verdict = _criteria(_planted(20000.0, 200.0))
+
+    assert verdict["refute_1_f_below_floor"] is True
+    assert verdict["support_1_f_clears_bars"] is False
+
+
+def test_a_share_between_the_bars_is_uninformative():
+    """f = 0.03 sits in the declared gap between refuting and supporting."""
+    verdict = _criteria(_planted(10000.0, 300.0))
+
+    assert verdict["uninformative"] is True
+    assert verdict["support_1_f_clears_bars"] is False
+    assert verdict["refute_1_f_below_floor"] is False
+
+
+def test_the_flat_counterfactual_no_longer_decides_anything():
+    """The amendment in one assertion.
+
+    Flat returns an undefined f on this rising fixture, as it will at 05:00.
+    Before the amendment that made support unreachable and fired refutation 2
+    automatically. Now it is reported and scored on nothing, so a true effect
+    reaches support with flat exactly as broken as it was.
+    """
+    frame = _planted(2000.0, 200.0, surplus_responder_fraction=0.95)
+    shares = _shares(frame)
+
+    assert np.isnan(shares.set_index("counterfactual").loc["flat", "f"])
+    verdict = _criteria(frame)
+    assert verdict["support_1_f_clears_bars"] is True
+    assert verdict["refute_2_f_negative_somewhere"] is False
+    assert verdict["spread_over"] == "loglinear/quadratic"

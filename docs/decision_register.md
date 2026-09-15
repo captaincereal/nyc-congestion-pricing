@@ -75,23 +75,35 @@ intention: before freezing a criterion, plant a true effect of the expected size
 in a fixture and confirm the criterion passes. That check takes minutes and
 would have caught all four.
 
-### Not amended here
+### Amended, at the owner's direction, later the same day
 
-No result exists, so a prospective amendment is available and precedented — the
-2026-09-12 H003 amendment was made before execution, at the owner's direction,
-with the original text retained. **This session has not made one**, because it
-wrote the criteria it would be amending and the weaker reading of an author
-loosening their own frozen bar is one the record should not have to carry.
+The owner accepted the recommendation and directed the amendment, so it is made
+on the 2026-09-12 H003 precedent: **before execution**, with the record
+retaining its original text beside a dated amendment section that explains what
+changed and why.
 
-The recommendation, for the owner to accept or reject: drop the flat
-counterfactual from support criterion 1 and from refutation criterion 2, keeping
-it as a reported diagnostic. The spread condition already in the criteria — f
-moving by more than a factor of two across the three counterfactuals makes the
-result uninformative — was written to stop a ramp artefact carrying the finding,
-and it does that job without resting on a statistic that inverts.
+The flat counterfactual is removed from support criterion 1, from refutation
+criterion 2 and from the spread clause, and stays reported as a diagnostic. The
+spread clause now runs across the fitted pair, which is what it needed to do
+anyway — a disagreement between a linear and a quadratic fit on the same six
+blocks measures the curvature sensitivity that clause was written to catch.
 
-**Until that is settled, H010 should not be dispatched.** Running it now
-produces a mechanically determined refutation that means nothing.
+**No magnitude changed.** 0.05, 0.02, 1.10, 0.95, 0.90 and the factor of two
+are exactly as frozen, the frozen counterfactual is still log-linear, and the
+Prediction is untouched. What was removed is a conjunct that could not be
+evaluated. That distinction is the whole defence against reading this as an
+author loosening their own bar, and the record makes it explicitly rather than
+leaving a reader to work it out.
+
+**The satisfiability check is now a test rather than an intention.** Planted true
+effects across the predicted range of f fire support; 0.01 fires refutation;
+0.03 fires uninformative; and support is reached while the flat counterfactual
+still returns an undefined f, which is the amendment in one assertion. Anyone
+freezing a criterion in this project should plant an effect of the size they
+expect and confirm the criterion clears, before committing the record. All four
+failures here would have been caught that way in minutes.
+
+H010 may now be dispatched. It has still not been run.
 
 ### What was built
 

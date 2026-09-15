@@ -83,22 +83,26 @@ to counts. Also report f under a flat-level counterfactual using the last
 pre-boundary block alone, and under a quadratic on the same six blocks.
 Inference by block bootstrap over whole dates, 500 draws.
 
+As amended on 2026-09-15, before execution, at the owner's direction. The
+record retains the original text beside the amendment and explains it; read that
+section rather than taking this summary on trust. The flat counterfactual is
+still computed and reported, and is scored on nothing, because on a rising
+series it drives the deficit negative and inflates the surplus.
+
 Supports, both required:
-  1. f >= 0.05 under the frozen counterfactual AND f >= 0.02 under the
-     flat-level one, with the bootstrap interval on the frozen estimate
-     excluding 0.02.
+  1. f >= 0.05 under the frozen counterfactual, with the bootstrap interval on
+     that estimate excluding 0.02.
   2. The exempt surplus is disproportionately cars and motorcycles: their share
      of the surplus divided by their share of exempt volume in the six
      pre-boundary blocks is at least 1.10.
 
 Refutes, any one:
   1. f < 0.02 under the frozen counterfactual.
-  2. f is negative under any of the three counterfactuals.
+  2. f is negative under either FITTED counterfactual (log-linear or quadratic).
   3. The cars-and-motorcycles ratio in criterion 2 is at or below 0.95.
 
 Uninformative: f lands between 0.02 and 0.05, or its bootstrap interval spans
-that range, or f moves by more than a factor of two across the three
-counterfactuals.
+that range, or f moves by more than a factor of two across the fitted pair.
 
 Feasibility gate declared in advance: if cars and motorcycles are more than 90%
 of exempt volume in the pre-boundary blocks, criterion 2 cannot reach 1.10 and
@@ -111,6 +115,12 @@ criteria a true effect could not satisfy, and the damage came from nobody
 noticing until afterwards, not from the criteria being applied honestly.
 
 ## Method
+
+`src/analysis/h010_route_substitution.py` already implements this, and
+`scripts/run_h010.py` runs it and commits the artefacts. On a hosted runner,
+dispatch the H010 workflow. The criteria are encoded in `evaluate_criteria`, so
+what fires is mechanical; your job is the Verdict and the writing, not the
+arithmetic.
 
 Follow the record's Method section. Where it leaves a choice open, you are
 better placed to make it than its author was; where it pins something down, that

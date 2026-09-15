@@ -234,3 +234,47 @@ damage came from nobody noticing until afterwards.
 
 Ten hypotheses are registered, nine answered. The 05:00 boundary has now been
 examined four times and the reader is entitled to that count.
+
+## 2026-09-15 — H010 amended before execution
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H010](H010-exempt-route-substitution.md) | Do drivers move onto toll-exempt roadways as the peak charge begins? | proposed, **amended 2026-09-15** | 2026-09-14 | |
+
+Supersedes the row above, which recorded H010 as proposed on its original
+criteria. Amended at the owner's direction, **before the analysis had run even
+once**, on the same precedent as the 2026-09-12 H003 amendment. The record
+retains the original text beside the amendment.
+
+**The criteria could not be satisfied, and that was established on synthetic
+fixtures rather than discovered afterwards.** The Method called the flat-level
+counterfactual a model-free floor that understates both the deficit and the
+surplus. It does neither: holding the last pre-boundary block level on a rising
+series drives the deficit **negative** and inflates the surplus. On a planted
+truth of f = 0.100 the two fitted counterfactuals return 0.1000 and the flat one
+returns a deficit of −2,098 against a surplus of 8,698. So support criterion 1,
+which required f ≥ 0.02 under it, was unreachable by a true effect of any size,
+and refutation criterion 2, which fires when f is negative anywhere, fired
+before any data was consulted. The record would have refuted mechanically.
+
+The amendment removes the flat counterfactual from support 1, from refutation 2
+and from the spread clause, and keeps it reported. **No magnitude changed** —
+0.05, 0.02, 1.10, 0.95, 0.90 and the factor of two are all as frozen — and the
+Prediction is untouched.
+
+**This is the fourth criteria failure of the same shape here**, after H008's
+maximum over a contaminated placebo set, H009's demand for a significant zero,
+and the placebo bar the adjudication found computed on levels when the estimand
+was a difference. It was written by the session that diagnosed the other three.
+A reader should weigh the pre-registration on this thread accordingly, and the
+count belongs in the same place as every other count this register keeps.
+
+The defence is now mechanical rather than intentional. Satisfiability is a test:
+true effects planted across the predicted range of f fire support, 0.01 fires
+refutation, 0.03 fires uninformative. Anyone freezing a criterion in this
+project should plant an effect of the size they expect and confirm the criterion
+clears before committing the record. All four failures would have been caught
+that way, in minutes.
+
+Ten hypotheses are registered, nine answered. H010 is implemented, has a
+dispatch-only hosted path, and has **not been run**.

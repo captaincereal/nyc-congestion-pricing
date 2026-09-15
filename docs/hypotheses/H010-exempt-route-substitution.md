@@ -2,7 +2,7 @@
 
 | | |
 |---|---|
-| **Status** | proposed — **criteria defect found before execution, see the 2026-09-15 entry in [decision_register.md](../decision_register.md); do not dispatch until resolved** |
+| **Status** | proposed — **amended 2026-09-15 before execution, at the owner's direction. Original criteria retained below.** |
 | **Registered** | 2026-09-14 |
 | **Registered by** | Claude Opus 5, a session that did not write H008 or H009 and adjudicated them in [ADJUDICATION-timing.md](ADJUDICATION-timing.md) |
 | **Answered by** | |
@@ -127,7 +127,9 @@ So report **f under three counterfactuals**: the frozen log-linear one, a
 flat-level counterfactual using the last pre-boundary block alone, and a
 quadratic fit on the same six blocks. The flat-level version is the
 model-free floor — it cannot manufacture a deficit out of a ramp, and it will
-understate both D and S. If f moves by more than a factor of two across the
+understate both D and S. **[This sentence is false and was measured to be false
+before execution; see the Amendment below. The text is retained as
+registered.]** If f moves by more than a factor of two across the
 three, the ramp is driving the answer and that is the finding.
 
 **Inference.** Block bootstrap over dates, 500 draws, resampling whole dates so
@@ -183,6 +185,100 @@ exceeds 0.90 record criterion 2 as **untestable** rather than as failed. Two
 records in this project have frozen criteria a true effect could not satisfy;
 this one states its own ceiling in advance so the same failure is visible before
 the result exists rather than after.
+
+## Amendment, 2026-09-15 — before execution, at the owner's direction
+
+*The criteria above are retained exactly as frozen on 2026-09-14. This section
+changes how they are applied and says why. It was written before any result
+existed and before the analysis had been run even once; the git history carries
+that order, as the protocol requires.*
+
+### What was wrong
+
+The Method calls the flat-level counterfactual "the model-free floor" that
+"cannot manufacture a deficit out of a ramp" and "will understate both D and S".
+Measured on a fixture planting a deficit of 2,000 and a surplus of 200 per block
+on a realistic morning ramp, it does the opposite:
+
+| Counterfactual | Deficit (true 6,000) | Surplus (true 600) | f (true 0.100) |
+|---|---:|---:|---:|
+| log-linear | 6,000.0 | 600.0 | **0.1000** |
+| quadratic | 6,000.0 | 600.0 | **0.1000** |
+| flat | **−2,098.2** | **8,698.2** | **undefined** |
+
+Holding the last pre-boundary block level puts the counterfactual *below* a
+rising series. That shrinks the deficit until it turns negative and inflates the
+surplus, and both biases push f the same way. At 05:00 the entries series rises
+steeply — the reason the [adjudication](ADJUDICATION-timing.md) demoted the
+05:00 estimate in the first place — so this is the regime the criteria were
+written for, and the one where they break.
+
+Two consequences, neither of which depends on any data:
+
+**Support criterion 1 was unreachable.** It requires f ≥ 0.02 under the flat
+counterfactual. The flat deficit is negative there, so f is undefined, and no
+true effect of any size could have satisfied the conjunct.
+
+**Refutation criterion 2 fired automatically.** It reads "f is negative under any
+of the three counterfactuals". A negative deficit against a positive surplus is
+a negative ratio, so it was satisfied before any data was consulted.
+
+Together the record would have returned a refutation mechanically, whatever the
+answer.
+
+### What changes
+
+Only the role of the flat counterfactual. It remains computed and reported, and
+is scored on nothing.
+
+| | As frozen 2026-09-14 | As applied from 2026-09-15 |
+|---|---|---|
+| Support 1 | f ≥ 0.05 under the frozen counterfactual, **and ≥ 0.02 under the flat one**, with the bootstrap interval excluding 0.02 | f ≥ 0.05 under the frozen counterfactual, with the bootstrap interval excluding 0.02 |
+| Refute 2 | f is negative **under any of the three** counterfactuals | f is negative under **either fitted** counterfactual (log-linear or quadratic) |
+| Uninformative, spread clause | f moves by more than 2× **across the three** | f moves by more than 2× **across the fitted pair** |
+
+Everything else stands: the frozen counterfactual is still log-linear, the
+0.05 and 0.02 magnitudes are untouched, criterion 2 and its feasibility gate are
+untouched, and the Prediction is untouched.
+
+The spread clause keeps doing the job the deleted conjunct was reaching for. It
+was written to stop a ramp artefact carrying the finding on its own, and a
+disagreement between a linear and a quadratic fit on the same six blocks is a
+direct measure of exactly that curvature sensitivity.
+
+### Why this is not an author loosening their own bar
+
+It is a fair question and the record should answer it rather than wave it away.
+Three points, in the order a sceptic would raise them.
+
+The amendment was **directed by the owner**, on the same precedent as the
+2026-09-12 H003 amendment, and the recommendation put to them said plainly that
+its author wrote the criteria being amended.
+
+It changes **no magnitude**. Every number a result is judged against — 0.05,
+0.02, 1.10, 0.95, 0.90, the factor of two — is exactly as frozen. What was
+removed is a conjunct that could not be evaluated, not a threshold that was
+inconvenient.
+
+And it was made **before the analysis ran once**, against a defect established
+on synthetic fixtures with no reference to the MTA feed. Nobody knew, or knows
+at the time of writing, which way f comes out.
+
+### The check that was missing, now mechanical
+
+The criteria were frozen with their magnitudes stated, as the handoff demands,
+and without anyone confirming a true effect could clear them. That check is now
+a test rather than an intention:
+`tests/test_h010_route_substitution.py` plants true effects across the whole
+predicted range of f — 0.05, 0.10 and 0.25 — and asserts support fires; plants
+0.01 and asserts refutation fires; plants 0.03 and asserts the uninformative
+branch fires. It also asserts support is reached while the flat counterfactual
+is still returning an undefined f, which is the amendment in one assertion.
+
+**Anyone freezing a criterion in this project should do the same before
+committing the record.** Three earlier failures here shared one shape — a bar a
+true effect could not clear — and all three would have been caught in minutes by
+planting an effect and checking.
 
 ## Data required
 
