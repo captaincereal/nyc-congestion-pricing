@@ -1,0 +1,2926 @@
+[
+  {
+    "detail": {
+      "datasets": [
+        {
+          "columns": [
+            {
+              "field": "bridge_tunnel",
+              "name": "Bridge/Tunnel",
+              "type": "text"
+            },
+            {
+              "field": "eastbound_volume",
+              "name": "Eastbound Volume",
+              "type": "number"
+            },
+            {
+              "field": "month",
+              "name": "Month",
+              "type": "text"
+            },
+            {
+              "field": "vehicles_type",
+              "name": "Vehicles Type",
+              "type": "text"
+            },
+            {
+              "field": "year",
+              "name": "Year",
+              "type": "number"
+            }
+          ],
+          "date_columns": [],
+          "description": "The Port Authority collects eastbound vehicle traffic volumes from its toll plazas at the six Port Authority vehicular crossings (i.e., George Washington Bridge, Holland Tunnel, Lincoln Tunnel, Goethals Bridge, Outerbridge Crossing and Bayonne Bridge).  This dataset contains monthly eastbound traffic volumes for each crossing and for all Port Authority crossings combined, based on vehicles passing",
+          "id": "5uvq-7ebw",
+          "link": "https://data.ny.gov/Transportation/Eastbound-Tunnel-and-Bridge-Traffic-Monthly-Volume/5uvq-7ebw",
+          "name": "Eastbound Tunnel and Bridge Traffic Monthly Volume, Port Authority of NY NJ:  Beginning 2011",
+          "row_count": "1680",
+          "rows": null,
+          "updated_at": "2026-04-15T21:03:07.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "bridge_tunnel",
+              "name": "Bridge/Tunnel",
+              "type": "text"
+            },
+            {
+              "field": "eastbound_volume",
+              "name": "Eastbound Volume",
+              "type": "number"
+            },
+            {
+              "field": "vehicle_type",
+              "name": "Vehicle Type",
+              "type": "text"
+            },
+            {
+              "field": "year",
+              "name": "Year",
+              "type": "number"
+            }
+          ],
+          "date_columns": [],
+          "description": "The Port Authority collects eastbound vehicle traffic volumes from its toll plazas at the six Port Authority vehicular crossings (i.e., George Washington Bridge, Holland Tunnel, Lincoln Tunnel, Goethals Bridge, Outerbridge Crossing and Bayonne Bridge).  This dataset contains annual eastbound traffic volumes for each crossing and for all Port Authority crossings combined, based on vehicles passing ",
+          "id": "9ray-6dmy",
+          "link": "https://data.ny.gov/Transportation/Eastbound-Tunnel-and-Bridge-Traffic-Annual-Volume-/9ray-6dmy",
+          "name": "Eastbound Tunnel and Bridge Traffic Annual Volume, Port Authority of NY NJ:  Beginning 2002",
+          "row_count": "392",
+          "rows": null,
+          "updated_at": "2026-04-15T21:03:51.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "direction",
+              "name": "Direction",
+              "type": "text"
+            },
+            {
+              "field": "facility",
+              "name": "Facility",
+              "type": "text"
+            },
+            {
+              "field": "facility_id",
+              "name": "Facility ID",
+              "type": "text"
+            },
+            {
+              "field": "hour",
+              "name": "Hour",
+              "type": "number"
+            },
+            {
+              "field": "payment_method",
+              "name": "Payment Method",
+              "type": "text"
+            },
+            {
+              "field": "traffic_count",
+              "name": "Traffic Count",
+              "type": "number"
+            },
+            {
+              "field": "transit_timestamp",
+              "name": "Transit Timestamp",
+              "type": "calendar_date"
+            },
+            {
+              "field": "vehicle_class",
+              "name": "Vehicle Class",
+              "type": "number"
+            },
+            {
+              "field": "vehicle_class_category",
+              "name": "Vehicle Class Category",
+              "type": "text"
+            },
+            {
+              "field": "vehicle_class_description",
+              "name": "Vehicle Class Description",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "transit_timestamp",
+            "earliest": "2019-01-01T00:00:00.000",
+            "latest": "2026-09-01T23:00:00.000",
+            "rows": "13514755"
+          },
+          "date_columns": [
+            "transit_timestamp",
+            "date"
+          ],
+          "description": "This dataset provides hourly bridge and tunnels crossings by facility, direction, vehicle class, and payment method. This dataset is a count of all traffic on the facilities, regardless of whether the driver ultimately pays the toll.",
+          "id": "ebfx-2m7v",
+          "link": "https://data.ny.gov/Transportation/MTA-Bridges-and-Tunnels-Hourly-Crossings-Beginning/ebfx-2m7v",
+          "name": "MTA Bridges and Tunnels Hourly Crossings: Beginning 2019",
+          "row_count": "13514755",
+          "rows": null,
+          "updated_at": "2026-09-14T15:21:20.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "direction",
+              "name": "Direction",
+              "type": "text"
+            },
+            {
+              "field": "hour",
+              "name": "Hour",
+              "type": "number"
+            },
+            {
+              "field": "plaza_id",
+              "name": "Plaza ID",
+              "type": "number"
+            },
+            {
+              "field": "vehicles_e_zpass",
+              "name": "# Vehicles - E-ZPass",
+              "type": "number"
+            },
+            {
+              "field": "vehicles_vtoll",
+              "name": "# Vehicles - VToll",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2010-01-01T00:00:00.000",
+            "latest": "2025-04-12T00:00:00.000",
+            "rows": "2352543"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "This deprecated dataset provides data showing the number of vehicles (including cars, buses, trucks and motorcycles) that pass through each of the bridges and tunnels operated by the MTA each hour of the day. For a more detailed look traffic, refer to dataset https://data.ny.gov/d/ebfx-2m7v/.",
+          "id": "qzve-kjga",
+          "link": "https://data.ny.gov/Transportation/MTA-Bridges-Tunnels-Hourly-Traffic-Rates-2010-2025/qzve-kjga",
+          "name": "MTA Bridges & Tunnels Hourly Traffic Rates: 2010 - 2025",
+          "row_count": "2352543",
+          "rows": null,
+          "updated_at": "2025-04-17T14:50:15.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "count",
+              "name": "Count",
+              "type": "number"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "mode",
+              "name": "Mode",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2020-03-01T00:00:00.000",
+            "latest": "2026-09-13T00:00:00.000",
+            "rows": "17934"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "The daily ridership dataset provides systemwide ridership and traffic estimates for subways (including the Staten Island Railway), buses, Long Island Rail Road, Metro-North Railroad, Access-A-Ride, Bridges and Tunnels, and the Central Business District and Congestion Relief Zone since the start of Congestion Pricing",
+          "id": "sayj-mze2",
+          "link": "https://data.ny.gov/Transportation/MTA-Daily-Ridership-and-Traffic-Beginning-2020/sayj-mze2",
+          "name": "MTA Daily Ridership and Traffic: Beginning 2020",
+          "row_count": "17934",
+          "rows": null,
+          "updated_at": "2026-09-14T22:04:08.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "access_a_ride_of_comparable_pre_pandemic_day",
+              "name": "Access-A-Ride: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "access_a_ride_total_scheduled_trips",
+              "name": "Access-A-Ride: Total Scheduled Trips",
+              "type": "number"
+            },
+            {
+              "field": "bridges_and_tunnels_of_comparable_pre_pandemic_day",
+              "name": "Bridges and Tunnels: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "bridges_and_tunnels_total_traffic",
+              "name": "Bridges and Tunnels: Total Traffic",
+              "type": "number"
+            },
+            {
+              "field": "buses_of_comparable_pre_pandemic_day",
+              "name": "Buses: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "buses_total_estimated_ridersip",
+              "name": "Buses: Total Estimated Ridership",
+              "type": "number"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "lirr_of_comparable_pre_pandemic_day",
+              "name": "LIRR: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "lirr_total_estimated_ridership",
+              "name": "LIRR: Total Estimated Ridership",
+              "type": "number"
+            },
+            {
+              "field": "metro_north_of_comparable_pre_pandemic_day",
+              "name": "Metro-North: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "metro_north_total_estimated_ridership",
+              "name": "Metro-North: Total Estimated Ridership",
+              "type": "number"
+            },
+            {
+              "field": "staten_island_railway_of_comparable_pre_pandemic_day",
+              "name": "Staten Island Railway: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "staten_island_railway_total_estimated_ridership",
+              "name": "Staten Island Railway: Total Estimated Ridership",
+              "type": "number"
+            },
+            {
+              "field": "subways_of_comparable_pre_pandemic_day",
+              "name": "Subways: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "subways_total_estimated_ridership",
+              "name": "Subways: Total Estimated Ridership",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2020-03-01T00:00:00.000",
+            "latest": "2025-01-09T00:00:00.000",
+            "rows": "1776"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "This deprecated dataset provides systemwide ridership and traffic estimates for subways (including the Staten Island Railway), buses, Long Island Rail Road, Metro-North Railroad, Access-A-Ride, and Bridges and Tunnels, beginning 3/1/2020, and provides a percentage comparison against a comparable pre-pandemic date.\n\nNext-day estimates for daily ridership, without the pre-pandemic comparison, are no",
+          "id": "vxuj-8kew",
+          "link": "https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-2020-2025/vxuj-8kew",
+          "name": "MTA Daily Ridership Data: 2020 - 2025",
+          "row_count": "1776",
+          "rows": null,
+          "updated_at": "2025-01-14T15:52:24.000Z"
+        }
+      ],
+      "domain": "data.ny.gov",
+      "question": "Did vehicle volume fall on crossings that feed the zone, against crossings run by the same operator that do not?"
+    },
+    "error": "",
+    "key": "mta_bridges_tunnels"
+  },
+  {
+    "detail": {
+      "datasets": [
+        {
+          "columns": [
+            {
+              "field": "borough",
+              "name": "borough",
+              "type": "text"
+            },
+            {
+              "field": "fare_class_category",
+              "name": "fare_class_category",
+              "type": "text"
+            },
+            {
+              "field": "georeference",
+              "name": "Georeference",
+              "type": "point"
+            },
+            {
+              "field": "latitude",
+              "name": "latitude",
+              "type": "number"
+            },
+            {
+              "field": "longitude",
+              "name": "longitude",
+              "type": "number"
+            },
+            {
+              "field": "payment_method",
+              "name": "payment_method",
+              "type": "text"
+            },
+            {
+              "field": "ridership",
+              "name": "ridership",
+              "type": "number"
+            },
+            {
+              "field": "station_complex",
+              "name": "station_complex",
+              "type": "text"
+            },
+            {
+              "field": "station_complex_id",
+              "name": "station_complex_id",
+              "type": "text"
+            },
+            {
+              "field": "transfers",
+              "name": "transfers",
+              "type": "number"
+            },
+            {
+              "field": "transit_mode",
+              "name": "transit_mode",
+              "type": "text"
+            },
+            {
+              "field": "transit_timestamp",
+              "name": "transit_timestamp",
+              "type": "calendar_date"
+            }
+          ],
+          "coverage": {
+            "date_column": "transit_timestamp",
+            "earliest": "2025-01-01T00:00:00.000",
+            "latest": "2026-09-02T23:00:00.000",
+            "rows": "44538041"
+          },
+          "date_columns": [
+            "transit_timestamp"
+          ],
+          "description": "This dataset provides subway ridership estimates on an hourly basis by subway station complex and class of fare payment.",
+          "id": "5wq4-mkjj",
+          "link": "https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-2025/5wq4-mkjj",
+          "name": "MTA Subway Hourly Ridership: Beginning 2025",
+          "row_count": "44538041",
+          "rows": null,
+          "updated_at": "2026-09-09T15:07:13.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "c_a",
+              "name": "C/A",
+              "type": "text"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "description",
+              "name": "Description",
+              "type": "text"
+            },
+            {
+              "field": "division",
+              "name": "Division",
+              "type": "text"
+            },
+            {
+              "field": "entries",
+              "name": "Entries",
+              "type": "number"
+            },
+            {
+              "field": "exits",
+              "name": "Exits                                                     ",
+              "type": "number"
+            },
+            {
+              "field": "line_name",
+              "name": "Line Name",
+              "type": "text"
+            },
+            {
+              "field": "scp",
+              "name": "SCP",
+              "type": "text"
+            },
+            {
+              "field": "station",
+              "name": "Station",
+              "type": "text"
+            },
+            {
+              "field": "time",
+              "name": "Time",
+              "type": "text"
+            },
+            {
+              "field": "unit",
+              "name": "Unit",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2016-01-02T00:00:00.000",
+            "latest": "2016-12-30T00:00:00.000",
+            "rows": "9492670"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "This retired dataset contains information on entry/exit values for individual control areas and is posted purely for archival purposes. More detailed subway ridership data is now supported through the Subway hourly dataset (https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-202/wujg-7c2s).",
+          "id": "ekwu-khcy",
+          "link": "https://data.ny.gov/Transportation/MTA-Subway-Turnstile-Usage-Data-2016/ekwu-khcy",
+          "name": "MTA Subway Turnstile Usage Data: 2016",
+          "row_count": "9492670",
+          "rows": null,
+          "updated_at": "2024-07-29T20:02:06.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "c_a",
+              "name": "C/A",
+              "type": "text"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "desc",
+              "name": "Description",
+              "type": "text"
+            },
+            {
+              "field": "division",
+              "name": "Division",
+              "type": "text"
+            },
+            {
+              "field": "entries",
+              "name": "Entries",
+              "type": "number"
+            },
+            {
+              "field": "exits",
+              "name": "Exits                                                     ",
+              "type": "number"
+            },
+            {
+              "field": "linename",
+              "name": "Line Name",
+              "type": "text"
+            },
+            {
+              "field": "scp",
+              "name": "SCP",
+              "type": "text"
+            },
+            {
+              "field": "station",
+              "name": "Station",
+              "type": "text"
+            },
+            {
+              "field": "time",
+              "name": "Time",
+              "type": "text"
+            },
+            {
+              "field": "unit",
+              "name": "Unit",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2014-02-01T00:00:00.000",
+            "latest": "2014-12-31T00:00:00.000",
+            "rows": "10800770"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "This retired dataset contains information on entry/exit values for individual control areas and is posted purely for archival purposes. More detailed subway ridership data is now supported through the Subway hourly dataset (https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-202/wujg-7c2s).",
+          "id": "i55r-43gk",
+          "link": "https://data.ny.gov/Transportation/MTA-Subway-Turnstile-Usage-Data-2014/i55r-43gk",
+          "name": "MTA Subway Turnstile Usage Data: 2014",
+          "row_count": "10800770",
+          "rows": null,
+          "updated_at": "2024-07-29T20:16:34.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "_30minearlyto1late",
+              "name": "Percentage of Trips by Arrival Time",
+              "type": "text"
+            },
+            {
+              "field": "arrival_time",
+              "name": "Arrival Time",
+              "type": "text"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "hour_of_promise_time",
+              "name": "Hour of Promise Time",
+              "type": "number"
+            },
+            {
+              "field": "pickup_location",
+              "name": "Pickup Location",
+              "type": "text"
+            },
+            {
+              "field": "provider_type",
+              "name": "Provider Type",
+              "type": "text"
+            },
+            {
+              "field": "total_appointment_trips",
+              "name": "Total Appointment Trips",
+              "type": "number"
+            },
+            {
+              "field": "trips_within_arrival_time",
+              "name": "Trips Within Arrival Time",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2018-07-01T00:00:00.000",
+            "latest": "2023-12-31T00:00:00.000",
+            "rows": "982906"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "Drop-off On-Time Performance (OTP) measures the quality of provider service, comparing actual to customer-requested drop-off time for trips scheduled with an appointment time. Trips are considered on-time if they are no more than 30 minutes early, and no later than the appointment time.",
+          "id": "nxai-wcbd",
+          "link": "https://data.ny.gov/Transportation/MTA-NYCT-Paratransit-Drop-off-On-Time-Performance-/nxai-wcbd",
+          "name": "MTA NYCT Paratransit Drop-off On-Time Performance: 2018-2023",
+          "row_count": "982906",
+          "rows": null,
+          "updated_at": "2026-05-27T19:40:47.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "category",
+              "name": "Category",
+              "type": "text"
+            },
+            {
+              "field": "project",
+              "name": "Project",
+              "type": "text"
+            },
+            {
+              "field": "value",
+              "name": "Value",
+              "type": "text"
+            }
+          ],
+          "date_columns": [],
+          "description": "The 2025-2044 20-Year Needs Assessment Comparative Evaluation is a framework which assesses the costs and benefits of potential expansions and enhancements. All potential projects are evaluated using a consistent set of models, tools, and criteria including ridership, time savings, network resilience and sustainability, capacity, equity, network leverage, geographic distribution, and cost. The mos",
+          "id": "q43a-ygsk",
+          "link": "https://data.ny.gov/Transportation/MTA-2025-2044-20-Year-Needs-Assessment-Comparative/q43a-ygsk",
+          "name": "MTA 2025-2044 20-Year Needs Assessment Comparative Evaluation",
+          "row_count": "1334",
+          "rows": null,
+          "updated_at": "2026-04-21T19:45:07.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "dropoffs_within_standard",
+              "name": "Dropoffs Within Standard",
+              "type": "number"
+            },
+            {
+              "field": "hour_of_promise_time",
+              "name": "Hour of Promise Time",
+              "type": "number"
+            },
+            {
+              "field": "percentage_of_trips_within",
+              "name": "Percentage of Trips Within Standard",
+              "type": "text"
+            },
+            {
+              "field": "pick_up_location",
+              "name": "Pick-up Location",
+              "type": "text"
+            },
+            {
+              "field": "provider_type",
+              "name": "Provider Type",
+              "type": "text"
+            },
+            {
+              "field": "total_appointment_trips",
+              "name": "Total Appointment Trips",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2016-10-01T00:00:00.000",
+            "latest": "2019-07-31T00:00:00.000",
+            "rows": "193111"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "Drop-off On-Time Performance (OTP) measures the quality of provider service, comparing actual to customer-requested drop-off time for trips scheduled with an appointment time. This dataset uses the old methodology in which trips were considered on-time if they arrived at the drop-off location no more than five minutes after the requested time. The Drop-off On-Time Performance dataset with the new ",
+          "id": "rmfq-74ji",
+          "link": "https://data.ny.gov/Transportation/MTA-NYCT-Paratransit-Drop-off-On-Time-Performance-/rmfq-74ji",
+          "name": "MTA NYCT Paratransit Drop-off On-Time Performance: 2016 - 2019 (Archived Methodology)",
+          "row_count": "193111",
+          "rows": null,
+          "updated_at": "2024-06-28T17:58:42.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "hour_of_promise_time",
+              "name": "Hour Of Promise Time",
+              "type": "number"
+            },
+            {
+              "field": "on_time_performance",
+              "name": "On-Time Performance",
+              "type": "text"
+            },
+            {
+              "field": "pickup_location",
+              "name": "Pickup Location",
+              "type": "text"
+            },
+            {
+              "field": "pickups_within_standards",
+              "name": "Pickups Within Standards",
+              "type": "number"
+            },
+            {
+              "field": "provider_type",
+              "name": "Provider Type",
+              "type": "text"
+            },
+            {
+              "field": "standard",
+              "name": "Standard",
+              "type": "text"
+            },
+            {
+              "field": "total_pickups",
+              "name": "Total Pickups",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2016-10-01T00:00:00.000",
+            "latest": "2023-12-31T00:00:00.000",
+            "rows": "1403396"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "Pickup On-Time Performance (OTP) measures the quality of provider service, comparing actual to promised pickup time. Trips are considered on-time if they arrive no more than 20 minutes after the promised time. This dataset also includes trips that arrive within 15 and 30 minutes of the promised time.",
+          "id": "rube-svnv",
+          "link": "https://data.ny.gov/Transportation/MTA-NYCT-Paratransit-Pickup-On-Time-Performance-20/rube-svnv",
+          "name": "MTA NYCT Paratransit Pickup On-Time Performance: 2016-2023",
+          "row_count": null,
+          "rows": null,
+          "updated_at": "2026-05-27T19:39:53.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "count",
+              "name": "Count",
+              "type": "number"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "mode",
+              "name": "Mode",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2020-03-01T00:00:00.000",
+            "latest": "2026-09-13T00:00:00.000",
+            "rows": "17934"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "The daily ridership dataset provides systemwide ridership and traffic estimates for subways (including the Staten Island Railway), buses, Long Island Rail Road, Metro-North Railroad, Access-A-Ride, Bridges and Tunnels, and the Central Business District and Congestion Relief Zone since the start of Congestion Pricing",
+          "id": "sayj-mze2",
+          "link": "https://data.ny.gov/Transportation/MTA-Daily-Ridership-and-Traffic-Beginning-2020/sayj-mze2",
+          "name": "MTA Daily Ridership and Traffic: Beginning 2020",
+          "row_count": "17934",
+          "rows": null,
+          "updated_at": "2026-09-14T22:04:08.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "borough",
+              "name": "borough",
+              "type": "text"
+            },
+            {
+              "field": "fare_class_category",
+              "name": "fare_class_category",
+              "type": "text"
+            },
+            {
+              "field": "georeference",
+              "name": "Georeference",
+              "type": "point"
+            },
+            {
+              "field": "latitude",
+              "name": "latitude",
+              "type": "number"
+            },
+            {
+              "field": "longitude",
+              "name": "longitude",
+              "type": "number"
+            },
+            {
+              "field": "payment_method",
+              "name": "payment_method",
+              "type": "text"
+            },
+            {
+              "field": "ridership",
+              "name": "ridership",
+              "type": "number"
+            },
+            {
+              "field": "station_complex",
+              "name": "station_complex",
+              "type": "text"
+            },
+            {
+              "field": "station_complex_id",
+              "name": "station_complex_id",
+              "type": "text"
+            },
+            {
+              "field": "transfers",
+              "name": "transfers",
+              "type": "number"
+            },
+            {
+              "field": "transit_mode",
+              "name": "transit_mode",
+              "type": "text"
+            },
+            {
+              "field": "transit_timestamp",
+              "name": "transit_timestamp",
+              "type": "calendar_date"
+            }
+          ],
+          "coverage": {
+            "date_column": "transit_timestamp",
+            "earliest": "2017-01-13T00:00:00.000",
+            "latest": "2019-12-31T23:00:00.000",
+            "rows": "57611916"
+          },
+          "date_columns": [
+            "transit_timestamp"
+          ],
+          "description": "This dataset provides subway ridership estimates on an hourly basis by subway station complex and class of fare payment.",
+          "id": "t69i-h2me",
+          "link": "https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-2017-2019/t69i-h2me",
+          "name": "MTA Subway Hourly Ridership: 2017-2019",
+          "row_count": "57611916",
+          "rows": null,
+          "updated_at": "2025-11-12T15:36:51.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "c_a",
+              "name": "C/A",
+              "type": "text"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "description",
+              "name": "Description",
+              "type": "text"
+            },
+            {
+              "field": "division",
+              "name": "Division",
+              "type": "text"
+            },
+            {
+              "field": "entries",
+              "name": "Entries",
+              "type": "number"
+            },
+            {
+              "field": "exits",
+              "name": "Exits                                                     ",
+              "type": "number"
+            },
+            {
+              "field": "line_name",
+              "name": "Line Name",
+              "type": "text"
+            },
+            {
+              "field": "scp",
+              "name": "SCP",
+              "type": "text"
+            },
+            {
+              "field": "station",
+              "name": "Station",
+              "type": "text"
+            },
+            {
+              "field": "time",
+              "name": "Time",
+              "type": "text"
+            },
+            {
+              "field": "unit",
+              "name": "Unit",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2015-01-01T00:00:00.000",
+            "latest": "2016-01-01T00:00:00.000",
+            "rows": "9947131"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "This retired dataset contains information on entry/exit values for individual control areas and is posted purely for archival purposes. More detailed subway ridership data is now supported through the Subway hourly dataset (https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-Beginning-February-202/wujg-7c2s).",
+          "id": "ug6q-shqc",
+          "link": "https://data.ny.gov/Transportation/MTA-Subway-Turnstile-Usage-Data-2015/ug6q-shqc",
+          "name": "MTA Subway Turnstile Usage Data: 2015",
+          "row_count": "9947131",
+          "rows": null,
+          "updated_at": "2024-07-29T20:10:40.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "access_a_ride_of_comparable_pre_pandemic_day",
+              "name": "Access-A-Ride: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "access_a_ride_total_scheduled_trips",
+              "name": "Access-A-Ride: Total Scheduled Trips",
+              "type": "number"
+            },
+            {
+              "field": "bridges_and_tunnels_of_comparable_pre_pandemic_day",
+              "name": "Bridges and Tunnels: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "bridges_and_tunnels_total_traffic",
+              "name": "Bridges and Tunnels: Total Traffic",
+              "type": "number"
+            },
+            {
+              "field": "buses_of_comparable_pre_pandemic_day",
+              "name": "Buses: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "buses_total_estimated_ridersip",
+              "name": "Buses: Total Estimated Ridership",
+              "type": "number"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "lirr_of_comparable_pre_pandemic_day",
+              "name": "LIRR: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "lirr_total_estimated_ridership",
+              "name": "LIRR: Total Estimated Ridership",
+              "type": "number"
+            },
+            {
+              "field": "metro_north_of_comparable_pre_pandemic_day",
+              "name": "Metro-North: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "metro_north_total_estimated_ridership",
+              "name": "Metro-North: Total Estimated Ridership",
+              "type": "number"
+            },
+            {
+              "field": "staten_island_railway_of_comparable_pre_pandemic_day",
+              "name": "Staten Island Railway: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "staten_island_railway_total_estimated_ridership",
+              "name": "Staten Island Railway: Total Estimated Ridership",
+              "type": "number"
+            },
+            {
+              "field": "subways_of_comparable_pre_pandemic_day",
+              "name": "Subways: % of Comparable Pre-Pandemic Day",
+              "type": "number"
+            },
+            {
+              "field": "subways_total_estimated_ridership",
+              "name": "Subways: Total Estimated Ridership",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2020-03-01T00:00:00.000",
+            "latest": "2025-01-09T00:00:00.000",
+            "rows": "1776"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "This deprecated dataset provides systemwide ridership and traffic estimates for subways (including the Staten Island Railway), buses, Long Island Rail Road, Metro-North Railroad, Access-A-Ride, and Bridges and Tunnels, beginning 3/1/2020, and provides a percentage comparison against a comparable pre-pandemic date.\n\nNext-day estimates for daily ridership, without the pre-pandemic comparison, are no",
+          "id": "vxuj-8kew",
+          "link": "https://data.ny.gov/Transportation/MTA-Daily-Ridership-Data-2020-2025/vxuj-8kew",
+          "name": "MTA Daily Ridership Data: 2020 - 2025",
+          "row_count": "1776",
+          "rows": null,
+          "updated_at": "2025-01-14T15:52:24.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": ":@computed_region_kjdx_g34t",
+              "name": "Counties",
+              "type": "number"
+            },
+            {
+              "field": ":@computed_region_wbg7_3whc",
+              "name": "New York Zip Codes",
+              "type": "number"
+            },
+            {
+              "field": ":@computed_region_yamh_8v7k",
+              "name": "NYS Municipal Boundaries",
+              "type": "number"
+            },
+            {
+              "field": "borough",
+              "name": "borough",
+              "type": "text"
+            },
+            {
+              "field": "fare_class_category",
+              "name": "fare_class_category",
+              "type": "text"
+            },
+            {
+              "field": "georeference",
+              "name": "Georeference",
+              "type": "point"
+            },
+            {
+              "field": "latitude",
+              "name": "latitude",
+              "type": "number"
+            },
+            {
+              "field": "longitude",
+              "name": "longitude",
+              "type": "number"
+            },
+            {
+              "field": "payment_method",
+              "name": "payment_method",
+              "type": "text"
+            },
+            {
+              "field": "ridership",
+              "name": "ridership",
+              "type": "number"
+            },
+            {
+              "field": "station_complex",
+              "name": "station_complex",
+              "type": "text"
+            },
+            {
+              "field": "station_complex_id",
+              "name": "station_complex_id",
+              "type": "text"
+            },
+            {
+              "field": "transfers",
+              "name": "transfers",
+              "type": "number"
+            },
+            {
+              "field": "transit_mode",
+              "name": "transit_mode",
+              "type": "text"
+            },
+            {
+              "field": "transit_timestamp",
+              "name": "transit_timestamp",
+              "type": "calendar_date"
+            }
+          ],
+          "coverage": {
+            "date_column": "transit_timestamp",
+            "earliest": "2020-01-01T00:00:00.000",
+            "latest": "2024-12-31T23:00:00.000",
+            "rows": "120855567"
+          },
+          "date_columns": [
+            "transit_timestamp"
+          ],
+          "description": "This dataset provides subway ridership estimates on an hourly basis by subway station complex and class of fare payment.",
+          "id": "wujg-7c2s",
+          "link": "https://data.ny.gov/Transportation/MTA-Subway-Hourly-Ridership-2020-2024/wujg-7c2s",
+          "name": "MTA Subway Hourly Ridership: 2020-2024",
+          "row_count": null,
+          "rows": null,
+          "updated_at": "2026-03-10T18:00:55.000Z"
+        }
+      ],
+      "domain": "data.ny.gov",
+      "question": "Did people switch to transit inside the zone relative to outside?"
+    },
+    "error": "",
+    "key": "subway_ridership"
+  },
+  {
+    "detail": {
+      "datasets": [
+        {
+          "columns": [
+            {
+              "field": "boro",
+              "name": "Boro",
+              "type": "text"
+            },
+            {
+              "field": "d",
+              "name": "D",
+              "type": "number"
+            },
+            {
+              "field": "direction",
+              "name": "Direction",
+              "type": "text"
+            },
+            {
+              "field": "fromst",
+              "name": "fromSt",
+              "type": "text"
+            },
+            {
+              "field": "hh",
+              "name": "HH",
+              "type": "number"
+            },
+            {
+              "field": "m",
+              "name": "M",
+              "type": "number"
+            },
+            {
+              "field": "mm",
+              "name": "MM",
+              "type": "number"
+            },
+            {
+              "field": "requestid",
+              "name": "RequestID",
+              "type": "number"
+            },
+            {
+              "field": "segmentid",
+              "name": "SegmentID",
+              "type": "number"
+            },
+            {
+              "field": "street",
+              "name": "street",
+              "type": "text"
+            },
+            {
+              "field": "tost",
+              "name": "toSt",
+              "type": "text"
+            },
+            {
+              "field": "vol",
+              "name": "Vol",
+              "type": "number"
+            },
+            {
+              "field": "wktgeom",
+              "name": "WktGeom",
+              "type": "text"
+            },
+            {
+              "field": "yr",
+              "name": "Yr",
+              "type": "number"
+            }
+          ],
+          "date_columns": [],
+          "description": "New York City Department of Transportation (NYC DOT) uses Automated Traffic Recorders (ATR) to collect traffic sample volume counts at bridge crossings and roadways.These counts do not cover the entire year, and the number of days counted per location may vary from year to year.",
+          "id": "7ym2-wayt",
+          "link": "https://data.cityofnewyork.us/Transportation/Automated-Traffic-Volume-Counts/7ym2-wayt",
+          "name": "Automated Traffic Volume Counts",
+          "row_count": "1875154",
+          "rows": null,
+          "updated_at": "2026-03-20T04:21:01.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "_10_00_11_00am",
+              "name": "10:00-11:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_10_00_11_00pm",
+              "name": "10:00-11:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_11_00_12_00am",
+              "name": "11:00-12:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_11_00_12_00pm",
+              "name": "11:00-12:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_12_00_1_00_am",
+              "name": "12:00-1:00 AM",
+              "type": "number"
+            },
+            {
+              "field": "_12_00_1_00pm",
+              "name": "12:00-1:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_1_00_2_00am",
+              "name": "1:00-2:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_1_00_2_00pm",
+              "name": "1:00-2:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_2_00_3_00am",
+              "name": "2:00-3:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_2_00_3_00pm",
+              "name": "2:00-3:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_3_00_4_00am",
+              "name": "3:00-4:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_3_00_4_00pm",
+              "name": "3:00-4:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_4_00_5_00am",
+              "name": "4:00-5:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_4_00_5_00pm",
+              "name": "4:00-5:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_5_00_6_00am",
+              "name": "5:00-6:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_5_00_6_00pm",
+              "name": "5:00-6:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_6_00_7_00am",
+              "name": "6:00-7:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_6_00_7_00pm",
+              "name": "6:00-7:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_7_00_8_00am",
+              "name": "7:00-8:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_7_00_8_00pm",
+              "name": "7:00-8:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_8_00_9_00am",
+              "name": "8:00-9:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_8_00_9_00pm",
+              "name": "8:00-9:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_9_00_10_00am",
+              "name": "9:00-10:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_9_00_10_00pm",
+              "name": "9:00-10:00PM",
+              "type": "number"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "direction",
+              "name": "Direction",
+              "type": "text"
+            },
+            {
+              "field": "from",
+              "name": "From",
+              "type": "text"
+            },
+            {
+              "field": "roadway_name",
+              "name": "Roadway Name",
+              "type": "text"
+            },
+            {
+              "field": "segmentid",
+              "name": "SegmentID",
+              "type": "number"
+            },
+            {
+              "field": "to",
+              "name": "To",
+              "type": "text"
+            },
+            {
+              "field": "veh_class_type",
+              "name": "Veh Class Type",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2011-01-10T00:00:00.000",
+            "latest": "2025-11-26T00:00:00.000",
+            "rows": "28530"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "Vehicle classification counts collected by DOT for New York Metropolitan Transportation Council (NYMTC) to validate the New York Best Practice Model (NYBPM). For NYBPM screenline locations where data has been collected within the last three years are not considered for data collection for the present year. DOT collects data on at least 10% of the total NYBPM screenline locations.",
+          "id": "96ay-ea4r",
+          "link": "https://data.cityofnewyork.us/Transportation/Vehicle-Classification-Counts-2011-2025-/96ay-ea4r",
+          "name": "Vehicle Classification Counts (2011 - 2025)",
+          "row_count": "28530",
+          "rows": null,
+          "updated_at": "2026-04-30T14:46:29.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "_10_00_11_00am",
+              "name": "10:00-11:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_10_00_11_00pm",
+              "name": "10:00-11:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_11_00_12_00am",
+              "name": "11:00-12:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_11_00_12_00pm",
+              "name": "11:00-12:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_12_00_1_00_am",
+              "name": "12:00-1:00 AM",
+              "type": "number"
+            },
+            {
+              "field": "_12_00_1_00pm",
+              "name": "12:00-1:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_1_00_2_00am",
+              "name": "1:00-2:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_1_00_2_00pm",
+              "name": "1:00-2:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_2_00_3_00am",
+              "name": "2:00-3:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_2_00_3_00pm",
+              "name": "2:00-3:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_3_00_4_00am",
+              "name": "3:00-4:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_3_00_4_00pm",
+              "name": "3:00-4:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_4_00_5_00am",
+              "name": "4:00-5:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_4_00_5_00pm",
+              "name": "4:00-5:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_5_00_6_00am",
+              "name": "5:00-6:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_5_00_6_00pm",
+              "name": "5:00-6:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_6_00_7_00am",
+              "name": "6:00-7:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_6_00_7_00pm",
+              "name": "6:00-7:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_7_00_8_00am",
+              "name": "7:00-8:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_7_00_8_00pm",
+              "name": "7:00-8:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_8_00_9_00am",
+              "name": "8:00-9:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_8_00_9_00pm",
+              "name": "8:00-9:00PM",
+              "type": "number"
+            },
+            {
+              "field": "_9_00_10_00am",
+              "name": "9:00-10:00AM",
+              "type": "number"
+            },
+            {
+              "field": "_9_00_10_00pm",
+              "name": "9:00-10:00PM",
+              "type": "number"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "direction",
+              "name": "Direction",
+              "type": "text"
+            },
+            {
+              "field": "from",
+              "name": "From",
+              "type": "text"
+            },
+            {
+              "field": "id",
+              "name": "ID",
+              "type": "text"
+            },
+            {
+              "field": "roadway_name",
+              "name": "Roadway Name",
+              "type": "text"
+            },
+            {
+              "field": "segmentid",
+              "name": "SegmentID",
+              "type": "number"
+            },
+            {
+              "field": "to",
+              "name": "To",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2012-01-08T00:00:00.000",
+            "latest": "2021-05-09T00:00:00.000",
+            "rows": "42756"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "This is static historical dataset. New York City Department of Transportation (NYC DOT) uses Automated Traffic Recorders (ATR) to collect traffic sample volume counts at bridge crossings and roadways. These counts do not cover the entire year, and the number of days counted per location may vary from year to year.\n\nFor a current feed of Automated Traffic Volume Counts, see: https://data.cityofnewy",
+          "id": "btm5-ppia",
+          "link": "https://data.cityofnewyork.us/Transportation/Traffic-Volume-Counts-Historical-/btm5-ppia",
+          "name": "Traffic Volume Counts (Historical)",
+          "row_count": "42756",
+          "rows": null,
+          "updated_at": "2026-01-30T19:28:28.000Z"
+        }
+      ],
+      "domain": "data.cityofnewyork.us",
+      "question": "Are there street-level vehicle counts with a pre-period near the cordon?"
+    },
+    "error": "",
+    "key": "traffic_volume_counts"
+  },
+  {
+    "detail": {
+      "datasets": [
+        {
+          "columns": [
+            {
+              "field": "congestion_surcharge",
+              "name": "congestion_surcharge",
+              "type": "text"
+            },
+            {
+              "field": "dolocationid",
+              "name": "DOLocationID",
+              "type": "number"
+            },
+            {
+              "field": "extra",
+              "name": "extra",
+              "type": "number"
+            },
+            {
+              "field": "fare_amount",
+              "name": "fare_amount",
+              "type": "number"
+            },
+            {
+              "field": "improvement_surcharge",
+              "name": "improvement_surcharge",
+              "type": "number"
+            },
+            {
+              "field": "mta_tax",
+              "name": "mta_tax",
+              "type": "number"
+            },
+            {
+              "field": "passenger_count",
+              "name": "passenger_count",
+              "type": "number"
+            },
+            {
+              "field": "payment_type",
+              "name": "payment_type",
+              "type": "number"
+            },
+            {
+              "field": "pulocationid",
+              "name": "PULocationID",
+              "type": "number"
+            },
+            {
+              "field": "ratecodeid",
+              "name": "RatecodeID",
+              "type": "number"
+            },
+            {
+              "field": "store_and_fwd_flag",
+              "name": "store_and_fwd_flag",
+              "type": "text"
+            },
+            {
+              "field": "tip_amount",
+              "name": "tip_amount",
+              "type": "number"
+            },
+            {
+              "field": "tolls_amount",
+              "name": "tolls_amount",
+              "type": "number"
+            },
+            {
+              "field": "total_amount",
+              "name": "total_amount",
+              "type": "number"
+            },
+            {
+              "field": "tpep_dropoff_datetime",
+              "name": "tpep_dropoff_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "tpep_pickup_datetime",
+              "name": "tpep_pickup_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "trip_distance",
+              "name": "trip_distance",
+              "type": "number"
+            },
+            {
+              "field": "vendorid",
+              "name": "VendorID",
+              "type": "number"
+            }
+          ],
+          "date_columns": [
+            "tpep_pickup_datetime",
+            "tpep_dropoff_datetime"
+          ],
+          "description": "These records are generated from the trip record submissions made by yellow taxi Technology Service Providers (TSPs). Each row represents a single trip in a yellow taxi. The trip records include fields capturing pick-up and drop-off dates/times, pick-up and drop-off taxi zone locations, trip distances, itemized fares, rate types, payment types, and driver-reported passenger counts.",
+          "error": "ReadTimeout(ReadTimeoutError(\"HTTPSConnectionPool(host='data.cityofnewyork.us', port=443): Read timed out. (read timeout=60)\"))",
+          "id": "2upf-qytp",
+          "link": "https://data.cityofnewyork.us/Transportation/2019-Yellow-Taxi-Trip-Data/2upf-qytp",
+          "name": "2019 Yellow Taxi Trip Data",
+          "row_count": "84152418",
+          "rows": null,
+          "updated_at": "2023-12-14T20:46:33.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "base_license_number",
+              "name": "Base License Number",
+              "type": "text"
+            },
+            {
+              "field": "base_name",
+              "name": "Base Name",
+              "type": "text"
+            },
+            {
+              "field": "dba",
+              "name": "DBA",
+              "type": "text"
+            },
+            {
+              "field": "month",
+              "name": "Month",
+              "type": "number"
+            },
+            {
+              "field": "month_name",
+              "name": "Month Name",
+              "type": "text"
+            },
+            {
+              "field": "total_dispatched_shared_trips",
+              "name": "Total Dispatched Shared Trips",
+              "type": "number"
+            },
+            {
+              "field": "total_dispatched_trips",
+              "name": "Total Dispatched Trips",
+              "type": "number"
+            },
+            {
+              "field": "unique_dispatched_vehicles",
+              "name": "Unique Dispatched Vehicles",
+              "type": "number"
+            },
+            {
+              "field": "year",
+              "name": "Year",
+              "type": "number"
+            }
+          ],
+          "date_columns": [],
+          "description": "Monthly report including total dispatched trips, total dispatched shared trips, and unique dispatched vehicles aggregated by FHV (For-Hire Vehicle) base. These have been tabulated from raw trip record submissions made by bases to the NYC Taxi and Limousine Commission (TLC). \r\n\r\nThis dataset is typically updated monthly on a two-month lag, as bases have until the conclusion of the following month t",
+          "id": "2v9c-2k7f",
+          "link": "https://data.cityofnewyork.us/Transportation/FHV-Base-Aggregate-Report/2v9c-2k7f",
+          "name": "FHV Base Aggregate Report",
+          "row_count": "39443",
+          "rows": null,
+          "updated_at": "2026-09-14T22:12:32.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "airport_fee",
+              "name": "airport_fee",
+              "type": "number"
+            },
+            {
+              "field": "congestion_surcharge",
+              "name": "congestion_surcharge",
+              "type": "number"
+            },
+            {
+              "field": "dolocationid",
+              "name": "DOLocationID",
+              "type": "number"
+            },
+            {
+              "field": "extra",
+              "name": "extra",
+              "type": "number"
+            },
+            {
+              "field": "fare_amount",
+              "name": "fare_amount",
+              "type": "number"
+            },
+            {
+              "field": "improvement_surcharge",
+              "name": "improvement_surcharge",
+              "type": "number"
+            },
+            {
+              "field": "mta_tax",
+              "name": "mta_tax",
+              "type": "number"
+            },
+            {
+              "field": "passenger_count",
+              "name": "passenger_count",
+              "type": "number"
+            },
+            {
+              "field": "payment_type",
+              "name": "payment_type",
+              "type": "number"
+            },
+            {
+              "field": "pulocationid",
+              "name": "PULocationID",
+              "type": "number"
+            },
+            {
+              "field": "ratecodeid",
+              "name": "RatecodeID",
+              "type": "number"
+            },
+            {
+              "field": "store_and_fwd_flag",
+              "name": "store_and_fwd_flag",
+              "type": "text"
+            },
+            {
+              "field": "tip_amount",
+              "name": "tip_amount",
+              "type": "number"
+            },
+            {
+              "field": "tolls_amount",
+              "name": "tolls_amount",
+              "type": "number"
+            },
+            {
+              "field": "total_amount",
+              "name": "total_amount",
+              "type": "number"
+            },
+            {
+              "field": "tpep_dropoff_datetime",
+              "name": "tpep_dropoff_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "tpep_pickup_datetime",
+              "name": "tpep_pickup_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "trip_distance",
+              "name": "trip_distance",
+              "type": "number"
+            },
+            {
+              "field": "vendorid",
+              "name": "VendorID",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "tpep_pickup_datetime",
+            "earliest": "2001-01-01T00:06:49.000",
+            "latest": "2024-01-03T19:42:57.000",
+            "rows": "38310226"
+          },
+          "date_columns": [
+            "tpep_pickup_datetime",
+            "tpep_dropoff_datetime"
+          ],
+          "description": "These records are generated from the trip record submissions made by yellow taxi Technology Service Providers (TSPs). Each row represents a single trip in a yellow taxi. The trip records include fields capturing pick-up and drop-off dates/times, pick-up and drop-off taxi zone locations, trip distances, itemized fares, rate types, payment types, and driver-reported passenger counts.",
+          "id": "4b4i-vvec",
+          "link": "https://data.cityofnewyork.us/Transportation/2023-Yellow-Taxi-Trip-Data/4b4i-vvec",
+          "name": "2023 Yellow Taxi Trip Data",
+          "row_count": "38310226",
+          "rows": null,
+          "updated_at": "2024-07-16T18:35:01.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "active",
+              "name": "Active",
+              "type": "text"
+            },
+            {
+              "field": "base_address",
+              "name": "Base Address",
+              "type": "text"
+            },
+            {
+              "field": "base_name",
+              "name": "Base Name",
+              "type": "text"
+            },
+            {
+              "field": "base_number",
+              "name": "Base Number",
+              "type": "text"
+            },
+            {
+              "field": "base_telephone_number",
+              "name": "Base Telephone Number",
+              "type": "text"
+            },
+            {
+              "field": "base_type",
+              "name": "Base Type",
+              "type": "text"
+            },
+            {
+              "field": "certification_date",
+              "name": "Certification Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "dmv_license_plate_number",
+              "name": "DMV License Plate Number",
+              "type": "text"
+            },
+            {
+              "field": "expiration_date",
+              "name": "Expiration Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "hack_up_date",
+              "name": "Hack Up Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "last_date_updated",
+              "name": "Last Date Updated",
+              "type": "calendar_date"
+            },
+            {
+              "field": "last_time_updated",
+              "name": "Last Time Updated",
+              "type": "text"
+            },
+            {
+              "field": "license_type",
+              "name": "License Type",
+              "type": "text"
+            },
+            {
+              "field": "name",
+              "name": "Name",
+              "type": "text"
+            },
+            {
+              "field": "order_date",
+              "name": "Order Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "permit_license_number",
+              "name": "Permit License Number",
+              "type": "text"
+            },
+            {
+              "field": "reason",
+              "name": "Reason",
+              "type": "text"
+            },
+            {
+              "field": "veh",
+              "name": "VEH",
+              "type": "text"
+            },
+            {
+              "field": "vehicle_license_number",
+              "name": "Vehicle License Number",
+              "type": "text"
+            },
+            {
+              "field": "vehicle_vin_number",
+              "name": "Vehicle VIN Number",
+              "type": "text"
+            },
+            {
+              "field": "vehicle_year",
+              "name": "Vehicle Year",
+              "type": "number"
+            },
+            {
+              "field": "website",
+              "name": "Website",
+              "type": "text"
+            },
+            {
+              "field": "wheelchair_accessible",
+              "name": "Wheelchair Accessible",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "expiration_date",
+            "earliest": "2026-09-14T00:00:00.000",
+            "latest": "2028-12-10T00:00:00.000",
+            "rows": "104618"
+          },
+          "date_columns": [
+            "expiration_date",
+            "certification_date",
+            "hack_up_date",
+            "order_date",
+            "last_date_updated"
+          ],
+          "description": "PLEASE NOTE: This dataset of all TLC licensed for-hire vehicles in good standing is updated daily between 4\u20137 PM. Check the \u201cLast Update Date\u201d to confirm it shows today\u2019s or yesterday\u2019s date. If it\u2019s older, find the latest data here: <a href=\"https://app.powerbigov.us/view?r=eyJrIjoiNTI0ZmRiNWEtZGNjMC00YzU1LTg4YjEtYjNlMjMxOThhOGIyIiwidCI6IjMyZjU2ZmM3LTVmODEtNGUyMi1hOTViLTE1ZGE2NjUxM2JlZiJ9\">Active",
+          "id": "8wbx-tsch",
+          "link": "https://data.cityofnewyork.us/Transportation/For-Hire-Vehicles-FHV-Active/8wbx-tsch",
+          "name": "For Hire Vehicles (FHV) - Active",
+          "row_count": "94954",
+          "rows": null,
+          "updated_at": "2026-09-14T19:17:04.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "dispatching_base_num",
+              "name": "Dispatching_base_num",
+              "type": "text"
+            },
+            {
+              "field": "dolocationid",
+              "name": "DOlocationID",
+              "type": "number"
+            },
+            {
+              "field": "dropoff_datetime",
+              "name": "DropOff_datetime",
+              "type": "text"
+            },
+            {
+              "field": "pickup_datetime",
+              "name": "Pickup_DateTime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "pulocationid",
+              "name": "PUlocationID",
+              "type": "number"
+            },
+            {
+              "field": "sr_flag",
+              "name": "SR_Flag",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "pickup_datetime",
+            "earliest": "2017-01-01T00:00:00.000",
+            "latest": "2018-01-18T03:30:00.000",
+            "rows": "200283593"
+          },
+          "date_columns": [
+            "pickup_datetime"
+          ],
+          "description": "These records are generated from the For-Hire Vehicle (\u201cFHV\u201d) Trip Record submissions made by traditional livery, luxury, and black car bases. The FHV trip records include fields capturing the dispatching base license number and the pick-up date, time, and taxi zone location ID, which correspond with the NYC Taxi Zones open dataset. Each row represents a single trip in an FHV.",
+          "id": "avz8-mqzz",
+          "link": "https://data.cityofnewyork.us/Transportation/2017-For-Hire-Vehicle-Trip-Data/avz8-mqzz",
+          "name": "2017 For Hire Vehicle Trip Data",
+          "row_count": "200283592",
+          "rows": null,
+          "updated_at": "2023-12-15T15:01:45.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "dolocationid",
+              "name": "DOLocationID",
+              "type": "number"
+            },
+            {
+              "field": "extra",
+              "name": "extra",
+              "type": "number"
+            },
+            {
+              "field": "fare_amount",
+              "name": "fare_amount",
+              "type": "number"
+            },
+            {
+              "field": "improvement_surcharge",
+              "name": "improvement_surcharge",
+              "type": "number"
+            },
+            {
+              "field": "mta_tax",
+              "name": "mta_tax",
+              "type": "number"
+            },
+            {
+              "field": "passenger_count",
+              "name": "passenger_count",
+              "type": "number"
+            },
+            {
+              "field": "payment_type",
+              "name": "payment_type",
+              "type": "number"
+            },
+            {
+              "field": "pulocationid",
+              "name": "PULocationID",
+              "type": "number"
+            },
+            {
+              "field": "ratecodeid",
+              "name": "RatecodeID",
+              "type": "number"
+            },
+            {
+              "field": "store_and_fwd_flag",
+              "name": "store_and_fwd_flag",
+              "type": "text"
+            },
+            {
+              "field": "tip_amount",
+              "name": "tip_amount",
+              "type": "number"
+            },
+            {
+              "field": "tolls_amount",
+              "name": "tolls_amount",
+              "type": "number"
+            },
+            {
+              "field": "total_amount",
+              "name": "total_amount",
+              "type": "number"
+            },
+            {
+              "field": "tpep_dropoff_datetime",
+              "name": "tpep_dropoff_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "tpep_pickup_datetime",
+              "name": "tpep_pickup_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "trip_distance",
+              "name": "trip_distance",
+              "type": "number"
+            },
+            {
+              "field": "vendorid",
+              "name": "VendorID",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "tpep_pickup_datetime",
+            "earliest": "2001-01-01T00:04:13.000",
+            "latest": "2053-03-21T16:47:33.000",
+            "rows": "113496874"
+          },
+          "date_columns": [
+            "tpep_pickup_datetime",
+            "tpep_dropoff_datetime"
+          ],
+          "description": "These records are generated from the trip record submissions made by yellow taxi Technology Service Providers (TSPs). Each row represents a single trip in a yellow taxi. The trip records include fields capturing pick-up and drop-off dates/times, pick-up and drop-off taxi zone locations, trip distances, itemized fares, rate types, payment types, and driver-reported passenger counts.",
+          "id": "biws-g3hs",
+          "link": "https://data.cityofnewyork.us/Transportation/2017-Yellow-Taxi-Trip-Data/biws-g3hs",
+          "name": "2017 Yellow Taxi Trip Data",
+          "row_count": "113496874",
+          "rows": null,
+          "updated_at": "2023-12-14T20:45:49.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "affiliated_base_number",
+              "name": "Affiliated_base_number",
+              "type": "text"
+            },
+            {
+              "field": "dispatching_base_num",
+              "name": "dispatching_base_num",
+              "type": "text"
+            },
+            {
+              "field": "dolocationid",
+              "name": "DOLocationID",
+              "type": "number"
+            },
+            {
+              "field": "dropoff_datetime",
+              "name": "dropoff_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "pickup_datetime",
+              "name": "pickup_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "pulocationid",
+              "name": "PULocationID",
+              "type": "number"
+            },
+            {
+              "field": "sr_flag",
+              "name": "SR_Flag",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "pickup_datetime",
+            "earliest": "2020-01-01T00:00:00.000",
+            "latest": "2020-12-31T23:59:35.000",
+            "rows": "14914817"
+          },
+          "date_columns": [
+            "pickup_datetime",
+            "dropoff_datetime"
+          ],
+          "description": "These records are generated from the For-Hire Vehicle (\u201cFHV\u201d) Trip Record submissions made by traditional livery, luxury, and black car bases. The FHV trip records include fields capturing the dispatching base license number and the pick-up date, time, and taxi zone location ID, which correspond with the NYC Taxi Zones open dataset. Each row represents a single trip in an FHV.",
+          "id": "m3yx-mvk4",
+          "link": "https://data.cityofnewyork.us/Transportation/2020-For-Hire-Vehicles-Trip-Data/m3yx-mvk4",
+          "name": "2020 For Hire Vehicles Trip Data",
+          "row_count": "14914817",
+          "rows": null,
+          "updated_at": "2023-12-15T15:08:45.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "congestion_surcharge",
+              "name": "congestion_surcharge",
+              "type": "number"
+            },
+            {
+              "field": "dolocationid",
+              "name": "DOLocationID",
+              "type": "number"
+            },
+            {
+              "field": "extra",
+              "name": "extra",
+              "type": "number"
+            },
+            {
+              "field": "fare_amount",
+              "name": "fare_amount",
+              "type": "number"
+            },
+            {
+              "field": "improvement_surcharge",
+              "name": "improvement_surcharge",
+              "type": "number"
+            },
+            {
+              "field": "mta_tax",
+              "name": "mta_tax",
+              "type": "number"
+            },
+            {
+              "field": "passenger_count",
+              "name": "passenger_count",
+              "type": "number"
+            },
+            {
+              "field": "payment_type",
+              "name": "payment_type",
+              "type": "number"
+            },
+            {
+              "field": "pulocationid",
+              "name": "PULocationID",
+              "type": "number"
+            },
+            {
+              "field": "ratecodeid",
+              "name": "RatecodeID",
+              "type": "number"
+            },
+            {
+              "field": "store_and_fwd_flag",
+              "name": "store_and_fwd_flag",
+              "type": "text"
+            },
+            {
+              "field": "tip_amount",
+              "name": "tip_amount",
+              "type": "number"
+            },
+            {
+              "field": "tolls_amount",
+              "name": "tolls_amount",
+              "type": "number"
+            },
+            {
+              "field": "total_amount",
+              "name": "total_amount",
+              "type": "number"
+            },
+            {
+              "field": "tpep_dropoff_datetime",
+              "name": "tpep_dropoff_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "tpep_pickup_datetime",
+              "name": "tpep_pickup_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "trip_distance",
+              "name": "trip_distance",
+              "type": "number"
+            },
+            {
+              "field": "vendorid",
+              "name": "VendorID",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "tpep_pickup_datetime",
+            "earliest": "2002-12-31T23:07:20.000",
+            "latest": "2098-09-11T02:23:31.000",
+            "rows": "30904072"
+          },
+          "date_columns": [
+            "tpep_pickup_datetime",
+            "tpep_dropoff_datetime"
+          ],
+          "description": "These records are generated from the trip record submissions made by yellow taxi Technology Service Providers (TSPs). Each row represents a single trip in a yellow taxi. The trip records include fields capturing pick-up and drop-off dates/times, pick-up and drop-off taxi zone locations, trip distances, itemized fares, rate types, payment types, and driver-reported passenger counts.",
+          "id": "m6nq-qud6",
+          "link": "https://data.cityofnewyork.us/Transportation/2021-Yellow-Taxi-Trip-Data/m6nq-qud6",
+          "name": "2021 Yellow Taxi Trip Data",
+          "row_count": "30070044",
+          "rows": null,
+          "updated_at": "2023-12-14T20:46:51.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "dolocationid",
+              "name": "DOLocationID",
+              "type": "number"
+            },
+            {
+              "field": "extra",
+              "name": "extra",
+              "type": "number"
+            },
+            {
+              "field": "fare_amount",
+              "name": "fare_amount",
+              "type": "number"
+            },
+            {
+              "field": "improvement_surcharge",
+              "name": "improvement_surcharge",
+              "type": "number"
+            },
+            {
+              "field": "mta_tax",
+              "name": "mta_tax",
+              "type": "number"
+            },
+            {
+              "field": "passenger_count",
+              "name": "passenger_count",
+              "type": "number"
+            },
+            {
+              "field": "payment_type",
+              "name": "payment_type",
+              "type": "number"
+            },
+            {
+              "field": "pulocationid",
+              "name": "PULocationID",
+              "type": "number"
+            },
+            {
+              "field": "ratecodeid",
+              "name": "RatecodeID",
+              "type": "number"
+            },
+            {
+              "field": "store_and_fwd_flag",
+              "name": "store_and_fwd_flag",
+              "type": "text"
+            },
+            {
+              "field": "tip_amount",
+              "name": "tip_amount",
+              "type": "number"
+            },
+            {
+              "field": "tolls_amount",
+              "name": "tolls_amount",
+              "type": "number"
+            },
+            {
+              "field": "total_amount",
+              "name": "total_amount",
+              "type": "number"
+            },
+            {
+              "field": "tpep_dropoff_datetime",
+              "name": "tpep_dropoff_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "tpep_pickup_datetime",
+              "name": "tpep_pickup_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "trip_distance",
+              "name": "trip_distance",
+              "type": "number"
+            },
+            {
+              "field": "vendorid",
+              "name": "VendorID",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "tpep_pickup_datetime",
+            "earliest": "2001-01-01T00:01:48.000",
+            "latest": "2084-11-04T12:32:24.000",
+            "rows": "112234626"
+          },
+          "date_columns": [
+            "tpep_pickup_datetime",
+            "tpep_dropoff_datetime"
+          ],
+          "description": "These records are generated from the trip record submissions made by yellow taxi Technology Service Providers (TSPs). Each row represents a single trip in a yellow taxi. The trip records include fields capturing pick-up and drop-off dates/times, pick-up and drop-off taxi zone locations, trip distances, itemized fares, rate types, payment types, and driver-reported passenger counts.",
+          "id": "t29m-gskq",
+          "link": "https://data.cityofnewyork.us/Transportation/2018-Yellow-Taxi-Trip-Data/t29m-gskq",
+          "name": "2018 Yellow Taxi Trip Data",
+          "row_count": "112234626",
+          "rows": null,
+          "updated_at": "2023-12-14T20:46:24.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "avg_days_drivers_on_road",
+              "name": "Avg Days Drivers on Road",
+              "type": "number"
+            },
+            {
+              "field": "avg_days_vehicles_on_road",
+              "name": "Avg Days Vehicles on Road",
+              "type": "number"
+            },
+            {
+              "field": "avg_hours_per_day_per_driver",
+              "name": "Avg Hours Per Day Per Driver",
+              "type": "number"
+            },
+            {
+              "field": "avg_hours_per_day_per_vehicle",
+              "name": "Avg Hours Per Day Per Vehicle",
+              "type": "number"
+            },
+            {
+              "field": "avg_minutes_per_trip",
+              "name": "Avg Minutes Per Trip",
+              "type": "number"
+            },
+            {
+              "field": "farebox_per_day",
+              "name": "Farebox Per Day",
+              "type": "number"
+            },
+            {
+              "field": "license_class",
+              "name": "License Class",
+              "type": "text"
+            },
+            {
+              "field": "month_year",
+              "name": "Year/Month",
+              "type": "text"
+            },
+            {
+              "field": "percent_of_trips_paid_with",
+              "name": "Percent of Trips Paid with Credit Card",
+              "type": "number"
+            },
+            {
+              "field": "trips_per_day",
+              "name": "Trips Per Day",
+              "type": "number"
+            },
+            {
+              "field": "trips_per_day_shared",
+              "name": "Trips Per Day Shared",
+              "type": "number"
+            },
+            {
+              "field": "unique_drivers",
+              "name": "Unique Drivers",
+              "type": "number"
+            },
+            {
+              "field": "unique_vehicles",
+              "name": "Unique Vehicles",
+              "type": "number"
+            },
+            {
+              "field": "vehicles_per_day",
+              "name": "Vehicles Per Day",
+              "type": "number"
+            }
+          ],
+          "date_columns": [],
+          "description": "Monthly metrics containing average daily trips and amount of fares collected, active vehicles and drivers, and credit card usage. The information was tabulated from trip records submitted for all TLC industries.",
+          "id": "v6kb-cqej",
+          "link": "https://data.cityofnewyork.us/Transportation/TLC-Industry-Indicators/v6kb-cqej",
+          "name": "TLC Industry Indicators",
+          "row_count": "896",
+          "rows": null,
+          "updated_at": "2026-08-04T14:18:52.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "affiliated_base_number",
+              "name": "Affiliated_base_number",
+              "type": "text"
+            },
+            {
+              "field": "dispatching_base_num",
+              "name": "dispatching_base_num",
+              "type": "text"
+            },
+            {
+              "field": "dolocationid",
+              "name": "DOlocationID",
+              "type": "number"
+            },
+            {
+              "field": "dropoff_datetime",
+              "name": "dropOff_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "pickup_datetime",
+              "name": "pickup_datetime",
+              "type": "calendar_date"
+            },
+            {
+              "field": "pulocationid",
+              "name": "PUlocationID",
+              "type": "number"
+            },
+            {
+              "field": "sr_flag",
+              "name": "SR_Flag",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "pickup_datetime",
+            "earliest": "2023-01-01T00:00:00.000",
+            "latest": "2023-12-31T23:59:59.000",
+            "rows": "15858639"
+          },
+          "date_columns": [
+            "pickup_datetime",
+            "dropoff_datetime"
+          ],
+          "description": "These records are generated from the For-Hire Vehicle (\u201cFHV\u201d) Trip Record submissions made by traditional livery, luxury, and black car bases. The FHV trip records include fields capturing the dispatching base license number and the pick-up date, time, and taxi zone location ID, which correspond with the NYC Taxi Zones open dataset. Each row represents a single trip in an FHV.",
+          "id": "ywip-y6qr",
+          "link": "https://data.cityofnewyork.us/Transportation/2023-For-Hire-Vehicles-Trip-Data/ywip-y6qr",
+          "name": "2023 For Hire Vehicles Trip Data",
+          "row_count": "15858639",
+          "rows": null,
+          "updated_at": "2024-07-16T18:39:26.000Z"
+        }
+      ],
+      "domain": "data.cityofnewyork.us",
+      "question": "Is there a door-to-door travel-time outcome with a long pre-period?"
+    },
+    "error": "",
+    "key": "tlc_trips"
+  },
+  {
+    "detail": {
+      "datasets": [
+        {
+          "columns": [
+            {
+              "field": "month",
+              "name": "Month",
+              "type": "calendar_date"
+            },
+            {
+              "field": "zonal_speed",
+              "name": "Zonal Speed",
+              "type": "number"
+            },
+            {
+              "field": "zone",
+              "name": "Zone",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "month",
+            "earliest": "2019-10-01T00:00:00.000",
+            "latest": "2025-08-01T00:00:00.000",
+            "rows": "213"
+          },
+          "date_columns": [
+            "month"
+          ],
+          "description": "This dataset provides average vehicle speeds for taxi and for-hire vehicles, in the Manhattan Central Business District (CBD), in areas adjacent to the CBD, and in the rest of New York City, by month, as collected by the NYC Taxi and Limousine Commission.",
+          "id": "6p29-6xqn",
+          "link": "https://data.ny.gov/Transportation/MTA-Central-Business-District-Taxi-and-For-Hire-Ve/6p29-6xqn",
+          "name": "MTA Central Business District Taxi and For-Hire Vehicle Speeds: Beginning October 2019",
+          "row_count": "213",
+          "rows": null,
+          "updated_at": "2026-08-28T15:18:47.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "cbd_relation",
+              "name": "CBD Relation",
+              "type": "text"
+            },
+            {
+              "field": "day_type",
+              "name": "Day Type",
+              "type": "number"
+            },
+            {
+              "field": "month",
+              "name": "Month",
+              "type": "calendar_date"
+            },
+            {
+              "field": "service_type",
+              "name": "Service Type",
+              "type": "text"
+            },
+            {
+              "field": "time_period",
+              "name": "Time Period",
+              "type": "text"
+            },
+            {
+              "field": "trips",
+              "name": "Trips",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "month",
+            "earliest": "2019-05-01T00:00:00.000",
+            "latest": "2026-05-01T00:00:00.000",
+            "rows": "4831"
+          },
+          "date_columns": [
+            "month"
+          ],
+          "description": "This dataset provides monthly aggregated data for Taxi and For-Hire Vehicle (FHV) trips operating in and around Manhattan's Central Business District (CBD). Each record represents a summary of trips classified by key dimensions, including service type, CBD relation, day type, and time period.",
+          "id": "d3qp-nhf8",
+          "link": "https://data.ny.gov/Transportation/MTA-Central-Business-District-Taxi-and-For-Hire-Ve/d3qp-nhf8",
+          "name": "MTA Central Business District Taxi and For-Hire Vehicle Trips: Beginning May 2019",
+          "row_count": "4831",
+          "rows": null,
+          "updated_at": "2026-08-28T18:11:01.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "area",
+              "name": "Area",
+              "type": "text"
+            },
+            {
+              "field": "daily_vmt_agps",
+              "name": "Daily VMT AGPS",
+              "type": "number"
+            },
+            {
+              "field": "daily_vmt_cvd",
+              "name": "Daily VMT CVD",
+              "type": "number"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "indexed_average_vmt",
+              "name": "Indexed Average VMT",
+              "type": "number"
+            },
+            {
+              "field": "month",
+              "name": "Month",
+              "type": "number"
+            },
+            {
+              "field": "year",
+              "name": "Year",
+              "type": "number"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2024-01-01T00:00:00.000",
+            "latest": "2026-04-01T00:00:00.000",
+            "rows": "56"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "This dataset provides the total vehicle miles traveled by all vehicles in the CBD, measured in miles, on a monthly basis.",
+          "id": "jbxx-kxff",
+          "link": "https://data.ny.gov/Transportation/MTA-Vehicle-Miles-Traveled-in-the-Central-Business/jbxx-kxff",
+          "name": "MTA Vehicle Miles Traveled in the Central Business District: Beginning 2024",
+          "row_count": "56",
+          "rows": null,
+          "updated_at": "2026-08-28T15:22:59.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "count",
+              "name": "Count",
+              "type": "number"
+            },
+            {
+              "field": "date",
+              "name": "Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "mode",
+              "name": "Mode",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "date",
+            "earliest": "2020-03-01T00:00:00.000",
+            "latest": "2026-09-13T00:00:00.000",
+            "rows": "17934"
+          },
+          "date_columns": [
+            "date"
+          ],
+          "description": "The daily ridership dataset provides systemwide ridership and traffic estimates for subways (including the Staten Island Railway), buses, Long Island Rail Road, Metro-North Railroad, Access-A-Ride, Bridges and Tunnels, and the Central Business District and Congestion Relief Zone since the start of Congestion Pricing",
+          "id": "sayj-mze2",
+          "link": "https://data.ny.gov/Transportation/MTA-Daily-Ridership-and-Traffic-Beginning-2020/sayj-mze2",
+          "name": "MTA Daily Ridership and Traffic: Beginning 2020",
+          "row_count": "17934",
+          "rows": null,
+          "updated_at": "2026-09-14T22:04:08.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "crz_entries",
+              "name": "CRZ Entries",
+              "type": "number"
+            },
+            {
+              "field": "day_of_week",
+              "name": "Day of Week",
+              "type": "text"
+            },
+            {
+              "field": "day_of_week_int",
+              "name": "Day of Week Int",
+              "type": "number"
+            },
+            {
+              "field": "detection_group",
+              "name": "Detection Group",
+              "type": "text"
+            },
+            {
+              "field": "detection_region",
+              "name": "Detection Region",
+              "type": "text"
+            },
+            {
+              "field": "excluded_roadway_entries",
+              "name": "Excluded Roadway Entries",
+              "type": "number"
+            },
+            {
+              "field": "hour_of_day",
+              "name": "Hour of Day",
+              "type": "number"
+            },
+            {
+              "field": "minute_of_hour",
+              "name": "Minute of Hour",
+              "type": "number"
+            },
+            {
+              "field": "time_period",
+              "name": "Time Period",
+              "type": "text"
+            },
+            {
+              "field": "toll_10_minute_block",
+              "name": "Toll 10 Minute Block",
+              "type": "calendar_date"
+            },
+            {
+              "field": "toll_date",
+              "name": "Toll Date",
+              "type": "calendar_date"
+            },
+            {
+              "field": "toll_hour",
+              "name": "Toll Hour",
+              "type": "calendar_date"
+            },
+            {
+              "field": "toll_week",
+              "name": "Toll Week",
+              "type": "calendar_date"
+            },
+            {
+              "field": "vehicle_class",
+              "name": "Vehicle Class",
+              "type": "text"
+            }
+          ],
+          "coverage": {
+            "date_column": "toll_date",
+            "earliest": "2025-01-05T00:00:00.000",
+            "latest": "2026-09-05T00:00:00.000",
+            "rows": "6314112"
+          },
+          "date_columns": [
+            "toll_date",
+            "toll_hour",
+            "toll_10_minute_block",
+            "toll_week"
+          ],
+          "description": "This dataset provides the number of crossings into the Congestion Relief Zone by crossing location and vehicle class, in 10-minute intervals. This data should not be used for revenue calculations, as entries do not include information about exemption statuses, payment methods, and repeat entries.",
+          "id": "t6yz-b64h",
+          "link": "https://data.ny.gov/Transportation/MTA-Congestion-Relief-Zone-Vehicle-Entries-Beginni/t6yz-b64h",
+          "name": "MTA Congestion Relief Zone Vehicle Entries: Beginning 2025",
+          "row_count": "6314112",
+          "rows": null,
+          "updated_at": "2026-09-10T18:30:04.000Z"
+        },
+        {
+          "columns": [
+            {
+              "field": "polygon",
+              "name": "Polygon",
+              "type": "polygon"
+            },
+            {
+              "field": "taxi_zone",
+              "name": "Taxi Zone",
+              "type": "number"
+            }
+          ],
+          "date_columns": [],
+          "description": "This dataset consists of a set of polygons that will allow users of New York City Taxi and Limousine Commission data on trip records for taxi and for-hire vehicle trips to determine which trips originate and/or end in a Taxi Zone in the Central Business District and are thus subjected to the CBD Tolling Program. TLC trip record data is available on NYC Open Data in separate datasets each year for ",
+          "id": "yfdc-w5jh",
+          "link": "https://data.ny.gov/Transportation/MTA-Central-Business-District-Taxi-Zones/yfdc-w5jh",
+          "name": "MTA Central Business District Taxi Zones",
+          "row_count": "38",
+          "rows": null,
+          "updated_at": "2024-09-04T15:18:18.000Z"
+        }
+      ],
+      "domain": "data.ny.gov",
+      "question": "What else does the zone-entry feed carry beyond what H008-H010 use?"
+    },
+    "error": "",
+    "key": "crz_entries"
+  },
+  {
+    "detail": {
+      "content_length": "49961641",
+      "content_type": "binary/octet-stream",
+      "status": 200,
+      "url": "https://d37ci6vzurychx.cloudfront.net/trip-data/yellow_tripdata_2024-01.parquet"
+    },
+    "error": "",
+    "key": "tlc_cloudfront_parquet"
+  },
+  {
+    "detail": {
+      "content_length": "20",
+      "content_type": "text/html;charset=UTF-8",
+      "status": 200,
+      "url": "https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page"
+    },
+    "error": "",
+    "key": "tlc_landing_page"
+  },
+  {
+    "detail": {
+      "content_length": "",
+      "content_type": "text/html;charset=utf-8",
+      "status": 404,
+      "url": "https://www.panynj.gov/bridges-tunnels/en/traffic-volumes.html"
+    },
+    "error": "",
+    "key": "port_authority_traffic"
+  }
+]
