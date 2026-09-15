@@ -278,3 +278,56 @@ that way, in minutes.
 
 Ten hypotheses are registered, nine answered. H010 is implemented, has a
 dispatch-only hosted path, and has **not been run**.
+
+## 2026-09-15 — H011 registered against a source with a real pre-period
+
+| ID | Title | Status | Registered | Verdict |
+|---|---|---|---|---|
+| [H011](H011-crossing-volume.md) | Did tolling reduce vehicle volume entering the zone, measured at the crossings? | proposed | 2026-09-15 | |
+
+The volume question has been unanswerable here because the zone-entry feed
+begins on the tolling date. The 2026-09-15 source survey found one that does
+not: **`ebfx-2m7v`**, MTA Bridges and Tunnels Hourly Crossings, 13.5M rows by
+facility, direction, hour and vehicle class, 2019-01-01 to 2026-09-01.
+
+Two of that operator's facilities enter the zone and the rest do not, so the
+control group is crossings run by one agency, counted by one system, reported in
+one file. Every previous control here was "similar streets" chosen by an analyst,
+rejected out of sample three times.
+
+**Three things about this record are different from the ten before it, and the
+count should say so.**
+
+Its author has **seen none of the outcome data** — only the dataset's name,
+columns, row count and date range, as the survey collected them. H007, H008,
+H009 and H010 each had to disclose prior sight of the numbers they tested. This
+is the first clean pre-registration on the thread.
+
+Its criteria were **checked for satisfiability before being frozen**, which is
+the rule H010's amendment installed after four failures of the same shape. The
+record carries the table: planting a −6% effect against a pre-period wobble of
+0.002 gives a breakdown value of 2.44, and against 0.005 gives 0.97. So M ≥ 1.0
+is reachable and demanding rather than unreachable, and a reader can check that
+rather than take it.
+
+Its primary statistic is **directly comparable to the failed design**. H002 and
+H005 report Rambachan–Roth breakdown values of 0.005 to 0.171 on the link panel,
+so M is a like-for-like measure of whether this source is better, and the refute
+bar of 0.3 says plainly what "no better" means.
+
+**It goes beyond the frozen scope and says so.** `docs/project_brief.md` admits
+volume only as a Phase 10 mechanism check. The speed question stays closed and
+nothing here reopens it.
+
+**The nearest source to the frozen question was considered and rejected on
+arithmetic.** `6p29-6xqn` gives monthly taxi and for-hire speeds for the CBD,
+areas adjacent to it and the rest of the city from October 2019, which is the
+treated / near-boundary / control structure the brief freezes. Its 213 rows are
+exactly 71 months × 3 zones, so it carries **one treated unit and two controls**.
+Time fixed effects and treated-specific event-time coefficients are collinear
+with one treated unit, and permutation inference offers two placebos. It can
+describe and it cannot identify. Establishing that cost one division and no
+ingestion.
+
+Eleven hypotheses are registered, nine answered. H010 and H011 are both
+implemented-or-registered and **unrun**.
