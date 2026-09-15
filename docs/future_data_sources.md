@@ -61,3 +61,40 @@ failure says nothing about the sources and the claim stands unconfirmed. Anyone
 reopening TLC should confirm the endpoint from a runner with normal egress
 before writing any ingestion code, rather than trusting either the table above
 or this paragraph.
+
+## 2026-09-15 — a survey exists; run it before designing around any of this
+
+The table at the top of this file and the paragraphs above it were written from
+memory and from what the project happened to have used. Neither has been checked
+against what the agencies currently publish, and this project has already lost
+weeks to a feed whose coverage was assumed rather than measured.
+
+`src/data/source_recon.py` settles that by asking. It searches Socrata's
+discovery API for datasets bearing on the questions the speed study could not
+answer, then reports each one's columns, date range and row count, and probes
+the handful of non-Socrata URLs that are otherwise guesses. **Datasets are found
+by searching rather than by asserting ids**, and a test enforces that: nothing is
+described that a search did not return.
+
+Dispatch the **Source recon** workflow. The runners have network; a sandbox may
+not. It writes `docs/source_recon.md` for a reader and
+`outputs/tables/source_recon.json` for a later session, and it takes no draw
+against fixed data, so it is safe to repeat whenever an inventory goes stale.
+
+The questions it is scoped to, none of which the speed study could answer:
+
+- Did vehicle volume fall on crossings that feed the zone, against crossings run
+  by the same operator that do not? Same counting equipment, same reporting, a
+  genuine pre-period — a far better comparison than "similar streets". The known
+  weakness is that traffic shifting *between* crossings makes the control partly
+  treated, the same problem H009 hit with the exempt roadways.
+- Did people switch to transit inside the zone relative to outside?
+- Are there street-level vehicle counts with a pre-period near the cordon?
+- Is there a door-to-door travel-time outcome with a long pre-period? This
+  revisits TLC, and **narrows the recommendation made earlier on this page**:
+  taxi records are useless for the *timing* question, because H008 measured that
+  class at essentially zero response, and that says nothing about their value for
+  travel time between fixed zone pairs, where the pre-period runs to a decade.
+
+**The survey endorses nothing.** Which source can answer which question is a
+judgement for a registered hypothesis. This only establishes what exists.

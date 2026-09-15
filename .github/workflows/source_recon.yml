@@ -1,0 +1,35 @@
+name: Source recon
+
+# Dispatch only. This container has no route to the data hosts and the runners
+# do, so the survey runs here. It computes no estimate and takes no draw against
+# fixed data, so unlike the H010 workflow it is safe to repeat whenever someone
+# wants a fresh inventory.
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: source-recon-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  survey:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e .
+      - name: Survey the candidate sources and commit the inventory
+        env:
+          RESULTS_BRANCH: ${{ github.ref_name }}
+          NYC_OPENDATA_APP_TOKEN: ${{ secrets.NYC_OPENDATA_APP_TOKEN }}
+        run: python -m scripts.run_source_recon
