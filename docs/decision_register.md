@@ -5,9 +5,115 @@
 Compiled 2026-09-09, updated 2026-09-14 · treatment date 2025-01-05 ·
 Validation details are recorded in the latest dated entry below.
 
-All six open decisions were resolved on 2026-09-14; that entry is the fourth
+All six open decisions were resolved on 2026-09-14; that entry is the fifth
 below. Earlier entries are historical and are superseded where the latest audit
 says so.
+
+## Update 2026-09-15 (later) — the survey ran, and it overturns "no better data exists"
+
+`src/data/source_recon.py` ran on a hosted runner and committed
+[source_recon.md](source_recon.md) and `outputs/tables/source_recon.json`. It
+computes no estimate and endorses no source. What it establishes is that several
+sources with long pre-periods exist, none of which this project had looked at,
+and at least one of which is closer to the frozen research question than the
+feed the study has been built on.
+
+**This supersedes the reading, stated earlier the same day, that the project had
+exhausted what it could produce.** That judgement was right about
+respecification and wrong about availability. The README's own line — that what
+could change the answer is different data rather than a different specification,
+and that "none of the three is available in what these feeds provide" — is now
+false on its own terms, and is corrected there.
+
+### The find that matters most
+
+**`6p29-6xqn` — MTA Central Business District Taxi and For-Hire Vehicle Speeds,
+beginning October 2019.** Columns `month`, `zone`, `zonal_speed`. The
+description states it covers the CBD, **areas adjacent to the CBD, and the rest
+of New York City**.
+
+That is a speed outcome with a treated zone, a spillover band and a control,
+which is the exact three-way structure `docs/project_brief.md` freezes as
+treated / near-boundary / control — published by the MTA, on a five-year
+pre-period. The study built that structure out of street sensors and could not
+make it identify. A ready-made version has been sitting on the same Socrata
+infrastructure this project already queries.
+
+Its limits are real and should be stated with it. It is **monthly** and there
+are 213 rows, so the panel is short. It measures **taxi and for-hire vehicles**,
+whose composition changes over six years. It cannot support a link-level design.
+What it can support is a comparative case study, which the register's own queue
+has described as the structurally correct framing since before H001.
+
+### Volume, with a genuine before
+
+**`ebfx-2m7v` — MTA Bridges and Tunnels Hourly Crossings, beginning 2019.**
+13,514,755 rows, 2019-01-01 to 2026-09-01. Columns include `facility`,
+`direction`, `hour`, `date`, `vehicle_class` and `traffic_count`.
+
+Hourly, by facility, by direction, by vehicle class, with a six-year
+pre-period, from one operator using one counting system throughout. Two MTA
+facilities are CRZ entry points — the brief names the Hugh L. Carey and
+Queens–Midtown tunnel approaches, and H009 uses the Carey Tunnel as a detection
+group — and the operator's remaining crossings are not. That is a treated and
+control split inside one agency's own measurement.
+
+**`5uvq-7ebw` — Port Authority Eastbound Tunnel and Bridge Monthly Volume,
+beginning 2011.** Columns `bridge_tunnel`, `eastbound_volume`, `month`, `year`,
+`vehicles_type`, across the six Port Authority vehicular crossings. Eastbound is
+into New York, and a fourteen-year pre-period.
+
+Which specific crossings land inside the zone must be read off the data's own
+facility list rather than assumed. Getting that wrong in either direction is the
+D3 mistake again.
+
+`jbxx-kxff` carries vehicle miles travelled in the CBD by `area` from 2024, for
+all vehicles rather than taxis, with only a one-year pre-period.
+`qzve-kjga` gives hourly MTA crossings back to 2010 and is marked deprecated,
+ending 2025-04.
+
+### Transit substitution is straightforwardly available
+
+`wujg-7c2s` (2020–2024, 120,855,567 rows), `5wq4-mkjj` (beginning 2025) and
+`t69i-h2me` (2017–2019) give hourly subway ridership by station complex, with
+`latitude` and `longitude`. Stations can be classified inside or outside the
+zone with the geometry machinery `src/data/geo.py` already has, and the
+pre-period is years rather than months.
+
+### A data-quality landmine, found before anyone stepped on it
+
+The TLC trip files carry **corrupt timestamps at the extremes**. Measured on the
+published datasets: 2017 Yellow runs 2001-01-01 to **2053-03-21**, 2018 Yellow to
+**2084-11-04**, 2021 Yellow to **2098-09-11**. Any TLC design has to trim on the
+date column before anything else, and the row counts are large enough that a
+naive min/max would silently set a window decades wide.
+
+One probe timed out (2019 Yellow) and was recorded as an error while the survey
+continued, which is the behaviour it was built for.
+
+### The guesses, now measured
+
+The TLC CloudFront parquet path was **right**: HTTP 200, 49,961,641 bytes. The
+Port Authority page at `panynj.gov` was **wrong**: HTTP 404 — and the survey
+found Port Authority traffic volumes on Socrata instead. One guess confirmed,
+one refuted, and the refuted one replaced by something better, which is the
+argument for searching rather than asserting in one paragraph.
+
+### What this does and does not change
+
+It does not revive the speed panel. H001 through H006 stand, the link-level
+design still cannot identify the effect, and nothing here is a reason to
+respecify it.
+
+What it changes is the claim that better data does not exist. It does, it has
+pre-periods measured in years, and the nearest thing to the frozen research
+question is a monthly CBD speed series with an adjacent-zone band that nobody
+here had seen.
+
+**Nothing may be run against any of it without a registered hypothesis.** A
+survey establishing that a source exists is the weakest possible licence to use
+it, and the temptation to go straight from an inventory to an estimate is how a
+tenth draw becomes an eleventh.
 
 ## Update 2026-09-15 — H010 has a hosted path, and its frozen criteria cannot be satisfied
 

@@ -482,11 +482,21 @@ pre-period, and the recommendation is against ingesting them for now: they cover
 the one vehicle class H008 measured at essentially zero response, so they cannot
 carry the design that works here. The reasoning is under Evidence.
 
-What could still change the answer is different data, not a different
+What could still change the answer is different data rather than a different
 specification: links nearer the cordon than the current 808 m nearest control,
 an outcome other than link speed, or — for the spillover question specifically —
-working speed sensors on the 11th/12th Avenue corridor across the toll date.
-None of the three is available in what these feeds provide.
+working measurement on the corridor across the toll date.
+
+**An earlier version of this section said none of the three was available. A
+source survey on 2026-09-15 established that is wrong**
+([source_recon.md](docs/source_recon.md)). The MTA publishes monthly taxi and
+for-hire speeds for the Central Business District, areas adjacent to it, and the
+rest of the city, back to October 2019 (`6p29-6xqn`); hourly crossings by
+facility, direction and vehicle class back to 2019 (`ebfx-2m7v`); and hourly
+subway ridership by station back to 2017. The Port Authority publishes monthly
+eastbound crossing volumes back to 2011. Each carries a pre-period measured in
+years, and none has been used here. What follows from that is a registered
+hypothesis, and nothing has been run against any of them.
 
 [All six open decisions](docs/owner_decisions.md) were resolved on 2026-09-14
 at the owner's direction, with reasoning in
