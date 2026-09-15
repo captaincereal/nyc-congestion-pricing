@@ -1,0 +1,47 @@
+name: H011
+
+# Dispatch only. H011 is a pre-registered hypothesis against fixed data, so
+# every estimate run is another draw. The roster stage is not a draw -- it reads
+# which facilities exist -- but it shares a workflow so the stage gate stays
+# visible in one place.
+on:
+  workflow_dispatch:
+    inputs:
+      stage:
+        description: 'roster reads the facility list; estimate needs the committed classification'
+        type: choice
+        options: [roster, estimate]
+        default: roster
+      inbound:
+        description: 'For estimate only: the direction value meaning into Manhattan'
+        type: string
+        default: ''
+
+concurrency:
+  group: h011-${{ github.ref_name }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  run:
+    if: github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: pip
+      - run: python -m pip install -e .
+      - name: Run the requested H011 stage
+        env:
+          RESULTS_BRANCH: ${{ github.ref_name }}
+          NYC_OPENDATA_APP_TOKEN: ${{ secrets.NYC_OPENDATA_APP_TOKEN }}
+        run: >-
+          python -m scripts.run_h011 --stage ${{ inputs.stage }}
+          ${{ inputs.inbound && format('--inbound {0}', inputs.inbound) || '' }}
