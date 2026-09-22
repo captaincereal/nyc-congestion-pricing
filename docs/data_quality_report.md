@@ -1,6 +1,6 @@
 # Data-quality report — E-Z Pass local-street staging
 
-Generated: 2026-09-21T22:40:18+00:00
+Generated: 2026-09-22T06:29:58+00:00
 Source DB: `nyc_cp.duckdb`  ·  raw manifest: `ezpass_manifest.json` (present; presence alone does not establish verification)
 
 > Observed problems only. Handling decisions are in the last section and are applied elsewhere, never by this script.
